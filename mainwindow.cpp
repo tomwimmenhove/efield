@@ -1,6 +1,5 @@
-#include <tgmath.h>
-
 #include "mainwindow.h"
+#include "heatmap.h"
 #include "ui_mainwindow.h"
 
 #include <QPainter>
@@ -35,15 +34,15 @@ void MainWindow::SetFixedValues()
 {
     for (int x = 420/4; x < 630/4;x++)
     {
-        simulator.XYValue(x, 380/4) = 1;
+        simulator.CurrentSurface().XYValue(x, 380/4) = 1;
         //XYValue(x, 52) = 0;
 
-        simulator.XYValue(x, 700/4) = 0;
+        simulator.CurrentSurface().XYValue(x, 700/4) = 0;
     }
 
     for (int y = 380/4; y < 600/4; y++)
     {
-        simulator.XYValue(620/4, y) = 1;
+        simulator.CurrentSurface().XYValue(620/4, y) = 1;
     }
 
 
@@ -70,38 +69,6 @@ void MainWindow::SetFixedValues()
 //    }
 }
 
-QRgb getHeatMapColor(float value)
-{
-    /* Turn into 20 'steps' */
-    value *= 20;
-    value = round(value);
-    value /= 20;
-
-    const int NUM_COLORS = 4;
-    static float color[NUM_COLORS][3] = { {0,0,255}, {0,255,0}, {255,255,0}, {255,0,0} };
-    // A static array of 4 colors:  (blue,   green,  yellow,  red) using {r,g,b} for each.
-
-    int idx1;        // |-- Our desired color will be between these two indexes in "color".
-    int idx2;        // |
-    float fractBetween = 0;  // Fraction between "idx1" and "idx2" where our value is.
-
-    if(value <= 0)      {  idx1 = idx2 = 0;            }    // accounts for an input <=0
-    else if(value >= 1)  {  idx1 = idx2 = NUM_COLORS-1; }    // accounts for an input >=0
-    else
-    {
-        value = value * (NUM_COLORS-1);        // Will multiply value by 3.
-        idx1  = value;                         // Our desired color will be after this index.
-        idx2  = idx1+1;                        // ... and before this index (inclusive).
-        fractBetween = value - float(idx1);    // Distance between the two indexes (0-1).
-    }
-
-    float red   = (color[idx2][0] - color[idx1][0])*fractBetween + color[idx1][0];
-    float green = (color[idx2][1] - color[idx1][1])*fractBetween + color[idx1][1];
-    float blue  = (color[idx2][2] - color[idx1][2])*fractBetween + color[idx1][2];
-
-    return 0xff000000 | ((uint8_t) red) << 16 | ((uint8_t) green) << 8 | ((uint8_t) blue);
-}
-
 void MainWindow::on_pushButton_clicked()
 {
 
@@ -112,13 +79,13 @@ void MainWindow::GraphMouse_Moved(int x, int y)
     int valueX = x * simulator.Width() / ui->graphicsLabel->width();
     int valueY = y * simulator.Height() / ui->graphicsLabel->height();
 
-    float value = simulator.XYValue(valueX, valueY);
+    float value = simulator.CurrentSurface().XYValue(valueX, valueY);
 
     statusBar()->show();
     statusBar()->showMessage(QString(tr("Value at [%1, %2]: %3")).arg(valueX).arg(valueY).arg(value));
 }
 
-void MainWindow::GraphMouse_Pressed(int x, int y)
+void MainWindow::GraphMouse_Pressed(int, int)
 {
 }
 
@@ -142,10 +109,12 @@ void MainWindow::FrameUpdate()
 
     qDebug() << numIter << "iterations or IterateSimulation() took" << timer.elapsed() << "milliseconds";
 
-    int w = simulator.Width();
-    int h = simulator.Height();
-    float max = simulator.MaxValue();
-    float min = simulator.MinValue();
+    auto surface = &simulator.CurrentSurface();//.Clone();
+
+    int w = surface->Width();
+    int h = surface->Height();
+    float max = surface->MaxValue();
+    float min = surface->MinValue();
     float range = max - min;
 
     QRgb* pixels = new QRgb[w * h];
@@ -154,9 +123,9 @@ void MainWindow::FrameUpdate()
         for (int x = 0; x < w; ++x)
         {
             /* Scale between  0..1 */
-            float f = (simulator.XYValue(x, y) - min) / range;
+            float f = (surface->XYValue(x, y) - min) / range;
 
-            pixels[x + y * h] = getHeatMapColor(f);
+            pixels[x + y * h] = HeatMap::GetColor(f);
         }
     }
 
@@ -164,7 +133,8 @@ void MainWindow::FrameUpdate()
 
     QPixmap pixmapObject = QPixmap::fromImage(image);
 
-    ui->graphicsLabel->setPixmap(pixmapObject.scaled(ui->graphicsLabel->width(), ui->graphicsLabel->height(), Qt::IgnoreAspectRatio)); //KeepAspectRatio));
+    //ui->graphicsLabel->setPixmap(pixmapObject.scaled(ui->graphicsLabel->width(), ui->graphicsLabel->height(), Qt::IgnoreAspectRatio));
+    ui->graphicsLabel->setPixmap(pixmapObject.scaled(ui->graphicsLabel->width(), ui->graphicsLabel->height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
 
     delete[] pixels;
 }

@@ -31,12 +31,16 @@ SOURCES += \
         main.cpp \
         mainwindow.cpp \
     qclickablelabel.cpp \
-    model/simulator.cpp
+    model/simulator.cpp \
+    heatmap.cpp \
+    model/surface.cpp
 
 HEADERS += \
         mainwindow.h \
     qclickablelabel.h \
-    model/simulator.h
+    model/simulator.h \
+    heatmap.h \
+    model/surface.h
 
 FORMS += \
         mainwindow.ui
