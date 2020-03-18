@@ -1,12 +1,14 @@
 #ifndef SIMULATOR_H
 #define SIMULATOR_H
 
+#include <functional>
+
 #include "surface.h"
 
 class Simulator
 {
 public:
-    Simulator(int Width, int Height);
+    Simulator(int Width, int Height, std::function<void(Surface*)> updateBoundaries);
 
     inline int Height() const { return h; }
     inline int Width() const { return w; }
@@ -20,6 +22,7 @@ private:
     float SlowValueAverager(Surface* surface, int x, int y);
 
     int w, h;
+    std::function<void(Surface*)> updateBoundaries;
     int curBufIdx = 0;
 
     Surface* curSurface;

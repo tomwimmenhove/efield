@@ -3,8 +3,10 @@
 
 #include <QMainWindow>
 #include <QTimer>
+#include <QSharedPointer>
 
 #include "model/simulator.h"
+#include "model/simulatorthread.h"
 
 namespace Ui {
 class MainWindow;
@@ -26,10 +28,13 @@ private slots:
     void GraphMouse_Pressed(int x, int y);
     void GraphMouse_Left();
 
-private:
-    void SetFixedValues();
+    void Simulator_NewSurface(QSharedPointer<Surface> surface);
 
-    Simulator simulator = Simulator(250, 250);
+private:
+    SimulatorThread* simulatorThread;
+    static void SetFixedValues(Surface* surface);
+
+    QSharedPointer<Simulator> simulator;
 
     Ui::MainWindow *ui;
     QTimer* frameTimer;

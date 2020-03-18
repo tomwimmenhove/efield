@@ -2,10 +2,12 @@
 
 #include "simulator.h"
 
-Simulator::Simulator(int width, int height)
-    : w(width), h(height)
+Simulator::Simulator(int width, int height, std::function<void(Surface*)> updateBoundaries)
+    : w(width), h(height), updateBoundaries(updateBoundaries)
 {
     SwitchBuf();
+
+    updateBoundaries(curSurface);
 }
 
 void Simulator::IterateSimulation()
@@ -43,6 +45,8 @@ void Simulator::IterateSimulation()
                                          ) / 8.0f;
         }
     }
+
+    updateBoundaries(curSurface);
 }
 
 void Simulator::SwitchBuf()
