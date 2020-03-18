@@ -30,11 +30,13 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
         main.cpp \
         mainwindow.cpp \
-    qclickablelabel.cpp
+    qclickablelabel.cpp \
+    model/simulator.cpp
 
 HEADERS += \
         mainwindow.h \
-    qclickablelabel.h
+    qclickablelabel.h \
+    model/simulator.h
 
 FORMS += \
         mainwindow.ui

@@ -4,6 +4,8 @@
 #include <QMainWindow>
 #include <QTimer>
 
+#include "model/simulator.h"
+
 namespace Ui {
 class MainWindow;
 }
@@ -19,7 +21,6 @@ public:
 private slots:
     void on_pushButton_clicked();
     void FrameUpdate();
-    void IterateSimulation();
 
     void GraphMouse_Moved(int x, int y);
     void GraphMouse_Pressed(int x, int y);
@@ -27,20 +28,11 @@ private slots:
 
 private:
     void SetFixedValues();
-    float* SwitchBuf();
-    inline float& XYValue(int x, int y) { return curBuf[x + y * w]; }
-    inline float& XYValue(float* buf, int x, int y) { return buf[x + y * w]; }
-    float SlowValueAverager(float* buf, int x, int y);
+
+    Simulator simulator = Simulator(250, 250);
 
     Ui::MainWindow *ui;
-    float* values[2];
-    int w = 250;
-    int h = 250;
-
     QTimer* frameTimer;
-
-    float* curBuf;
-    int curBufIdx = 0;
 };
 
 #endif // MAINWINDOW_H
