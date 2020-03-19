@@ -17,8 +17,6 @@ public:
     float MaxValue() const;
     float MinValue() const;
 
-    QSharedPointer<Surface> Clone();
-
 private:
     inline Surface(int width, int height) : w(width), h(height), values(width * height) { }
 

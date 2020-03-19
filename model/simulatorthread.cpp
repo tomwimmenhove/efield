@@ -52,7 +52,7 @@ void SimulatorThread::RunParallel()
                 if (requestSurface)
                 {
                     requestSurface--;
-                    emit NewSurface(simulator->CurrentSurface().Clone());
+                    emit NewSurface(QSharedPointer<Surface>(new Surface(simulator->CurrentSurface())));
                 }
 
                 iterations++;
@@ -80,7 +80,7 @@ void SimulatorThread::RunSequential()
         if (requestSurface)
         {
             requestSurface--;
-            emit NewSurface(simulator->CurrentSurface().Clone());
+            emit NewSurface(QSharedPointer<Surface>(new Surface(simulator->CurrentSurface())));
         }
 
         iterations++;
