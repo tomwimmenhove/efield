@@ -26,7 +26,7 @@ void SimulatorThread::RunParallel()
 {
     simulator->PreIterateSimulationChunk();
 
-    bool doCancel = false;
+    QAtomicInt doCancel = false;
 
     int n = simulator->NumChunks();
     omp_set_num_threads(numThreads);
@@ -38,7 +38,7 @@ void SimulatorThread::RunParallel()
         int iend = (id + 1) * n / numThreads;
 
         if (id == numThreads - 1)
-            iend = n;
+            iend = n - 1;
 
         while (!doCancel)
         {

@@ -52,7 +52,7 @@ void MainWindow::SetFixedValues(Surface* surface)
 
     for (int y = 380/2; y < 600/2; y++)
     {
-        surface->XYValue(620/2, y) = 1;
+        surface->XYValue(630/2, y) = 1;
     }
 
 

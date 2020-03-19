@@ -2,12 +2,12 @@
 #define SURFACE_H
 
 #include <QSharedPointer>
+#include <QVector>
 
 class Surface
 {
 public:
     Surface(int width, int height, float initValue);
-    ~Surface();
 
     inline float& XYValue(int x, int y) { return values[x + y * w]; }
     inline int Height() const { return h; }
@@ -20,10 +20,10 @@ public:
     QSharedPointer<Surface> Clone();
 
 private:
-    Surface(int width, int height);
+    inline Surface(int width, int height) : w(width), h(height), values(width * height) { }
 
     int w, h;
-    float* values;
+    QVector<float> values;
 };
 
 #endif // SURFACE_H

@@ -2,12 +2,6 @@
 
 #include "surface.h"
 
-Surface::Surface(int width, int height)
-    : w(width), h(height)
-{
-    values = new float[w * h];
-}
-
 Surface::Surface(int width, int height, float initValue)
     : Surface(width, height)
 {
@@ -15,11 +9,6 @@ Surface::Surface(int width, int height, float initValue)
     {
         values[i] = initValue;
     }
-}
-
-Surface::~Surface()
-{
-    delete[] values;
 }
 
 float Surface::MaxValue() const

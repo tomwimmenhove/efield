@@ -15,13 +15,14 @@ Simulator::Simulator(int width, int height, std::function<void(Surface*)> update
 void Simulator::IterateSimulation()
 {
     PreIterateSimulationChunk();
-    IterateSimulationChunk(1, h);
+    IterateSimulationChunk(1, h - 1); // First and last are done by PreIterateSimulationChunk()
     PostIterateSimulationChunk();
 }
 
 void Simulator::PreIterateSimulationChunk()
 {
-    Surface* oldSurface = OtherSurface();
+    Surface* oldSurface = curSurface;
+    SwitchSurface();
 
     for (int x = 0; x < w; x++)
         curSurface->XYValue(x, 0) = SlowValueAverager(oldSurface, x, 0);
@@ -38,8 +39,7 @@ void Simulator::PreIterateSimulationChunk()
 
 void Simulator::IterateSimulationChunk(int startChunk, int endChunk)
 {
-    Surface* oldSurface = curSurface;
-    SwitchSurface();
+    Surface* oldSurface = OtherSurface();
 
     for (int y = startChunk >= 1 ? startChunk : 1; y < endChunk; y++)
     {
