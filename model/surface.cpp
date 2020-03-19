@@ -38,15 +38,3 @@ float Surface::MinValue() const
 
     return min;
 }
-
-QSharedPointer<Surface> Surface::Clone()
-{
-    Surface* s = new Surface(w, h);
-
-    for (int i = 0; i < w * h; i++)
-    {
-        s->values[i] = values[i];
-    }
-
-    return QSharedPointer<Surface>(s);
-}

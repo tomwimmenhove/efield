@@ -2,7 +2,7 @@
 #define SURFACE_H
 
 #include <QSharedPointer>
-#include <QVector>
+#include <vector>
 
 class Surface
 {
@@ -17,13 +17,11 @@ public:
     float MaxValue() const;
     float MinValue() const;
 
-    QSharedPointer<Surface> Clone();
-
 private:
     inline Surface(int width, int height) : w(width), h(height), values(width * height) { }
 
     int w, h;
-    QVector<float> values;
+    std::vector<float> values; // BUG: QVector is ~3x slower!
 };
 
 #endif // SURFACE_H
