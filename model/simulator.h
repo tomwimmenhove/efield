@@ -17,8 +17,15 @@ public:
 
     void IterateSimulation();
 
+    inline int NumChunks() const { return h; }
+    void PreIterateSimulationChunk();
+    void IterateSimulationChunk(int startChunk, int endChunk);
+    void PostIterateSimulationChunk() { updateBoundaries(curSurface); }
+
 private:
-    void SwitchBuf();
+    inline Surface* OtherSurface() { return &surfaces[curBufIdx ^ 1]; }
+    inline Surface* SwitchSurface() { return curSurface = &surfaces[curBufIdx ^= 1]; }
+
     float SlowValueAverager(Surface* surface, int x, int y);
 
     int w, h;

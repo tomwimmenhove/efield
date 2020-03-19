@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QTimer>
 #include <QSharedPointer>
+#include <QElapsedTimer>
 
 #include "model/simulator.h"
 #include "model/simulatorthread.h"
@@ -30,6 +31,8 @@ private slots:
 
     void Simulator_NewSurface(QSharedPointer<Surface> surface);
 
+    void on_actionStart_triggered();
+
 private:
     SimulatorThread* simulatorThread;
     static void SetFixedValues(Surface* surface);
@@ -38,6 +41,8 @@ private:
 
     Ui::MainWindow *ui;
     QTimer* frameTimer;
+    QElapsedTimer runTimer;
+    int frames = 0;
 };
 
 #endif // MAINWINDOW_H

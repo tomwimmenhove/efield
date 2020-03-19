@@ -1,19 +1,27 @@
 #include <limits>
+#include <QDebug>
+#include <QElapsedTimer>
 
 #include "simulator.h"
 
 Simulator::Simulator(int width, int height, std::function<void(Surface*)> updateBoundaries)
     : w(width), h(height), updateBoundaries(updateBoundaries)
 {
-    SwitchBuf();
+    SwitchSurface();
 
     updateBoundaries(curSurface);
 }
 
 void Simulator::IterateSimulation()
 {
-    Surface* oldSurface = curSurface;
-    SwitchBuf();
+    PreIterateSimulationChunk();
+    IterateSimulationChunk(1, h);
+    PostIterateSimulationChunk();
+}
+
+void Simulator::PreIterateSimulationChunk()
+{
+    Surface* oldSurface = OtherSurface();
 
     for (int x = 0; x < w; x++)
         curSurface->XYValue(x, 0) = SlowValueAverager(oldSurface, x, 0);
@@ -26,9 +34,14 @@ void Simulator::IterateSimulation()
 
     for (int y = 0; y < h; y++)
         curSurface->XYValue(w - 1, y) = SlowValueAverager(oldSurface, w - 1, y);
+}
 
-#pragma omp parallel for
-    for (int y = 1; y < h - 1; y++)
+void Simulator::IterateSimulationChunk(int startChunk, int endChunk)
+{
+    Surface* oldSurface = curSurface;
+    SwitchSurface();
+
+    for (int y = startChunk >= 1 ? startChunk : 1; y < endChunk; y++)
     {
         for (int x = 1; x < w - 1; x++)
         {
@@ -45,14 +58,6 @@ void Simulator::IterateSimulation()
                                          ) / 8.0f;
         }
     }
-
-    updateBoundaries(curSurface);
-}
-
-void Simulator::SwitchBuf()
-{
-    curBufIdx ^= 1;
-    curSurface = &surfaces[curBufIdx];
 }
 
 float Simulator::SlowValueAverager(Surface* surface, int x, int y)

@@ -4,7 +4,6 @@
 
 #include <QPainter>
 #include <QGraphicsScene>
-#include <QElapsedTimer>
 #include <QDebug>
 #include <QString>
 
@@ -18,16 +17,22 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->graphicsLabel, &QClickableLabel::Mouse_Pressed, this, &MainWindow::GraphMouse_Pressed);
     connect(ui->graphicsLabel, &QClickableLabel::Mouse_Left, this, &MainWindow::GraphMouse_Left);
 
-    simulator = QSharedPointer<Simulator>(new Simulator(250, 250, SetFixedValues));
+    simulator = QSharedPointer<Simulator>(new Simulator(500, 500, SetFixedValues));
 
     frameTimer = new QTimer(this);
     connect(frameTimer, &QTimer::timeout, this, &MainWindow::FrameUpdate);
-    frameTimer->start(40);
 
     simulatorThread = new SimulatorThread(simulator);
     connect(simulatorThread, &SimulatorThread::NewSurface, this, &MainWindow::Simulator_NewSurface);
     connect(simulatorThread, &SimulatorThread::finished, simulatorThread, &QObject::deleteLater);
+
+#ifdef _OPENMP
+    simulatorThread->SetNumThreads(6);
+#endif
+
     simulatorThread->start();
+    frameTimer->start(40);
+    runTimer.start();
 }
 
 MainWindow::~MainWindow()
@@ -37,17 +42,17 @@ MainWindow::~MainWindow()
 
 void MainWindow::SetFixedValues(Surface* surface)
 {
-    for (int x = 420/4; x < 630/4;x++)
+    for (int x = 420/2; x < 630/2; x++)
     {
-        surface->XYValue(x, 380/4) = 1;
+        surface->XYValue(x, 380/2) = 1;
         //XYValue(x, 52) = 0;
 
-        surface->XYValue(x, 700/4) = 0;
+        surface->XYValue(x, 700/2) = -1;
     }
 
-    for (int y = 380/4; y < 600/4; y++)
+    for (int y = 380/2; y < 600/2; y++)
     {
-        surface->XYValue(620/4, y) = 1;
+        surface->XYValue(620/2, y) = 1;
     }
 
 
@@ -132,50 +137,17 @@ void MainWindow::Simulator_NewSurface(QSharedPointer<Surface> surface)
 void MainWindow::FrameUpdate()
 {
     simulatorThread->RequestSurface();
-    return;
 
-
-    int numIter = 100;
-
-    QElapsedTimer timer;
-    timer.start();
-
-    for (int i = 0; i < numIter; i++)
+    frames++;
+    if (frames % 25 == 0)
     {
-        simulator->IterateSimulation();
+        qDebug() << ((float) simulatorThread->Iterations() * 1000.0 / runTimer.elapsed()) << " iterations/sec";
     }
+}
 
-    qDebug() << numIter << "iterations or IterateSimulation() took" << timer.elapsed() << "milliseconds";
-
-
-    auto surface = &simulator->CurrentSurface();//.Clone();
-
-    int w = surface->Width();
-    int h = surface->Height();
-    float max = surface->MaxValue();
-    float min = surface->MinValue();
-    float range = max - min;
-
-    QRgb* pixels = new QRgb[w * h];
-    for (int y = 0; y < h; ++y)
-    {
-        for (int x = 0; x < w; ++x)
-        {
-            /* Scale between  0..1 */
-            float f = (surface->XYValue(x, y) - min) / range;
-
-            pixels[x + y * h] = HeatMap::GetColor(f);
-        }
-    }
-
-    QImage image((uchar*)pixels, w, h, QImage::Format_ARGB32);
-
-    QPixmap pixmapObject = QPixmap::fromImage(image);
-
-    //ui->graphicsLabel->setPixmap(pixmapObject.scaled(ui->graphicsLabel->width(), ui->graphicsLabel->height(), Qt::IgnoreAspectRatio));
-    ui->graphicsLabel->setPixmap(pixmapObject.scaled(ui->graphicsLabel->width(), ui->graphicsLabel->height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
-
-    delete[] pixels;
-
-
+void MainWindow::on_actionStart_triggered()
+{
+    simulatorThread->start();
+    frameTimer->start(40);
+    runTimer.start();
 }

@@ -17,17 +17,17 @@
    <widget class="QClickableLabel" name="graphicsLabel">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>10</y>
-      <width>1201</width>
-      <height>691</height>
+      <x>0</x>
+      <y>-10</y>
+      <width>1221</width>
+      <height>721</height>
      </rect>
     </property>
     <property name="mouseTracking">
      <bool>true</bool>
     </property>
     <property name="text">
-     <string>TextLabel</string>
+     <string/>
     </property>
    </widget>
   </widget>
@@ -40,6 +40,13 @@
      <height>32</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menuSimulation">
+    <property name="title">
+     <string>Si&amp;mulation</string>
+    </property>
+    <addaction name="actionStart"/>
+   </widget>
+   <addaction name="menuSimulation"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
@@ -50,6 +57,11 @@
    </attribute>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
+  <action name="actionStart">
+   <property name="text">
+    <string>&amp;Start</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>

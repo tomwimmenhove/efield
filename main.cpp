@@ -7,8 +7,8 @@
 int main(int argc, char *argv[])
 {
 #ifdef _OPENMP
-    int threadNum = omp_get_thread_num();
-    printf("This is thread %d\n", threadNum);
+    int maxThreads = omp_get_max_threads();
+    omp_set_num_threads(maxThreads);
 #endif
 
     QApplication a(argc, argv);
