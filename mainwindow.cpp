@@ -40,19 +40,19 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::SetFixedValues(Surface* surface)
+void MainWindow::SetFixedValues(Surface& surface)
 {
     for (int x = 420/2; x < 630/2; x++)
     {
-        surface->XYValue(x, 380/2) = 1;
+        surface.XYValue(x, 380/2) = 1;
         //XYValue(x, 52) = 0;
 
-        surface->XYValue(x, 700/2) = -1;
+        surface.XYValue(x, 700/2) = -1;
     }
 
     for (int y = 380/2; y < 600/2; y++)
     {
-        surface->XYValue(630/2, y) = 1;
+        surface.XYValue(630/2, y) = 1;
     }
 
 
@@ -77,11 +77,6 @@ void MainWindow::SetFixedValues(Surface* surface)
 //    {
 //        XYValue(x, 52) = 0;
 //    }
-}
-
-void MainWindow::on_pushButton_clicked()
-{
-
 }
 
 void MainWindow::GraphMouse_Moved(int x, int y)

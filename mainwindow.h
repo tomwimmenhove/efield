@@ -22,7 +22,6 @@ public:
     ~MainWindow();
 
 private slots:
-    void on_pushButton_clicked();
     void FrameUpdate();
 
     void GraphMouse_Moved(int x, int y);
@@ -35,7 +34,7 @@ private slots:
 
 private:
     SimulatorThread* simulatorThread;
-    static void SetFixedValues(Surface* surface);
+    static void SetFixedValues(Surface& surface);
 
     QSharedPointer<Simulator> simulator;
 
