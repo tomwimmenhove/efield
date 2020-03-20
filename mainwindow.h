@@ -28,8 +28,6 @@ private slots:
     void GraphMouse_Pressed(int x, int y);
     void GraphMouse_Left();
 
-    void Simulator_NewSurface(QSharedPointer<Surface> surface);
-
     void on_actionStart_triggered();
 
 private:

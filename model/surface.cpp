@@ -6,9 +6,7 @@ Surface::Surface(int width, int height, float initValue)
     : Surface(width, height)
 {
     for (int i = 0; i < w * h ;i++)
-    {
         values[i] = initValue;
-    }
 }
 
 float Surface::MaxValue() const

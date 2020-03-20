@@ -12,6 +12,13 @@ Simulator::Simulator(int width, int height, std::function<void(Surface&)> update
     updateBoundaries(CurrentSurface());
 }
 
+QSharedPointer<Surface> Simulator::CloneSurface()
+{
+    QMutexLocker locker(&surfaceMutexex[curBufIdx ^ 1]);
+
+    return QSharedPointer<Surface>(new Surface(OtherSurface()));
+}
+
 void Simulator::SwitchSurface()
 {
     surfaceMutexex[curBufIdx].unlock();

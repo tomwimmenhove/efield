@@ -12,7 +12,10 @@ class SimulatorThread : public QThread
     Q_OBJECT
 
 public:
-    SimulatorThread(QSharedPointer<Simulator> simulator);
+    SimulatorThread(QSharedPointer<Simulator> simulator)
+        : simulator(simulator)
+    { }
+
 #ifdef _OPENMP
     inline void SetNumThreads(int n) { numThreads = n; }
     inline int NumThreads() const { return numThreads; }
@@ -23,12 +26,8 @@ public:
 
     void run() override;
     inline void Cancel() { cancel = true; }
-    inline void RequestSurface() { requestSurface++; }
     inline int Iterations() const { return iterations; }
     
-signals:
-    void NewSurface(QSharedPointer<Surface> surface);
-
 private:
     int numThreads = 1;
     QAtomicInt iterations = 0;
@@ -36,9 +35,6 @@ private:
     QSharedPointer<Simulator> simulator;
 
     QAtomicInt cancel = false;
-    QAtomicInt requestSurface = false;
 };
-
-Q_DECLARE_METATYPE(QSharedPointer<Surface>);
 
 #endif // SIMULATORTHREAD_H

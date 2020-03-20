@@ -16,7 +16,7 @@ public:
 
     inline Surface& CurrentSurface() { return surfaces[curBufIdx]; }
 
-    //inline QSharedPointer<Surface> CloneSurface() { new Surface(OtherSurface()); }
+    QSharedPointer<Surface> CloneSurface();
 
     void IterateSimulation();
 
