@@ -23,7 +23,6 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(frameTimer, &QTimer::timeout, this, &MainWindow::FrameUpdate);
 
     simulatorThread = new SimulatorThread(simulator);
-    connect(simulatorThread, &SimulatorThread::NewSurface, this, &MainWindow::Simulator_NewSurface);
     connect(simulatorThread, &SimulatorThread::finished, simulatorThread, &QObject::deleteLater);
 
 #ifdef _OPENMP
@@ -40,19 +39,19 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::SetFixedValues(Surface* surface)
+void MainWindow::SetFixedValues(Surface& surface)
 {
     for (int x = 420/2; x < 630/2; x++)
     {
-        surface->XYValue(x, 380/2) = 1;
+        surface.XYValue(x, 380/2) = 1;
         //XYValue(x, 52) = 0;
 
-        surface->XYValue(x, 700/2) = -1;
+        surface.XYValue(x, 700/2) = -1;
     }
 
     for (int y = 380/2; y < 600/2; y++)
     {
-        surface->XYValue(630/2, y) = 1;
+        surface.XYValue(630/2, y) = 1;
     }
 
 
@@ -79,11 +78,6 @@ void MainWindow::SetFixedValues(Surface* surface)
 //    }
 }
 
-void MainWindow::on_pushButton_clicked()
-{
-
-}
-
 void MainWindow::GraphMouse_Moved(int x, int y)
 {
     int valueX = x * simulator->Width() / ui->graphicsLabel->width();
@@ -104,15 +98,17 @@ void MainWindow::GraphMouse_Left()
     statusBar()->hide();
 }
 
-void MainWindow::Simulator_NewSurface(QSharedPointer<Surface> surface)
+void MainWindow::FrameUpdate()
 {
+    QSharedPointer<Surface> surface = simulator->CloneSurface();
+
     int w = surface->Width();
     int h = surface->Height();
     float max = surface->MaxValue();
     float min = surface->MinValue();
     float range = max - min;
 
-    QRgb* pixels = new QRgb[w * h];
+    std::vector<QRgb> pixels(w * h);
     for (int y = 0; y < h; ++y)
     {
         for (int x = 0; x < w; ++x)
@@ -124,19 +120,10 @@ void MainWindow::Simulator_NewSurface(QSharedPointer<Surface> surface)
         }
     }
 
-    QImage image((uchar*)pixels, w, h, QImage::Format_ARGB32);
-
+    QImage image((uchar*)pixels.data(), w, h, QImage::Format_ARGB32);
     QPixmap pixmapObject = QPixmap::fromImage(image);
 
-    //ui->graphicsLabel->setPixmap(pixmapObject.scaled(ui->graphicsLabel->width(), ui->graphicsLabel->height(), Qt::IgnoreAspectRatio));
     ui->graphicsLabel->setPixmap(pixmapObject.scaled(ui->graphicsLabel->width(), ui->graphicsLabel->height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
-
-    delete[] pixels;
-}
-
-void MainWindow::FrameUpdate()
-{
-    simulatorThread->RequestSurface();
 
     frames++;
     if (frames % 25 == 0)
