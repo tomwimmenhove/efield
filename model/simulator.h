@@ -5,18 +5,19 @@
 #include <QMutex>
 
 #include "surface.h"
+#include "floatsurface.h"
 
 class Simulator
 {
 public:
-    Simulator(int Width, int Height, std::function<void(Surface&)> updateBoundaries);
+    Simulator(int width, int height, std::function<void(FloatSurface&)> updateBoundaries);
 
     inline int Height() const { return h; }
     inline int Width() const { return w; }
 
-    inline Surface& CurrentSurface() { return surfaces[curBufIdx]; }
+    inline FloatSurface& CurrentSurface() { return surfaces[curBufIdx]; }
 
-    QSharedPointer<Surface> CloneSurface();
+    QSharedPointer<FloatSurface> CloneSurface();
 
     void IterateSimulation();
 
@@ -26,16 +27,16 @@ public:
     void PostIterateSimulationChunk() { updateBoundaries(CurrentSurface()); }
 
 private:
-    inline Surface& OtherSurface() { return surfaces[curBufIdx ^ 1]; }
+    inline FloatSurface& OtherSurface() { return surfaces[curBufIdx ^ 1]; }
     void SwitchSurface();
 
-    float SlowValueAverager(Surface& surface, int x, int y);
+    float SlowValueAverager(FloatSurface& surface, int x, int y);
 
     int w, h;
-    std::function<void(Surface&)> updateBoundaries;
+    std::function<void(FloatSurface&)> updateBoundaries;
     int curBufIdx = 0;
 
-    Surface surfaces[2] = { Surface(w, h, 0), Surface(w, h, 0), };
+    FloatSurface surfaces[2] = { FloatSurface(w, h, 0), FloatSurface(w, h, 0), };
     QMutex surfaceMutexex[2];
 };
 

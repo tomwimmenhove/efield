@@ -34,7 +34,9 @@ SOURCES += \
     model/simulator.cpp \
     heatmap.cpp \
     model/surface.cpp \
-    model/simulatorthread.cpp
+    model/simulatorthread.cpp \
+    model/floatsurface.cpp \
+    model/gradientsurface.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -42,7 +44,12 @@ HEADERS += \
     model/simulator.h \
     heatmap.h \
     model/surface.h \
-    model/simulatorthread.h
+    model/simulatorthread.h \
+    model/drawing.h \
+    model/idrawer.h \
+    model/floatsurfacedrawer.h \
+    model/floatsurface.h \
+    model/gradientsurface.h
 
 FORMS += \
         mainwindow.ui

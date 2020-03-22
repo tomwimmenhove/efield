@@ -4,7 +4,7 @@
 
 #include "simulator.h"
 
-Simulator::Simulator(int width, int height, std::function<void(Surface&)> updateBoundaries)
+Simulator::Simulator(int width, int height, std::function<void(FloatSurface&)> updateBoundaries)
     : w(width), h(height), updateBoundaries(updateBoundaries)
 {
     surfaceMutexex[curBufIdx].lock();
@@ -12,11 +12,11 @@ Simulator::Simulator(int width, int height, std::function<void(Surface&)> update
     updateBoundaries(CurrentSurface());
 }
 
-QSharedPointer<Surface> Simulator::CloneSurface()
+QSharedPointer<FloatSurface> Simulator::CloneSurface()
 {
     QMutexLocker locker(&surfaceMutexex[curBufIdx ^ 1]);
 
-    return QSharedPointer<Surface>(new Surface(OtherSurface()));
+    return QSharedPointer<FloatSurface>(new FloatSurface(OtherSurface()));
 }
 
 void Simulator::SwitchSurface()
@@ -35,9 +35,9 @@ void Simulator::IterateSimulation()
 
 void Simulator::PreIterateSimulationChunk()
 {
-    Surface& oldSurface = CurrentSurface();
+    FloatSurface& oldSurface = CurrentSurface();
     SwitchSurface();
-    Surface& curSurface = CurrentSurface();
+    FloatSurface& curSurface = CurrentSurface();
 
     for (int x = 0; x < w; x++)
         curSurface.XYValue(x, 0) = SlowValueAverager(oldSurface, x, 0);
@@ -54,7 +54,7 @@ void Simulator::PreIterateSimulationChunk()
 
 void Simulator::IterateSimulationChunk(int startChunk, int endChunk)
 {
-    Surface& oldSurface = OtherSurface();
+    FloatSurface& oldSurface = OtherSurface();
 
     for (int y = startChunk >= 1 ? startChunk : 1; y < endChunk; y++)
     {
@@ -75,7 +75,7 @@ void Simulator::IterateSimulationChunk(int startChunk, int endChunk)
     }
 }
 
-float Simulator::SlowValueAverager(Surface& surface, int x, int y)
+float Simulator::SlowValueAverager(FloatSurface& surface, int x, int y)
 {
     float total = 0;
     int n = 0;

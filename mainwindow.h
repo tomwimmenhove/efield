@@ -8,6 +8,7 @@
 
 #include "model/simulator.h"
 #include "model/simulatorthread.h"
+#include "model/gradientsurface.h"
 
 namespace Ui {
 class MainWindow;
@@ -32,9 +33,12 @@ private slots:
 
 private:
     SimulatorThread* simulatorThread;
-    static void SetFixedValues(Surface& surface);
+    static void SetFixedValues(FloatSurface& surface);
 
     QSharedPointer<Simulator> simulator;
+
+    QSharedPointer<FloatSurface> surface;
+    QSharedPointer<GradientSurface> gradient;
 
     Ui::MainWindow *ui;
     QTimer* frameTimer;

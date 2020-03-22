@@ -1,11 +1,16 @@
 #include "mainwindow.h"
 #include "heatmap.h"
 #include "ui_mainwindow.h"
+#include "model/drawing.h"
+#include "model/floatsurfacedrawer.h"
+#include "model/floatsurface.h"
+#include "model/gradientsurface.h"
 
 #include <QPainter>
 #include <QGraphicsScene>
 #include <QDebug>
 #include <QString>
+#include <math.h>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -17,7 +22,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->graphicsLabel, &QClickableLabel::Mouse_Pressed, this, &MainWindow::GraphMouse_Pressed);
     connect(ui->graphicsLabel, &QClickableLabel::Mouse_Left, this, &MainWindow::GraphMouse_Left);
 
-    simulator = QSharedPointer<Simulator>(new Simulator(500, 500, SetFixedValues));
+    simulator = QSharedPointer<Simulator>(new Simulator(250, 250, SetFixedValues));
 
     frameTimer = new QTimer(this);
     connect(frameTimer, &QTimer::timeout, this, &MainWindow::FrameUpdate);
@@ -39,54 +44,64 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::SetFixedValues(Surface& surface)
+void MainWindow::SetFixedValues(FloatSurface& surface)
 {
-    for (int x = 420/2; x < 630/2; x++)
-    {
-        surface.XYValue(x, 380/2) = 1;
-        //XYValue(x, 52) = 0;
+    FloatSurfaceDrawer drawer(surface);
+    Drawing<float> drawing(drawer);
 
-        surface.XYValue(x, 700/2) = -1;
+    int n = 4;
+
+    drawing.DrawLine(200/n, 200/n, 800/n, 200/n, 0);
+    drawing.DrawLine(200/n, 800/n, 800/n, 800/n, 0);
+
+    drawing.DrawLine(200/n, 200/n, 200/n, 800/n, 0);
+    drawing.DrawLine(800/n, 200/n, 800/n, 800/n, 0);
+
+
+    /* anode */
+    drawing.DrawLine(300/n, 700/n, 700/n, 700/n, 1);
+    //drawing.DrawLine(700/n, 700/n, 700/n, 500/n, 1);
+
+    /* cathode */
+    drawing.DrawLine(300/n, 300/n, 700/n, 300/n, -1);
+
+    return;
+    for (int x = 420/4; x < 630/4; x++)
+    {
+        surface.XYValue(x, 380/4) = 1;
+        surface.XYValue(x, 700/4) = -1;
     }
 
-    for (int y = 380/2; y < 600/2; y++)
-    {
-        surface.XYValue(630/2, y) = 1;
-    }
-
-
-//    for (int y = 0; y < 48; y++)
-//    {
-//        XYValue(50, y) = 1;
-//    }
-
-//    for (int y = 53; y < 100; y++)
-//    {
-//        XYValue(50, y) = 0;
-//    }
-
-
-//    for (int y = 49; y < 55;y++)
-//    {
-//        XYValue(37, y) = 1;
-//        XYValue(64, y) = 1;
-//    }
-
-//    for (int x = 40; x < 60;x++)
-//    {
-//        XYValue(x, 52) = 0;
-//    }
+    //    for (int y = 380/4; y < 600/4; y++)
+    //    {
+    //        surface.XYValue(630/4, y) = 1;
+    //    }
 }
 
 void MainWindow::GraphMouse_Moved(int x, int y)
 {
-    int valueX = x * simulator->Width() / ui->graphicsLabel->width();
-    int valueY = y * simulator->Height() / ui->graphicsLabel->height();
+    if (!surface)
+        return;
 
-    float value = simulator->CurrentSurface().XYValue(valueX, valueY);
+    int valueX = x * surface->Width() / ui->graphicsLabel->width();
+    int valueY = (ui->graphicsLabel->height() - y - 1) * surface->Height() / ui->graphicsLabel->height();
 
     statusBar()->show();
-    statusBar()->showMessage(QString(tr("Value at [%1, %2]: %3")).arg(valueX).arg(valueY).arg(value));
+    if (gradient)
+    {
+        QVector2D v = gradient->XYValue(valueX, valueY);
+
+        statusBar()->showMessage(QString(tr("Value at [%1, %2]: %3 @%4°"))
+                                 .arg(valueX)
+                                 .arg(valueY)
+                                 .arg(v.length())
+                                 .arg(atan2 (v.y(), v.x()) * 180 / M_PI));
+    }
+    else
+    {
+        float value = surface->XYValue(valueX, valueY);
+        statusBar()->showMessage(QString(tr("Value at [%1, %2]: %3")).arg(valueX).arg(valueY).arg(value));
+    }
 }
 
 void MainWindow::GraphMouse_Pressed(int, int)
@@ -100,7 +115,17 @@ void MainWindow::GraphMouse_Left()
 
 void MainWindow::FrameUpdate()
 {
-    QSharedPointer<Surface> surface = simulator->CloneSurface();
+    QSharedPointer<FloatSurface> s = simulator->CloneSurface();
+    if (ui->dbGradient->checkState() == Qt::Checked)
+    {
+        gradient = QSharedPointer<GradientSurface>(new GradientSurface(*s));
+        surface = QSharedPointer<FloatSurface>(new FloatSurface(*gradient));
+    }
+    else
+    {
+        surface = s;
+        gradient = nullptr;
+    }
 
     int w = surface->Width();
     int h = surface->Height();
@@ -114,13 +139,17 @@ void MainWindow::FrameUpdate()
         for (int x = 0; x < w; ++x)
         {
             /* Scale between  0..1 */
-            float f = (surface->XYValue(x, y) - min) / range;
+            if (range != 0)
+            {
+                float f = (surface->XYCValue(x, y) - min) / range;
 
-            pixels[x + y * h] = HeatMap::GetColor(f);
+                pixels[x + (h - y - 1) * h] = HeatMap::GetColor(f);
+            }
         }
     }
 
-    QImage image((uchar*)pixels.data(), w, h, QImage::Format_ARGB32);
+    QImage image = QImage((uchar*)pixels.data(), w, h, QImage::Format_ARGB32);
+
     QPixmap pixmapObject = QPixmap::fromImage(image);
 
     ui->graphicsLabel->setPixmap(pixmapObject.scaled(ui->graphicsLabel->width(), ui->graphicsLabel->height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
