@@ -10,6 +10,7 @@
 #include <QGraphicsScene>
 #include <QDebug>
 #include <QString>
+#include <QColor>
 #include <math.h>
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -22,7 +23,9 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->graphicsLabel, &QClickableLabel::Mouse_Pressed, this, &MainWindow::GraphMouse_Pressed);
     connect(ui->graphicsLabel, &QClickableLabel::Mouse_Left, this, &MainWindow::GraphMouse_Left);
 
-    simulator = QSharedPointer<Simulator>(new Simulator(250, 250, SetFixedValues));
+    simulator = QSharedPointer<Simulator>(new Simulator(601, 601, SetFixedValues));
+
+    arrow = MakeArrow();
 
     frameTimer = new QTimer(this);
     connect(frameTimer, &QTimer::timeout, this, &MainWindow::FrameUpdate);
@@ -39,6 +42,20 @@ MainWindow::MainWindow(QWidget *parent) :
     runTimer.start();
 }
 
+QPixmap MainWindow::MakeArrow()
+{
+    QPixmap arrow = QPixmap(9, 9);
+    arrow.fill(QColor(0, 0, 0, 255));
+    arrow.fill(QColor(0, 0, 0, 0));
+    QPainter arrowPainter(&arrow);
+    //arrowPainter.setRenderHint(QPainter::Antialiasing);
+    arrowPainter.drawLine(0, 4, 8, 4);
+    arrowPainter.drawLine(4, 0, 8, 4);
+    arrowPainter.drawLine(4, 8, 8, 4);
+
+    return arrow;
+}
+
 MainWindow::~MainWindow()
 {
     delete ui;
@@ -49,33 +66,21 @@ void MainWindow::SetFixedValues(FloatSurface& surface)
     FloatSurfaceDrawer drawer(surface);
     Drawing<float> drawing(drawer);
 
-    int n = 4;
+    int n = 1;
 
-    drawing.DrawLine(200/n, 200/n, 800/n, 200/n, 0);
-    drawing.DrawLine(200/n, 800/n, 800/n, 800/n, 0);
+    drawing.DrawLine(0/n, 0/n, 600/n, 0/n, 0);
+    drawing.DrawLine(0/n, 600/n, 600/n, 600/n, 0);
 
-    drawing.DrawLine(200/n, 200/n, 200/n, 800/n, 0);
-    drawing.DrawLine(800/n, 200/n, 800/n, 800/n, 0);
+    drawing.DrawLine(0/n, 0/n, 0/n, 600/n, 0);
+    drawing.DrawLine(600/n, 0/n, 600/n, 600/n, 0);
 
 
     /* anode */
-    drawing.DrawLine(300/n, 700/n, 700/n, 700/n, 1);
-    //drawing.DrawLine(700/n, 700/n, 700/n, 500/n, 1);
+    drawing.DrawLine(100/n, 500/n, 500/n, 500/n, 1);
+    //drawing.DrawLine(500/n, 500/n, 500/n, 300/n, 1);
 
     /* cathode */
-    drawing.DrawLine(300/n, 300/n, 700/n, 300/n, -1);
-
-    return;
-    for (int x = 420/4; x < 630/4; x++)
-    {
-        surface.XYValue(x, 380/4) = 1;
-        surface.XYValue(x, 700/4) = -1;
-    }
-
-    //    for (int y = 380/4; y < 600/4; y++)
-    //    {
-    //        surface.XYValue(630/4, y) = 1;
-    //    }
+    drawing.DrawLine(100/n, 100/n, 500/n, 100/n, -1);
 }
 
 void MainWindow::GraphMouse_Moved(int x, int y)
@@ -91,11 +96,13 @@ void MainWindow::GraphMouse_Moved(int x, int y)
     {
         QVector2D v = gradient->XYValue(valueX, valueY);
 
-        statusBar()->showMessage(QString(tr("Value at [%1, %2]: %3 @%4°"))
+        statusBar()->showMessage(QString(tr("Value at [%1, %2]: %3 @%4° (Vector [%5, %6])"))
                                  .arg(valueX)
                                  .arg(valueY)
                                  .arg(v.length())
-                                 .arg(atan2 (v.y(), v.x()) * 180 / M_PI));
+                                 .arg(atan2(v.y(), v.x()) * 180 / M_PI)
+                                 .arg(v.x())
+                                 .arg(v.y()));
     }
     else
     {
@@ -115,15 +122,14 @@ void MainWindow::GraphMouse_Left()
 
 void MainWindow::FrameUpdate()
 {
-    QSharedPointer<FloatSurface> s = simulator->CloneSurface();
     if (ui->dbGradient->checkState() == Qt::Checked)
     {
-        gradient = QSharedPointer<GradientSurface>(new GradientSurface(*s));
+        gradient = QSharedPointer<GradientSurface>(new GradientSurface(*simulator->CloneSurface()));
         surface = QSharedPointer<FloatSurface>(new FloatSurface(*gradient));
     }
     else
     {
-        surface = s;
+        surface = simulator->CloneSurface();
         gradient = nullptr;
     }
 
@@ -149,10 +155,34 @@ void MainWindow::FrameUpdate()
     }
 
     QImage image = QImage((uchar*)pixels.data(), w, h, QImage::Format_ARGB32);
-
     QPixmap pixmapObject = QPixmap::fromImage(image);
+    QPixmap scaledPixmap = pixmapObject.scaled(ui->graphicsLabel->width(), ui->graphicsLabel->height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 
-    ui->graphicsLabel->setPixmap(pixmapObject.scaled(ui->graphicsLabel->width(), ui->graphicsLabel->height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+    if (gradient)
+    {
+        QPainter painter(&scaledPixmap);
+        painter.setPen(Qt::black);
+        //painter.setRenderHint(QPainter::Antialiasing);
+
+        for (int y = 0; y < h; y += h/50)
+        {
+            for (int x = 0; x < w; x += w/50)
+            {
+                QVector2D v = -gradient->XYCValue(x, y); // Negated, because E-field lines go from positive to negative
+                float a = atan2(v.y(), v.x());
+                QMatrix rm;
+                rm.rotate(a * 180 / M_PI);
+
+                int nx = x * scaledPixmap.width() / w;
+                int ny = y * scaledPixmap.height() / h;
+
+                painter.drawPixmap(nx - arrow.width(), ny - arrow.height(), arrow.transformed(rm));
+            }
+        }
+    }
+
+
+    ui->graphicsLabel->setPixmap(scaledPixmap);
 
     frames++;
     if (frames % 25 == 0)
@@ -166,4 +196,16 @@ void MainWindow::on_actionStart_triggered()
     simulatorThread->start();
     frameTimer->start(40);
     runTimer.start();
+}
+
+void MainWindow::on_actionSave_image_triggered()
+{
+    if (ui->dbGradient->checkState() == Qt::Checked)
+    {
+        ui->graphicsLabel->pixmap()->save("/tmp/efield_gradient.png");
+    }
+    else
+    {
+        ui->graphicsLabel->pixmap()->save("/tmp/efield_potential.png");
+    }
 }

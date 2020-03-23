@@ -31,7 +31,11 @@ private slots:
 
     void on_actionStart_triggered();
 
+    void on_actionSave_image_triggered();
+
 private:
+    QPixmap MakeArrow();
+
     SimulatorThread* simulatorThread;
     static void SetFixedValues(FloatSurface& surface);
 
@@ -39,6 +43,8 @@ private:
 
     QSharedPointer<FloatSurface> surface;
     QSharedPointer<GradientSurface> gradient;
+
+    QPixmap arrow;
 
     Ui::MainWindow *ui;
     QTimer* frameTimer;

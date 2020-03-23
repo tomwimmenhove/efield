@@ -59,7 +59,14 @@
     </property>
     <addaction name="actionStart"/>
    </widget>
+   <widget class="QMenu" name="menuSnapShot">
+    <property name="title">
+     <string>S&amp;napShot</string>
+    </property>
+    <addaction name="actionSave_image"/>
+   </widget>
    <addaction name="menuSimulation"/>
+   <addaction name="menuSnapShot"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
@@ -73,6 +80,11 @@
   <action name="actionStart">
    <property name="text">
     <string>&amp;Start</string>
+   </property>
+  </action>
+  <action name="actionSave_image">
+   <property name="text">
+    <string>Save image</string>
    </property>
   </action>
  </widget>
