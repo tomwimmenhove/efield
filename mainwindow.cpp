@@ -189,7 +189,6 @@ void MainWindow::FrameUpdate()
         }
     }
 
-
     ui->graphicsLabel->setPixmap(scaledPixmap);
 
     frames++;
