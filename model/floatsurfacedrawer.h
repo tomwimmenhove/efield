@@ -1,7 +1,7 @@
 #ifndef FLOATSURFACEDRAWER_H
 #define FLOATSURFACEDRAWER_H
 
-#include "surface.h"
+#include "floatsurface.h"
 #include "idrawer.h"
 
 class FloatSurfaceDrawer : public IDrawer<float>

@@ -11,6 +11,7 @@
 #include <QDebug>
 #include <QString>
 #include <QColor>
+#include <QtGlobal>
 #include <math.h>
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -30,16 +31,8 @@ MainWindow::MainWindow(QWidget *parent) :
     frameTimer = new QTimer(this);
     connect(frameTimer, &QTimer::timeout, this, &MainWindow::FrameUpdate);
 
-    simulatorThread = new SimulatorThread(simulator);
-    connect(simulatorThread, &SimulatorThread::finished, simulatorThread, &QObject::deleteLater);
-
-#ifdef _OPENMP
-    simulatorThread->SetNumThreads(6);
-#endif
-
-    simulatorThread->start();
-    frameTimer->start(40);
-    runTimer.start();
+    statusBar()->show();
+    StartSimulation();
 }
 
 QPixmap MainWindow::MakeArrow()
@@ -88,8 +81,23 @@ void MainWindow::GraphMouse_Moved(int x, int y)
     if (!surface)
         return;
 
-    int valueX = x * surface->Width() / ui->graphicsLabel->width();
-    int valueY = (ui->graphicsLabel->height() - y - 1) * surface->Height() / ui->graphicsLabel->height();
+    float scale = qMin((float) ui->graphicsLabel->width() / surface->Width(), (float) ui->graphicsLabel->height() / surface->Height());
+
+    // Should we round these?
+    float scaledWidth = scale * surface->Width();
+    float scaledHeight = scale * surface->Height();
+
+    int xStart = (ui->graphicsLabel->width() - scaledWidth) / 2;
+    int yStart = (ui->graphicsLabel->height() - scaledHeight) / 2;
+
+    int valueX = (x - xStart) * surface->Width() / scaledWidth;
+    int valueY = (scaledHeight - (y - yStart) - 1) * surface->Height() / scaledHeight;
+
+    if (valueX < 0 || valueX >= surface->Width() || valueY < 0 || valueY >= surface->Height())
+    {
+        statusBar()->showMessage(QString(tr("[%1, %2]")).arg(valueX).arg(valueY));
+        return;
+    }
 
     statusBar()->show();
     if (gradient)
@@ -117,7 +125,7 @@ void MainWindow::GraphMouse_Pressed(int, int)
 
 void MainWindow::GraphMouse_Left()
 {
-    statusBar()->hide();
+    //statusBar()->hide();
 }
 
 void MainWindow::FrameUpdate()
@@ -156,7 +164,7 @@ void MainWindow::FrameUpdate()
 
     QImage image = QImage((uchar*)pixels.data(), w, h, QImage::Format_ARGB32);
     QPixmap pixmapObject = QPixmap::fromImage(image);
-    QPixmap scaledPixmap = pixmapObject.scaled(ui->graphicsLabel->width(), ui->graphicsLabel->height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+    QPixmap scaledPixmap = pixmapObject.scaled(ui->graphicsLabel->width(), ui->graphicsLabel->height(), Qt::KeepAspectRatio);//, Qt::SmoothTransformation);
 
     if (gradient)
     {
@@ -164,19 +172,19 @@ void MainWindow::FrameUpdate()
         painter.setPen(Qt::black);
         //painter.setRenderHint(QPainter::Antialiasing);
 
-        for (int y = 0; y < h; y += h/50)
+        for (int y = 0; y < scaledPixmap.height(); y += 15)
         {
-            for (int x = 0; x < w; x += w/50)
+            for (int x = 0; x < scaledPixmap.width(); x += 15)
             {
-                QVector2D v = -gradient->XYCValue(x, y); // Negated, because E-field lines go from positive to negative
+                int nx = x * w / scaledPixmap.width();
+                int ny = y * h / scaledPixmap.height();
+
+                QVector2D v = -gradient->XYCValue(nx, ny); // Negated, because E-field lines go from positive to negative
                 float a = atan2(v.y(), v.x());
                 QMatrix rm;
                 rm.rotate(a * 180 / M_PI);
 
-                int nx = x * scaledPixmap.width() / w;
-                int ny = y * scaledPixmap.height() / h;
-
-                painter.drawPixmap(nx - arrow.width(), ny - arrow.height(), arrow.transformed(rm));
+                painter.drawPixmap(x - arrow.width(), y - arrow.height(), arrow.transformed(rm));
             }
         }
     }
@@ -193,9 +201,12 @@ void MainWindow::FrameUpdate()
 
 void MainWindow::on_actionStart_triggered()
 {
-    simulatorThread->start();
-    frameTimer->start(40);
-    runTimer.start();
+    StartSimulation();
+}
+
+void MainWindow::on_actionS_top_triggered()
+{
+    StopSimulation();
 }
 
 void MainWindow::on_actionSave_image_triggered()
@@ -208,4 +219,24 @@ void MainWindow::on_actionSave_image_triggered()
     {
         ui->graphicsLabel->pixmap()->save("/tmp/efield_potential.png");
     }
+}
+
+void MainWindow::StartSimulation()
+{
+    simulatorThread = new SimulatorThread(simulator);
+#ifdef _OPENMP
+    simulatorThread->SetNumThreads(6);
+#endif
+
+    connect(simulatorThread, &SimulatorThread::finished, simulatorThread, &QObject::deleteLater);
+
+    simulatorThread->start();
+    frameTimer->start(40);
+    runTimer.restart();
+}
+
+void MainWindow::StopSimulation()
+{
+    frameTimer->stop();
+    simulatorThread->Cancel();
 }

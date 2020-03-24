@@ -6,50 +6,59 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1226</width>
-    <height>765</height>
+    <width>1232</width>
+    <height>639</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <widget class="QClickableLabel" name="graphicsLabel">
-    <property name="geometry">
-     <rect>
-      <x>0</x>
-      <y>30</y>
-      <width>1221</width>
-      <height>681</height>
-     </rect>
-    </property>
-    <property name="mouseTracking">
-     <bool>true</bool>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-   </widget>
-   <widget class="QCheckBox" name="dbGradient">
-    <property name="geometry">
-     <rect>
-      <x>50</x>
-      <y>0</y>
-      <width>101</width>
-      <height>24</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Gradient</string>
-    </property>
-   </widget>
+   <layout class="QGridLayout" name="gridLayout_2">
+    <item row="0" column="0">
+     <layout class="QGridLayout" name="gridLayout">
+      <item row="1" column="0">
+       <widget class="QClickableLabel" name="graphicsLabel">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>1</width>
+          <height>1</height>
+         </size>
+        </property>
+        <property name="mouseTracking">
+         <bool>true</bool>
+        </property>
+        <property name="text">
+         <string>Simulation image</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QCheckBox" name="dbGradient">
+        <property name="text">
+         <string>Gradient</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1226</width>
+     <width>1232</width>
      <height>32</height>
     </rect>
    </property>
@@ -58,15 +67,9 @@
      <string>Si&amp;mulation</string>
     </property>
     <addaction name="actionStart"/>
-   </widget>
-   <widget class="QMenu" name="menuSnapShot">
-    <property name="title">
-     <string>S&amp;napShot</string>
-    </property>
-    <addaction name="actionSave_image"/>
+    <addaction name="actionS_top"/>
    </widget>
    <addaction name="menuSimulation"/>
-   <addaction name="menuSnapShot"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
@@ -82,9 +85,9 @@
     <string>&amp;Start</string>
    </property>
   </action>
-  <action name="actionSave_image">
+  <action name="actionS_top">
    <property name="text">
-    <string>Save image</string>
+    <string>S&amp;top</string>
    </property>
   </action>
  </widget>

@@ -27,6 +27,8 @@ void SimulatorThread::RunParallel()
         if (id == numThreads - 1)
             iend = n - 1;
 
+        qDebug() << "Simulation thread " << id << " starting";
+
         while (!doCancel)
         {
             simulator->IterateSimulationChunk(istart, iend);
@@ -40,24 +42,29 @@ void SimulatorThread::RunParallel()
                 if (cancel)
                 {
                     doCancel = true;
-                    break;
                 }
-
-                simulator->PreIterateSimulationChunk();
+                else
+                {
+                    simulator->PreIterateSimulationChunk();
+                }
             }
 #pragma omp barrier
         }
+
+        qDebug() << "Simulation thread " << id << " finished";
     }
 }
 #endif
 
 void SimulatorThread::RunSequential()
 {
+    qDebug() << "Simulation starting";
     while (!cancel)
     {
         simulator->IterateSimulation();
         iterations++;
     }
+    qDebug() << "Simulation finished";
 }
 
 void SimulatorThread::run()

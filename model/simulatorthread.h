@@ -4,6 +4,7 @@
 #include <QThread>
 #include <QAtomicInt>
 #include <QMutex>
+#include <QDebug>
 
 #include "simulator.h"
 
@@ -15,6 +16,11 @@ public:
     SimulatorThread(QSharedPointer<Simulator> simulator)
         : simulator(simulator)
     { }
+
+    virtual ~SimulatorThread()
+    {
+        qDebug() << "Bubbye";
+    }
 
 #ifdef _OPENMP
     inline void SetNumThreads(int n) { numThreads = n; }

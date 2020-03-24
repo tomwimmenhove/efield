@@ -30,10 +30,13 @@ private slots:
     void GraphMouse_Left();
 
     void on_actionStart_triggered();
-
     void on_actionSave_image_triggered();
+    void on_actionS_top_triggered();
 
 private:
+    void StartSimulation();
+    void StopSimulation();
+
     QPixmap MakeArrow();
 
     SimulatorThread* simulatorThread;
