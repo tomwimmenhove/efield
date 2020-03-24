@@ -32,7 +32,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(frameTimer, &QTimer::timeout, this, &MainWindow::FrameUpdate);
 
     statusBar()->show();
-    StartSimulation();
+    //StartSimulation();
+    //FrameUpdate();
 }
 
 QPixmap MainWindow::MakeArrow()
@@ -130,7 +131,7 @@ void MainWindow::GraphMouse_Left()
 
 void MainWindow::FrameUpdate()
 {
-    if (ui->dbGradient->checkState() == Qt::Checked)
+    if (ui->actionGradient->isChecked())
     {
         gradient = QSharedPointer<GradientSurface>(new GradientSurface(*simulator->CloneSurface()));
         surface = QSharedPointer<FloatSurface>(new FloatSurface(*gradient));
@@ -147,6 +148,8 @@ void MainWindow::FrameUpdate()
     float min = surface->MinValue();
     float range = max - min;
 
+    int steps = ui->actionStepped->isChecked() ? 20 : 0;
+
     std::vector<QRgb> pixels(w * h);
     for (int y = 0; y < h; ++y)
     {
@@ -157,7 +160,7 @@ void MainWindow::FrameUpdate()
             {
                 float f = (surface->XYCValue(x, y) - min) / range;
 
-                pixels[x + (h - y - 1) * h] = HeatMap::GetColor(f);
+                pixels[x + (h - y - 1) * h] = HeatMap::GetColor(f, steps);
             }
         }
     }
@@ -230,7 +233,7 @@ void MainWindow::StopSimulation()
 
 void MainWindow::on_actionSave_Image_triggered()
 {
-    if (ui->dbGradient->checkState() == Qt::Checked)
+    if (ui->actionGradient->isChecked())
     {
         ui->graphicsLabel->pixmap()->save("/tmp/efield_gradient.png");
     }
@@ -238,4 +241,21 @@ void MainWindow::on_actionSave_Image_triggered()
     {
         ui->graphicsLabel->pixmap()->save("/tmp/efield_potential.png");
     }
+}
+
+void MainWindow::on_actionGradient_triggered()
+{
+    FrameUpdate();
+}
+
+void MainWindow::on_actionStepped_triggered()
+{
+    FrameUpdate();
+}
+
+void MainWindow::resizeEvent(QResizeEvent* event)
+{
+   QMainWindow::resizeEvent(event);
+
+   FrameUpdate();
 }

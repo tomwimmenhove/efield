@@ -2,12 +2,15 @@
 
 #include "heatmap.h"
 
-QRgb HeatMap::GetColor(float value)
+QRgb HeatMap::GetColor(float value, int steps)
 {
-    /* Turn into 20 'steps' */
-    value *= 20;
-    value = round(value);
-    value /= 20;
+    if (steps)
+    {
+        /* Turn into 20 'steps' */
+        value *= (float) steps;
+        value = round(value);
+        value /= (float) steps;
+    }
 
     const int NUM_COLORS = 4;
     static float color[NUM_COLORS][3] = { {0,0,255}, {0,255,0}, {255,255,0}, {255,0,0} };

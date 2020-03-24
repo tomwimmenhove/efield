@@ -11,13 +11,13 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Electrostatic E-Field simulator</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout_2">
     <item row="0" column="0">
      <layout class="QGridLayout" name="gridLayout">
-      <item row="1" column="0">
+      <item row="0" column="0">
        <widget class="QClickableLabel" name="graphicsLabel">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -35,17 +35,10 @@
          <bool>true</bool>
         </property>
         <property name="text">
-         <string>Simulation image</string>
+         <string>Simulation plot</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0">
-       <widget class="QCheckBox" name="dbGradient">
-        <property name="text">
-         <string>Gradient</string>
         </property>
        </widget>
       </item>
@@ -75,8 +68,16 @@
     </property>
     <addaction name="actionSave_Image"/>
    </widget>
+   <widget class="QMenu" name="menuPlot">
+    <property name="title">
+     <string>P&amp;lot</string>
+    </property>
+    <addaction name="actionGradient"/>
+    <addaction name="actionStepped"/>
+   </widget>
    <addaction name="menuSimulation"/>
    <addaction name="menuImage"/>
+   <addaction name="menuPlot"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
@@ -91,15 +92,46 @@
    <property name="text">
     <string>&amp;Start</string>
    </property>
+   <property name="shortcut">
+    <string>F5</string>
+   </property>
   </action>
   <action name="actionS_top">
    <property name="text">
     <string>S&amp;top</string>
    </property>
+   <property name="shortcut">
+    <string>Shift+F5</string>
+   </property>
   </action>
   <action name="actionSave_Image">
    <property name="text">
     <string>Save &amp;Image</string>
+   </property>
+  </action>
+  <action name="actionGradient">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Gradient</string>
+   </property>
+   <property name="shortcut">
+    <string>G</string>
+   </property>
+  </action>
+  <action name="actionStepped">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Stepped</string>
+   </property>
+   <property name="shortcut">
+    <string>S</string>
    </property>
   </action>
  </widget>

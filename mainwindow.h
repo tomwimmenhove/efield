@@ -31,8 +31,12 @@ private slots:
 
     void on_actionStart_triggered();
     void on_actionS_top_triggered();
-
     void on_actionSave_Image_triggered();
+    void on_actionGradient_triggered();
+    void on_actionStepped_triggered();
+
+protected:
+    void resizeEvent(QResizeEvent* event) override;
 
 private:
     void StartSimulation();
