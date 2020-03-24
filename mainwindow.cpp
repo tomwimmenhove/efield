@@ -20,9 +20,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    connect(ui->graphicsLabel, &QClickableLabel::Mouse_Moved, this, &MainWindow::GraphMouse_Moved);
-    connect(ui->graphicsLabel, &QClickableLabel::Mouse_Pressed, this, &MainWindow::GraphMouse_Pressed);
-    connect(ui->graphicsLabel, &QClickableLabel::Mouse_Left, this, &MainWindow::GraphMouse_Left);
+    connect(ui->graphicsLabel, &MouseEventLabel::Mouse_Moved, this, &MainWindow::GraphMouse_Moved);
 
     simulator = QSharedPointer<Simulator>(new Simulator(601, 601, SetFixedValues));
 
@@ -120,15 +118,6 @@ void MainWindow::GraphMouse_Moved(int x, int y)
     }
 }
 
-void MainWindow::GraphMouse_Pressed(int, int)
-{
-}
-
-void MainWindow::GraphMouse_Left()
-{
-    //statusBar()->hide();
-}
-
 void MainWindow::FrameUpdate()
 {
     if (ui->actionGradient->isChecked())
@@ -148,7 +137,8 @@ void MainWindow::FrameUpdate()
     float min = surface->MinValue();
     float range = max - min;
 
-    int steps = ui->actionStepped->isChecked() ? 20 : 0;
+    ui->heatMapLegend->SetMin(min);
+    ui->heatMapLegend->SetMax(max);
 
     std::vector<QRgb> pixels(w * h);
     for (int y = 0; y < h; ++y)
@@ -158,9 +148,9 @@ void MainWindow::FrameUpdate()
             /* Scale between  0..1 */
             if (range != 0)
             {
-                float f = (surface->XYCValue(x, y) - min) / range;
+                float f = ui->heatMapLegend->GetSteppedValue((surface->XYCValue(x, y)) - min) / range;
 
-                pixels[x + (h - y - 1) * h] = HeatMap::GetColor(f, steps);
+                pixels[x + (h - y - 1) * h] = HeatMap::GetColor(f, 0);
             }
         }
     }
@@ -250,6 +240,8 @@ void MainWindow::on_actionGradient_triggered()
 
 void MainWindow::on_actionStepped_triggered()
 {
+    ui->heatMapLegend->setStepped(ui->actionStepped->isChecked());
+
     FrameUpdate();
 }
 
@@ -258,4 +250,9 @@ void MainWindow::resizeEvent(QResizeEvent* event)
    QMainWindow::resizeEvent(event);
 
    FrameUpdate();
+}
+
+void MainWindow::on_actionRedraw_triggered()
+{
+    FrameUpdate();
 }

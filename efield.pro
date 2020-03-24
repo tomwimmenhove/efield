@@ -30,17 +30,17 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
         main.cpp \
         mainwindow.cpp \
-    qclickablelabel.cpp \
     model/simulator.cpp \
     heatmap.cpp \
     model/surface.cpp \
     model/simulatorthread.cpp \
     model/floatsurface.cpp \
-    model/gradientsurface.cpp
+    model/gradientsurface.cpp \
+    mouseeventlabel.cpp \
+    heatlegendwidget.cpp
 
 HEADERS += \
         mainwindow.h \
-    qclickablelabel.h \
     model/simulator.h \
     heatmap.h \
     model/surface.h \
@@ -49,7 +49,9 @@ HEADERS += \
     model/idrawer.h \
     model/floatsurfacedrawer.h \
     model/floatsurface.h \
-    model/gradientsurface.h
+    model/gradientsurface.h \
+    mouseeventlabel.h \
+    heatlegendwidget.h
 
 FORMS += \
         mainwindow.ui

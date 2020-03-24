@@ -18,7 +18,7 @@
     <item row="0" column="0">
      <layout class="QGridLayout" name="gridLayout">
       <item row="0" column="0">
-       <widget class="QClickableLabel" name="graphicsLabel">
+       <widget class="MouseEventLabel" name="graphicsLabel">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
           <horstretch>0</horstretch>
@@ -39,6 +39,22 @@
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="HeatLegendWidget" name="heatMapLegend" native="true">
+        <property name="minimumSize">
+         <size>
+          <width>100</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>100</width>
+          <height>16777215</height>
+         </size>
         </property>
        </widget>
       </item>
@@ -74,6 +90,7 @@
     </property>
     <addaction name="actionGradient"/>
     <addaction name="actionStepped"/>
+    <addaction name="actionRedraw"/>
    </widget>
    <addaction name="menuSimulation"/>
    <addaction name="menuImage"/>
@@ -114,7 +131,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Gradient</string>
+    <string>&amp;Gradient</string>
    </property>
    <property name="shortcut">
     <string>G</string>
@@ -128,19 +145,30 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Stepped</string>
+    <string>&amp;Stepped</string>
    </property>
    <property name="shortcut">
     <string>S</string>
+   </property>
+  </action>
+  <action name="actionRedraw">
+   <property name="text">
+    <string>Redraw</string>
    </property>
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
   <customwidget>
-   <class>QClickableLabel</class>
+   <class>MouseEventLabel</class>
    <extends>QLabel</extends>
-   <header>qclickablelabel.h</header>
+   <header>mouseeventlabel.h</header>
+  </customwidget>
+  <customwidget>
+   <class>HeatLegendWidget</class>
+   <extends>QWidget</extends>
+   <header>heatlegendwidget.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources/>

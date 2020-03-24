@@ -26,14 +26,14 @@ private slots:
     void FrameUpdate();
 
     void GraphMouse_Moved(int x, int y);
-    void GraphMouse_Pressed(int x, int y);
-    void GraphMouse_Left();
 
     void on_actionStart_triggered();
     void on_actionS_top_triggered();
     void on_actionSave_Image_triggered();
     void on_actionGradient_triggered();
     void on_actionStepped_triggered();
+
+    void on_actionRedraw_triggered();
 
 protected:
     void resizeEvent(QResizeEvent* event) override;

@@ -1,16 +1,16 @@
-#ifndef QCLICKABLELABEL_H
-#define QCLICKABLELABEL_H
+#ifndef MOUSEEVENTLABEL_H
+#define MOUSEEVENTLABEL_H
 
 #include <QObject>
 #include <QLabel>
 #include <QMouseEvent>
 
-class QClickableLabel : public QLabel
+class MouseEventLabel : public QLabel
 {
     Q_OBJECT
 
 public:
-    explicit QClickableLabel(QWidget* parent = 0);
+    explicit MouseEventLabel(QWidget* parent = 0);
 
     void mouseMoveEvent(QMouseEvent* ev);
     void mousePressEvent(QMouseEvent* ev);
@@ -22,4 +22,4 @@ signals:
     void Mouse_Left();
 };
 
-#endif // QCLICKABLELABEL_H
+#endif // MOUSEEVENTLABEL_H
