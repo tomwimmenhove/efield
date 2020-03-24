@@ -209,18 +209,6 @@ void MainWindow::on_actionS_top_triggered()
     StopSimulation();
 }
 
-void MainWindow::on_actionSave_image_triggered()
-{
-    if (ui->dbGradient->checkState() == Qt::Checked)
-    {
-        ui->graphicsLabel->pixmap()->save("/tmp/efield_gradient.png");
-    }
-    else
-    {
-        ui->graphicsLabel->pixmap()->save("/tmp/efield_potential.png");
-    }
-}
-
 void MainWindow::StartSimulation()
 {
     simulatorThread = new SimulatorThread(simulator);
@@ -239,4 +227,16 @@ void MainWindow::StopSimulation()
 {
     frameTimer->stop();
     simulatorThread->Cancel();
+}
+
+void MainWindow::on_actionSave_Image_triggered()
+{
+    if (ui->dbGradient->checkState() == Qt::Checked)
+    {
+        ui->graphicsLabel->pixmap()->save("/tmp/efield_gradient.png");
+    }
+    else
+    {
+        ui->graphicsLabel->pixmap()->save("/tmp/efield_potential.png");
+    }
 }

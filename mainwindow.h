@@ -30,8 +30,9 @@ private slots:
     void GraphMouse_Left();
 
     void on_actionStart_triggered();
-    void on_actionSave_image_triggered();
     void on_actionS_top_triggered();
+
+    void on_actionSave_Image_triggered();
 
 private:
     void StartSimulation();

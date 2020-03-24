@@ -69,7 +69,14 @@
     <addaction name="actionStart"/>
     <addaction name="actionS_top"/>
    </widget>
+   <widget class="QMenu" name="menuImage">
+    <property name="title">
+     <string>Ima&amp;ge</string>
+    </property>
+    <addaction name="actionSave_Image"/>
+   </widget>
    <addaction name="menuSimulation"/>
+   <addaction name="menuImage"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
@@ -88,6 +95,11 @@
   <action name="actionS_top">
    <property name="text">
     <string>S&amp;top</string>
+   </property>
+  </action>
+  <action name="actionSave_Image">
+   <property name="text">
+    <string>Save &amp;Image</string>
    </property>
   </action>
  </widget>
