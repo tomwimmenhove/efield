@@ -16,12 +16,12 @@ public:
     double Max() const { return max; }
     void SetMax(double value);
 
-    bool getStepped() const { return stepped; }
-    void setStepped(bool value);
+    bool IsStepped() const { return stepped; }
+    void SetStepped(bool value);
 
     float GetSteppedValue(float value);
 
-    double getTickStep() const { return tickStep; }
+    double TickStep() const { return tickStep; }
 
 signals:
 

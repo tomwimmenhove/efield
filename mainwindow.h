@@ -5,6 +5,7 @@
 #include <QTimer>
 #include <QSharedPointer>
 #include <QElapsedTimer>
+#include <QExposeEvent>
 
 #include "model/simulator.h"
 #include "model/simulatorthread.h"
@@ -42,8 +43,6 @@ private:
     void StartSimulation();
     void StopSimulation();
 
-    QPixmap MakeArrow();
-
     SimulatorThread* simulatorThread;
     static void SetFixedValues(FloatSurface& surface);
 
@@ -51,8 +50,6 @@ private:
 
     QSharedPointer<FloatSurface> surface;
     QSharedPointer<GradientSurface> gradient;
-
-    QPixmap arrow;
 
     Ui::MainWindow *ui;
     QTimer* frameTimer;

@@ -1,6 +1,6 @@
 #include <tgmath.h>
 
-#include "heatmap.h"
+#include "visualizer/heatmap.h"
 
 QRgb HeatMap::GetColor(float value, int steps)
 {

@@ -85,7 +85,7 @@ void HeatLegendWidget::UpdateTickStep()
     tickStep = GetNiceTicks(axisStart, axisEnd, maxTicks);
 }
 
-void HeatLegendWidget::setStepped(bool value)
+void HeatLegendWidget::SetStepped(bool value)
 {
     stepped = value;
 
@@ -113,8 +113,6 @@ void HeatLegendWidget::paintEvent(QPaintEvent*)
     int barTop = h - textHeight / 2 - barHeight;
     int barBottom = h - textHeight / 2 - 1;
 
-    /* Calculate the ticks */
-
     UpdateTickStep();
 
     if (tickStep == 0)
@@ -131,7 +129,7 @@ void HeatLegendWidget::paintEvent(QPaintEvent*)
         /* Interpolate pixel-position */
         int y = (int) qRound((float) barBottom + (l - min) * ((float) barTop - (float) barBottom) / (max - min));
 
-        /* Draw the tick line */
+        /* Draw the tick arrow */
         painter.drawLine(barWidth, y, barWidth + 5, y);
         painter.drawLine(barWidth + 3, y - 2, barWidth + 5, y);
         painter.drawLine(barWidth + 3, y + 2, barWidth + 5, y);

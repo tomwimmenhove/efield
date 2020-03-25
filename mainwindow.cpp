@@ -1,11 +1,3 @@
-#include "mainwindow.h"
-#include "heatmap.h"
-#include "ui_mainwindow.h"
-#include "model/drawing.h"
-#include "model/floatsurfacedrawer.h"
-#include "model/floatsurface.h"
-#include "model/gradientsurface.h"
-
 #include <QPainter>
 #include <QGraphicsScene>
 #include <QDebug>
@@ -13,6 +5,12 @@
 #include <QColor>
 #include <QtGlobal>
 #include <math.h>
+
+#include "mainwindow.h"
+#include "ui_mainwindow.h"
+#include "model/floatsurfacedrawer.h"
+#include "util/simplevaluestepper.h"
+#include "visualizer/visualizer.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -24,28 +22,12 @@ MainWindow::MainWindow(QWidget *parent) :
 
     simulator = QSharedPointer<Simulator>(new Simulator(601, 601, SetFixedValues));
 
-    arrow = MakeArrow();
-
     frameTimer = new QTimer(this);
     connect(frameTimer, &QTimer::timeout, this, &MainWindow::FrameUpdate);
 
     statusBar()->show();
     //StartSimulation();
     //FrameUpdate();
-}
-
-QPixmap MainWindow::MakeArrow()
-{
-    QPixmap arrow = QPixmap(9, 9);
-    arrow.fill(QColor(0, 0, 0, 255));
-    arrow.fill(QColor(0, 0, 0, 0));
-    QPainter arrowPainter(&arrow);
-    //arrowPainter.setRenderHint(QPainter::Antialiasing);
-    arrowPainter.drawLine(0, 4, 8, 4);
-    arrowPainter.drawLine(4, 0, 8, 4);
-    arrowPainter.drawLine(4, 8, 8, 4);
-
-    return arrow;
 }
 
 MainWindow::~MainWindow()
@@ -131,55 +113,24 @@ void MainWindow::FrameUpdate()
         gradient = nullptr;
     }
 
-    int w = surface->Width();
-    int h = surface->Height();
-    float max = surface->MaxValue();
-    float min = surface->MinValue();
-    float range = max - min;
+    ui->heatMapLegend->SetMin(surface->MinValue());
+    ui->heatMapLegend->SetMax(surface->MaxValue());
 
-    ui->heatMapLegend->SetMin(min);
-    ui->heatMapLegend->SetMax(max);
+    double tickStep = ui->heatMapLegend->TickStep();
+    SimpleValueStepper stepper = SimpleValueStepper(ui->actionStepped->isChecked() ? tickStep : 0);
+    QImage image = Visualizer::QImageFromFloatSurface(*surface, stepper);
 
-    std::vector<QRgb> pixels(w * h);
-    for (int y = 0; y < h; ++y)
-    {
-        for (int x = 0; x < w; ++x)
-        {
-            /* Scale between  0..1 */
-            if (range != 0)
-            {
-                float f = ui->heatMapLegend->GetSteppedValue((surface->XYCValue(x, y)) - min) / range;
-
-                pixels[x + (h - y - 1) * h] = HeatMap::GetColor(f, 0);
-            }
-        }
-    }
-
-    QImage image = QImage((uchar*)pixels.data(), w, h, QImage::Format_ARGB32);
     QPixmap pixmapObject = QPixmap::fromImage(image);
     QPixmap scaledPixmap = pixmapObject.scaled(ui->graphicsLabel->width(), ui->graphicsLabel->height(), Qt::KeepAspectRatio);//, Qt::SmoothTransformation);
 
     if (gradient)
     {
         QPainter painter(&scaledPixmap);
+
         painter.setPen(Qt::black);
         //painter.setRenderHint(QPainter::Antialiasing);
 
-        for (int y = 0; y < scaledPixmap.height(); y += 15)
-        {
-            for (int x = 0; x < scaledPixmap.width(); x += 15)
-            {
-                int nx = x * w / scaledPixmap.width();
-                int ny = y * h / scaledPixmap.height();
-
-                QVector2D v = -gradient->XYCValue(nx, ny); // Negated, because E-field lines go from positive to negative
-                float a = atan2(v.y(), v.x());
-                QMatrix rm;
-                rm.rotate(a * 180 / M_PI);
-
-                painter.drawPixmap(x - arrow.width(), y - arrow.height(), arrow.transformed(rm));
-            }
-        }
+        Visualizer::PaintGradientVectors(painter, *gradient, 15);
     }
 
     ui->graphicsLabel->setPixmap(scaledPixmap);
@@ -240,7 +191,7 @@ void MainWindow::on_actionGradient_triggered()
 
 void MainWindow::on_actionStepped_triggered()
 {
-    ui->heatMapLegend->setStepped(ui->actionStepped->isChecked());
+    ui->heatMapLegend->SetStepped(ui->actionStepped->isChecked());
 
     FrameUpdate();
 }
@@ -249,6 +200,7 @@ void MainWindow::resizeEvent(QResizeEvent* event)
 {
    QMainWindow::resizeEvent(event);
 
+   qDebug() << ui->graphicsLabel->width();
    FrameUpdate();
 }
 
