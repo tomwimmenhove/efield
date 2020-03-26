@@ -18,7 +18,8 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    connect(ui->graphicsLabel, &MouseEventLabel::Mouse_Moved, this, &MainWindow::GraphMouse_Moved);
+    connect(ui->graphicsLabel, &MouseEventLabel::Mouse_Moved, this, &MainWindow::GraphLabel_MouseMoved);
+    connect(ui->graphicsLabel, &MouseEventLabel::Resized, this, &MainWindow::GraphLabel_Resized);
 
     simulator = QSharedPointer<Simulator>(new Simulator(601, 601, SetFixedValues));
 
@@ -57,7 +58,7 @@ void MainWindow::SetFixedValues(FloatSurface& surface)
     drawing.DrawLine(100/n, 100/n, 500/n, 100/n, -1);
 }
 
-void MainWindow::GraphMouse_Moved(int x, int y)
+void MainWindow::GraphLabel_MouseMoved(int x, int y)
 {
     if (!surface)
         return;
@@ -98,6 +99,11 @@ void MainWindow::GraphMouse_Moved(int x, int y)
         float value = surface->XYValue(valueX, valueY);
         statusBar()->showMessage(QString(tr("Value at [%1, %2]: %3")).arg(valueX).arg(valueY).arg(value));
     }
+}
+
+void MainWindow::GraphLabel_Resized(QSize)
+{
+    FrameUpdate();
 }
 
 void MainWindow::FrameUpdate()
@@ -197,14 +203,6 @@ void MainWindow::on_actionStepped_triggered()
     ui->heatMapLegend->SetStepped(ui->actionStepped->isChecked());
 
     FrameUpdate();
-}
-
-void MainWindow::resizeEvent(QResizeEvent* event)
-{
-   QMainWindow::resizeEvent(event);
-
-   qDebug() << ui->graphicsLabel->width();
-   FrameUpdate();
 }
 
 void MainWindow::on_actionRedraw_triggered()

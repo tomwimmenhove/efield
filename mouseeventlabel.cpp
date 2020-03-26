@@ -20,3 +20,8 @@ void MouseEventLabel::leaveEvent(QEvent*)
 {
     emit Mouse_Left();
 }
+
+void MouseEventLabel::resizeEvent(QResizeEvent* ev)
+{
+    emit Resized(ev->size());
+}
