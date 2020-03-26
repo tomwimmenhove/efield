@@ -118,9 +118,8 @@ void MainWindow::FrameUpdate()
 
     double tickStep = ui->heatMapLegend->TickStep();
     SimpleValueStepper stepper = SimpleValueStepper(ui->actionStepped->isChecked() ? tickStep : 0);
-    QImage image = Visualizer::QImageFromFloatSurface(*surface, stepper);
 
-    QPixmap pixmapObject = QPixmap::fromImage(image);
+    QPixmap pixmapObject = QPixmap::fromImage(Visualizer::QImageFromFloatSurface(*surface, stepper));
     QPixmap scaledPixmap = pixmapObject.scaled(ui->graphicsLabel->width(), ui->graphicsLabel->height(), Qt::KeepAspectRatio);//, Qt::SmoothTransformation);
 
     if (gradient)
@@ -135,10 +134,13 @@ void MainWindow::FrameUpdate()
 
     ui->graphicsLabel->setPixmap(scaledPixmap);
 
-    frames++;
-    if (frames % 25 == 0)
+    if (simulatorThread)
     {
-        qDebug() << ((float) simulatorThread->Iterations() * 1000.0 / runTimer.elapsed()) << " iterations/sec";
+        frames++;
+        if (frames % 25 == 0)
+        {
+            qDebug() << ((float) simulatorThread->Iterations() * 1000.0 / runTimer.elapsed()) << " iterations/sec";
+        }
     }
 }
 
@@ -170,6 +172,7 @@ void MainWindow::StopSimulation()
 {
     frameTimer->stop();
     simulatorThread->Cancel();
+    simulatorThread = nullptr;
 }
 
 void MainWindow::on_actionSave_Image_triggered()

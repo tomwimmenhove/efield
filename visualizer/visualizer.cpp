@@ -13,7 +13,7 @@ QImage Visualizer::QImageFromFloatSurface(const FloatSurface& surface, const IVa
     float min = surface.MinValue();
     float range = max - min;
 
-    std::vector<QRgb> pixels(w * h);
+    QImage image(w, h, QImage::Format_ARGB32);
     for (int y = 0; y < h; ++y)
     {
         for (int x = 0; x < w; ++x)
@@ -21,14 +21,17 @@ QImage Visualizer::QImageFromFloatSurface(const FloatSurface& surface, const IVa
             /* Scale between  0..1 */
             if (range != 0)
             {
-                float value = stepper.MakeStepped(surface.XYCValue(x, y));
-                float f = (value - min) / range;
-                pixels[x + (h - y - 1) * h] = HeatMap::GetColor(f, 0);
+                float value = surface.XYCValue(x, y);
+                float stepped = stepper.MakeStepped(value);
+                float f = (stepped - min) / range;
+
+                QRgb color = HeatMap::GetColor(f, 0);
+                image.setPixel(x, y, color);
             }
         }
     }
 
-    return QImage((uchar*)pixels.data(), w, h, QImage::Format_ARGB32);
+    return image;
 }
 
 void Visualizer::PaintGradientVectors(QPainter& painter, const GradientSurface& gradientSurface, int spacing)

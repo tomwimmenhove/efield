@@ -43,7 +43,7 @@ private:
     void StartSimulation();
     void StopSimulation();
 
-    SimulatorThread* simulatorThread;
+    SimulatorThread* simulatorThread = nullptr;
     static void SetFixedValues(FloatSurface& surface);
 
     QSharedPointer<Simulator> simulator;
