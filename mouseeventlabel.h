@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QLabel>
 #include <QMouseEvent>
+#include <QPoint>
 
 class MouseEventLabel : public QLabel
 {
@@ -19,10 +20,10 @@ public:
     void resizeEvent(QResizeEvent* ev);
 
 signals:
-    void Mouse_Moved(int x, int y);
-    void Mouse_Pressed(int x, int y);
+    void Mouse_Moved(const QPoint& pos);
+    void Mouse_Pressed(const QPoint& pos);
     void Mouse_Left();
-    void Resized(QSize size);
+    void Resized(const QSize& size);
 };
 
 #endif // MOUSEEVENTLABEL_H

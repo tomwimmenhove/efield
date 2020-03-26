@@ -1,184 +1,99 @@
-#include <QPainter>
-#include <QGraphicsScene>
-#include <QDebug>
-#include <QString>
-#include <QColor>
-#include <QtGlobal>
-#include <math.h>
-
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "model/floatsurfacedrawer.h"
-#include "util/simplevaluestepper.h"
-#include "visualizer/visualizer.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
+    static bool registered = false;
+    if (!registered)
+    {
+        qRegisterMetaType<SimpleValueStepper>("SimpleValueStepper");
+
+        registered = true;
+    }
+
     ui->setupUi(this);
 
     connect(ui->graphicsLabel, &MouseEventLabel::Mouse_Moved, this, &MainWindow::GraphLabel_MouseMoved);
     connect(ui->graphicsLabel, &MouseEventLabel::Resized, this, &MainWindow::GraphLabel_Resized);
 
-    simulator = QSharedPointer<Simulator>(new Simulator(601, 601, SetFixedValues));
+    connect(this, &MainWindow::StartSimulation, &mainVm, &MainVm::StartSimulation);
+    connect(this, &MainWindow::StopSimulation, &mainVm, &MainVm::StopSimulation);
+    connect(this, &MainWindow::UpdateVisualization, &mainVm, &MainVm::UpdateVisualization);
+    connect(this, &MainWindow::RequestVisualization, &mainVm, &MainVm::RequestVisualization);
+    connect(this, &MainWindow::MouseMovedOnPixmap, &mainVm, &MainVm::MouseMovedOnPixmap);
+
+    connect(&mainVm, &MainVm::UpdateDone, this, &MainWindow::MainVm_UpdateDone);
+    connect(&mainVm, &MainVm::NewVisualization, this, &MainWindow::MainVm_NewVisualization, Qt::QueuedConnection);
+    connect(&mainVm, &MainVm::NewStatusMessage, this, &MainWindow::MainVm_NewStatusMessage);
+
+#ifdef USE_VM_THREAD
+    mainVm.moveToThread(&vmThread);
+    vmThread.start();
+#endif
 
     frameTimer = new QTimer(this);
     connect(frameTimer, &QTimer::timeout, this, &MainWindow::FrameUpdate);
 
     statusBar()->show();
-    //StartSimulation();
-    //FrameUpdate();
 }
 
 MainWindow::~MainWindow()
 {
+#ifdef USE_VM_THREAD
+    vmThread.quit();
+    vmThread.wait();
+#endif
     delete ui;
 }
 
-void MainWindow::SetFixedValues(FloatSurface& surface)
+void MainWindow::GraphLabel_MouseMoved(const QPoint& point)
 {
-    FloatSurfaceDrawer drawer(surface);
-    Drawing<float> drawing(drawer);
-
-    int n = 1;
-
-    drawing.DrawLine(0/n, 0/n, 600/n, 0/n, 0);
-    drawing.DrawLine(0/n, 600/n, 600/n, 600/n, 0);
-
-    drawing.DrawLine(0/n, 0/n, 0/n, 600/n, 0);
-    drawing.DrawLine(600/n, 0/n, 600/n, 600/n, 0);
-
-
-    /* anode */
-    drawing.DrawLine(100/n, 500/n, 500/n, 500/n, 1);
-    //drawing.DrawLine(500/n, 500/n, 500/n, 300/n, 1);
-
-    /* cathode */
-    drawing.DrawLine(100/n, 100/n, 500/n, 100/n, -1);
+    emit MouseMovedOnPixmap(point, ui->graphicsLabel->size());
 }
 
-void MainWindow::GraphLabel_MouseMoved(int x, int y)
-{
-    if (!surface)
-        return;
-
-    float scale = qMin((float) ui->graphicsLabel->width() / surface->Width(), (float) ui->graphicsLabel->height() / surface->Height());
-
-    // Should we round these?
-    float scaledWidth = scale * surface->Width();
-    float scaledHeight = scale * surface->Height();
-
-    int xStart = (ui->graphicsLabel->width() - scaledWidth) / 2;
-    int yStart = (ui->graphicsLabel->height() - scaledHeight) / 2;
-
-    int valueX = (x - xStart) * surface->Width() / scaledWidth;
-    int valueY = (scaledHeight - (y - yStart) - 1) * surface->Height() / scaledHeight;
-
-    if (valueX < 0 || valueX >= surface->Width() || valueY < 0 || valueY >= surface->Height())
-    {
-        statusBar()->showMessage(QString(tr("[%1, %2]")).arg(valueX).arg(valueY));
-        return;
-    }
-
-    statusBar()->show();
-    if (gradient)
-    {
-        QVector2D v = gradient->XYValue(valueX, valueY);
-
-        statusBar()->showMessage(QString(tr("Value at [%1, %2]: %3 @%4° (Vector [%5, %6])"))
-                                 .arg(valueX)
-                                 .arg(valueY)
-                                 .arg(v.length())
-                                 .arg(atan2(v.y(), v.x()) * 180 / M_PI)
-                                 .arg(v.x())
-                                 .arg(v.y()));
-    }
-    else
-    {
-        float value = surface->XYValue(valueX, valueY);
-        statusBar()->showMessage(QString(tr("Value at [%1, %2]: %3")).arg(valueX).arg(valueY).arg(value));
-    }
-}
-
-void MainWindow::GraphLabel_Resized(QSize)
+void MainWindow::GraphLabel_Resized(const QSize&)
 {
     FrameUpdate();
 }
 
 void MainWindow::FrameUpdate()
 {
-    if (ui->actionGradient->isChecked())
-    {
-        gradient = QSharedPointer<GradientSurface>(new GradientSurface(*simulator->CloneSurface()));
-        surface = QSharedPointer<FloatSurface>(new FloatSurface(*gradient));
-    }
-    else
-    {
-        surface = simulator->CloneSurface();
-        gradient = nullptr;
-    }
+    emit UpdateVisualization(ui->actionGradient->isChecked());
+}
 
-    ui->heatMapLegend->SetMin(surface->MinValue());
-    ui->heatMapLegend->SetMax(surface->MaxValue());
+void MainWindow::MainVm_UpdateDone(float minValue, float maxValue)
+{
+    ui->heatMapLegend->SetMin(minValue);
+    ui->heatMapLegend->SetMax(maxValue);
 
     double tickStep = ui->heatMapLegend->TickStep();
     SimpleValueStepper stepper = SimpleValueStepper(ui->actionStepped->isChecked() ? tickStep : 0);
 
-    QPixmap pixmapObject = QPixmap::fromImage(Visualizer::QImageFromFloatSurface(*surface, stepper));
-    QPixmap scaledPixmap = pixmapObject.scaled(ui->graphicsLabel->width(), ui->graphicsLabel->height(), Qt::KeepAspectRatio);//, Qt::SmoothTransformation);
+    emit RequestVisualization(stepper, ui->graphicsLabel->width(), ui->graphicsLabel->height());
+}
 
-    if (gradient)
-    {
-        QPainter painter(&scaledPixmap);
+void MainWindow::MainVm_NewVisualization(const QPixmap& pixmap)
+{
+    ui->graphicsLabel->setPixmap(pixmap);
+}
 
-        painter.setPen(Qt::black);
-        //painter.setRenderHint(QPainter::Antialiasing);
-
-        Visualizer::PaintGradientVectors(painter, *gradient, 15);
-    }
-
-    ui->graphicsLabel->setPixmap(scaledPixmap);
-
-    if (simulatorThread)
-    {
-        frames++;
-        if (frames % 25 == 0)
-        {
-            qDebug() << ((float) simulatorThread->Iterations() * 1000.0 / runTimer.elapsed()) << " iterations/sec";
-        }
-    }
+void MainWindow::MainVm_NewStatusMessage(const QString& message)
+{
+    ui->statusBar->showMessage(message);
 }
 
 void MainWindow::on_actionStart_triggered()
 {
-    StartSimulation();
+    emit StartSimulation();
+    frameTimer->start(40);
 }
 
 void MainWindow::on_actionS_top_triggered()
 {
-    StopSimulation();
-}
-
-void MainWindow::StartSimulation()
-{
-    simulatorThread = new SimulatorThread(simulator);
-#ifdef _OPENMP
-    simulatorThread->SetNumThreads(6);
-#endif
-
-    connect(simulatorThread, &SimulatorThread::finished, simulatorThread, &QObject::deleteLater);
-
-    simulatorThread->start();
-    frameTimer->start(40);
-    runTimer.restart();
-}
-
-void MainWindow::StopSimulation()
-{
     frameTimer->stop();
-    simulatorThread->Cancel();
-    simulatorThread = nullptr;
+    emit StopSimulation();
 }
 
 void MainWindow::on_actionSave_Image_triggered()

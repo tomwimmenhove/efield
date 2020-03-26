@@ -2,18 +2,16 @@
 
 MouseEventLabel::MouseEventLabel(QWidget* parent)
     : QLabel(parent)
-{
-
-}
+{ }
 
 void MouseEventLabel::mouseMoveEvent(QMouseEvent* ev)
 {
-    emit Mouse_Moved(ev->x(), ev->y());
+    emit Mouse_Moved(ev->pos());
 }
 
 void MouseEventLabel::mousePressEvent(QMouseEvent* ev)
 {
-    emit Mouse_Pressed(ev->x(), ev->y());
+    emit Mouse_Pressed(ev->pos());
 }
 
 void MouseEventLabel::leaveEvent(QEvent*)

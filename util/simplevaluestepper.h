@@ -6,7 +6,7 @@
 class SimpleValueStepper : public IValueStepper
 {
 public:
-    SimpleValueStepper(double stepSize) : stepSize(stepSize) { }
+    SimpleValueStepper(double stepSize = 0) : stepSize(stepSize) { }
 
     virtual double MakeStepped(double value) const override
     {

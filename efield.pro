@@ -37,7 +37,8 @@ SOURCES += \
     model/gradientsurface.cpp \
     mouseeventlabel.cpp \
     visualizer/visualizer.cpp \
-    visualizer/heatlegendwidget.cpp
+    visualizer/heatlegendwidget.cpp \
+    viewmodel/mainvm.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -51,11 +52,11 @@ HEADERS += \
     model/gradientsurface.h \
     mouseeventlabel.h \
     heatlegendwidget.h \
-    util/nonsense.h \
     util/ivaluestepper.h \
     util/simplevaluestepper.h \
     visualizer/visualizer.h \
-    visualizer/heatmap.h
+    visualizer/heatmap.h \
+    viewmodel/mainvm.h
 
 FORMS += \
         mainwindow.ui

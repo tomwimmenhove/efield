@@ -3,13 +3,11 @@
 
 #include <QMainWindow>
 #include <QTimer>
-#include <QSharedPointer>
 #include <QElapsedTimer>
-#include <QExposeEvent>
 
-#include "model/simulator.h"
-#include "model/simulatorthread.h"
-#include "model/gradientsurface.h"
+#include "viewmodel/mainvm.h"
+
+//#define USE_VM_THREAD
 
 namespace Ui {
 class MainWindow;
@@ -24,10 +22,12 @@ public:
     ~MainWindow();
 
 private slots:
-    void FrameUpdate();
+    void GraphLabel_MouseMoved(const QPoint& point);
+    void GraphLabel_Resized(const QSize& size);
 
-    void GraphLabel_MouseMoved(int x, int y);
-    void GraphLabel_Resized(QSize size);
+    void MainVm_UpdateDone(float minValue, float maxValue);
+    void MainVm_NewVisualization(const QPixmap& pixmap);
+    void MainVm_NewStatusMessage(const QString& message);
 
     void on_actionStart_triggered();
     void on_actionS_top_triggered();
@@ -36,22 +36,24 @@ private slots:
     void on_actionStepped_triggered();
     void on_actionRedraw_triggered();
 
-private:
+signals:
     void StartSimulation();
     void StopSimulation();
+    void UpdateVisualization(bool useGradiant);
+    void RequestVisualization(const SimpleValueStepper& stepper, int width, int height);
+    void MouseMovedOnPixmap(QPoint mousePos, QSize pixmapSize);
 
-    SimulatorThread* simulatorThread = nullptr;
-    static void SetFixedValues(FloatSurface& surface);
+private:
+    void FrameUpdate();
 
-    QSharedPointer<Simulator> simulator;
+    MainVm mainVm;
+#ifdef USE_VM_THREAD
+    QThread vmThread;
+#endif
 
-    QSharedPointer<FloatSurface> surface;
-    QSharedPointer<GradientSurface> gradient;
+    QTimer* frameTimer;
 
     Ui::MainWindow *ui;
-    QTimer* frameTimer;
-    QElapsedTimer runTimer;
-    int frames = 0;
 };
 
 #endif // MAINWINDOW_H
