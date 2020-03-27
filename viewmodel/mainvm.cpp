@@ -8,6 +8,26 @@
 MainVm::MainVm()
 {
     simulator = QSharedPointer<Simulator>(new Simulator(601, 601, SetFixedValues));
+
+    simulatorWorker = new SimulatorWorker(simulator);
+
+#ifdef _OPENMP
+    simulatorWorker->SetNumThreads(6);
+#endif
+
+    connect(&simulatorThread, &QThread::finished, simulatorWorker, &SimulatorWorker::deleteLater);
+    connect(this, &MainVm::RunSimulatorWorker, simulatorWorker, &SimulatorWorker::Run);
+    connect(this, &MainVm::CancelSimulatorWorker, simulatorWorker, &SimulatorWorker::Cancel, Qt::DirectConnection);
+
+    simulatorWorker->moveToThread(&simulatorThread);
+    simulatorThread.start();
+}
+
+MainVm::~MainVm()
+{
+    emit CancelSimulatorWorker();
+    simulatorThread.quit();
+    simulatorThread.wait();
 }
 
 void MainVm::UpdateVisualization(bool useGradiant)
@@ -41,13 +61,10 @@ void MainVm::RequestVisualization(const SimpleValueStepper& stepper, int width, 
         Visualizer::PaintGradientVectors(painter, *gradient, 15);
     }
 
-    if (simulatorThread)
+    frames++;
+    if (frames % 25 == 0)
     {
-        frames++;
-        if (frames % 25 == 0)
-        {
-            qDebug() << ((float) simulatorThread->Iterations() * 1000.0 / runTimer.elapsed()) << " iterations/sec";
-        }
+        qDebug() << ((float) simulatorWorker->Iterations() * 1000.0 / runTimer.elapsed()) << " iterations/sec";
     }
 
     emit NewVisualization(scaledPixmap);
@@ -101,14 +118,7 @@ void MainVm::StartSimulation()
     if (started)
         return;
 
-    simulatorThread = new SimulatorThread(simulator);
-#ifdef _OPENMP
-    simulatorThread->SetNumThreads(6);
-#endif
-
-    connect(simulatorThread, &SimulatorThread::finished, simulatorThread, &QObject::deleteLater);
-
-    simulatorThread->start();
+    emit RunSimulatorWorker();
 
     runTimer.restart();
 
@@ -120,8 +130,7 @@ void MainVm::StopSimulation()
     if (!started)
         return;
 
-    simulatorThread->Cancel();
-    simulatorThread = nullptr;
+    emit CancelSimulatorWorker();
 
     started = false;
 }

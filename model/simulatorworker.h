@@ -1,40 +1,40 @@
-#ifndef SIMULATORTHREAD_H
-#define SIMULATORTHREAD_H
+#ifndef SIMULATORWORKER_H
+#define SIMULATORWORKER_H
 
-#include <QThread>
+#include <QObject>
 #include <QAtomicInt>
 #include <QMutex>
 #include <QDebug>
 
 #include "simulator.h"
 
-class SimulatorThread : public QThread
+class SimulatorWorker : public QObject
 {
     Q_OBJECT
-
 public:
-    SimulatorThread(QSharedPointer<Simulator> simulator)
-        : simulator(simulator)
+    explicit SimulatorWorker(QSharedPointer<Simulator> simulator, QObject *parent = nullptr)
+        : QObject(parent), simulator(simulator)
     { }
-
-    virtual ~SimulatorThread()
-    {
-        qDebug() << "Bubbye";
-    }
 
 #ifdef _OPENMP
     inline void SetNumThreads(int n) { numThreads = n; }
     inline int NumThreads() const { return numThreads; }
+#endif
 
+    inline int Iterations() const { return iterations; }
+
+signals:
+
+public slots:
+    void Run();
+    inline void Cancel() { cancel = true; }
+
+private:
+#ifdef _OPENMP
     void RunParallel();
 #endif
     void RunSequential();
 
-    void run() override;
-    inline void Cancel() { cancel = true; }
-    inline int Iterations() const { return iterations; }
-    
-private:
     int numThreads = 1;
     QAtomicInt iterations = 0;
     QMutex mutex;
@@ -43,4 +43,4 @@ private:
     QAtomicInt cancel = false;
 };
 
-#endif // SIMULATORTHREAD_H
+#endif // SIMULATORWORKER_H

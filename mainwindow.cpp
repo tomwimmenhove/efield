@@ -25,7 +25,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, &MainWindow::MouseMovedOnPixmap, &mainVm, &MainVm::MouseMovedOnPixmap);
 
     connect(&mainVm, &MainVm::UpdateDone, this, &MainWindow::MainVm_UpdateDone);
-    connect(&mainVm, &MainVm::NewVisualization, this, &MainWindow::MainVm_NewVisualization, Qt::QueuedConnection);
+    connect(&mainVm, &MainVm::NewVisualization, this, &MainWindow::MainVm_NewVisualization);
     connect(&mainVm, &MainVm::NewStatusMessage, this, &MainWindow::MainVm_NewStatusMessage);
 
 #ifdef USE_VM_THREAD

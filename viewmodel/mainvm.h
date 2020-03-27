@@ -4,9 +4,10 @@
 #include <QSharedPointer>
 #include <QElapsedTimer>
 #include <QSize>
+#include <QThread>
 
 #include "model/simulator.h"
-#include "model/simulatorthread.h"
+#include "model/simulatorworker.h"
 #include "model/gradientsurface.h"
 #include "util/simplevaluestepper.h"
 
@@ -16,6 +17,8 @@ class MainVm : public QObject
 
 public:
     MainVm();
+
+    ~MainVm();
 
 public slots:
     void StartSimulation();
@@ -29,10 +32,15 @@ signals:
     void NewVisualization(const QPixmap& pixmap);
     void NewStatusMessage(const QString& message);
 
+    void RunSimulatorWorker();
+    void CancelSimulatorWorker();
+
 private:
     static void SetFixedValues(FloatSurface& surface);
 
-    SimulatorThread* simulatorThread = nullptr;
+    QThread simulatorThread;
+    SimulatorWorker* simulatorWorker = nullptr;
+
     bool started = false;
 
     QSharedPointer<Simulator> simulator;

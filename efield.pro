@@ -32,19 +32,18 @@ SOURCES += \
         mainwindow.cpp \
     model/simulator.cpp \
     heatmap.cpp \
-    model/simulatorthread.cpp \
     model/floatsurface.cpp \
     model/gradientsurface.cpp \
     mouseeventlabel.cpp \
     visualizer/visualizer.cpp \
     visualizer/heatlegendwidget.cpp \
-    viewmodel/mainvm.cpp
+    viewmodel/mainvm.cpp \
+    model/simulatorworker.cpp
 
 HEADERS += \
         mainwindow.h \
     model/simulator.h \
     model/surface.h \
-    model/simulatorthread.h \
     model/drawing.h \
     model/idrawer.h \
     model/floatsurfacedrawer.h \
@@ -56,7 +55,8 @@ HEADERS += \
     util/simplevaluestepper.h \
     visualizer/visualizer.h \
     visualizer/heatmap.h \
-    viewmodel/mainvm.h
+    viewmodel/mainvm.h \
+    model/simulatorworker.h
 
 FORMS += \
         mainwindow.ui

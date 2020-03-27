@@ -1,15 +1,13 @@
+#include "simulatorworker.h"
+
 #include <QDebug>
 #include <QMutex>
 #include <QMutexLocker>
 
 #ifdef _OPENMP
 #include <omp.h>
-#endif
 
-#include "simulatorthread.h"
-
-#ifdef _OPENMP
-void SimulatorThread::RunParallel()
+void SimulatorWorker::RunParallel()
 {
     simulator->PreIterateSimulationChunk();
 
@@ -56,7 +54,7 @@ void SimulatorThread::RunParallel()
 }
 #endif
 
-void SimulatorThread::RunSequential()
+void SimulatorWorker::RunSequential()
 {
     qDebug() << "Simulation starting";
     while (!cancel)
@@ -67,9 +65,11 @@ void SimulatorThread::RunSequential()
     qDebug() << "Simulation finished";
 }
 
-void SimulatorThread::run()
+void SimulatorWorker::Run()
 {
     cancel = false;
+
+    iterations = 0;
 
 #ifdef _OPENMP
     if (numThreads > 1)
