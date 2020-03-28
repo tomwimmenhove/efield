@@ -14,9 +14,14 @@ public:
     SceneElement()
     { }
 
-    void Add(DrawingElement<T>* element)
+    void Add(const QSharedPointer<DrawingElement<T>>& element)
     {
-        elements.push_back(QSharedPointer<DrawingElement<T>>(element));
+        elements.push_back(element);
+    }
+
+    int Remove(const QSharedPointer<DrawingElement<T>>& element)
+    {
+        return elements.removeAll(element);
     }
 
     void Clear() { elements.clear(); }
@@ -27,10 +32,10 @@ public:
             element->Draw(drawer);
     }
 
-    void DrawAnnotation(QPainter& painter, const QSize& graphicsSize, const QSize& surfaceSize) override
+    void DrawAnnotation(QPainter& painter, const QSize& surfaceSize) override
     {
         for (auto const& element: elements)
-            element->DrawAnnotation(painter, graphicsSize, surfaceSize);
+            element->DrawAnnotation(painter, surfaceSize);
     }
 
 private:

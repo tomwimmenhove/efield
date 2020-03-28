@@ -5,6 +5,7 @@
 #include "model/floatsurfacedrawer.h"
 #include "visualizer/visualizer.h"
 #include "graphics/lineelement.h"
+#include "graphics/nodeelement.h"
 
 MainVm::MainVm()
 {
@@ -66,7 +67,7 @@ void MainVm::RequestVisualization(const SimpleValueStepper& stepper, const QSize
     }
 
     painter.setRenderHint(QPainter::Antialiasing);
-    scene.DrawAnnotation(painter, scaledPixmap.size(), surface->Size());
+    scene.DrawAnnotation(painter, surface->Size());
 
     frames++;
     if (frames % 25 == 0)
@@ -155,21 +156,20 @@ void MainVm::CreateScene()
     SharedNode cathodeLeft(100, 100);
     SharedNode cathodeRight(500, 100);
 
-    DrawingElement<float>* top = new LineElement<float>(topLeft, topRight, 0);
-    DrawingElement<float>* bottom = new LineElement<float>(bottomLeft, bottomRight, 0);
-    DrawingElement<float>* left = new LineElement<float>(topLeft, bottomLeft, 0);
-    DrawingElement<float>* right = new LineElement<float>(topRight, bottomRight, 0);
 
-    DrawingElement<float>* anode = new LineElement<float>(anodeLeft, anodeRight, 1);
-    DrawingElement<float>* cathode = new LineElement<float>(cathodeLeft, cathodeRight, -1);
+    scene.Add(NodeElement<float>::SharedElement(anodeRight));
+    scene.Add(NodeElement<float>::SharedElement(anodeLeft));
+    scene.Add(NodeElement<float>::SharedElement(cathodeLeft));
+    scene.Add(NodeElement<float>::SharedElement(cathodeRight));
 
-    scene.Add(top);
-    scene.Add(bottom);
-    scene.Add(left);
-    scene.Add(right);
 
-    scene.Add(anode);
-    scene.Add(cathode);
+    scene.Add(LineElement<float>::SharedElement(topLeft, topRight, 0));
+    scene.Add(LineElement<float>::SharedElement(bottomLeft, bottomRight, 0));
+    scene.Add(LineElement<float>::SharedElement(topLeft, bottomLeft, 0));
+    scene.Add(LineElement<float>::SharedElement(topRight, bottomRight, 0));
+
+    scene.Add(LineElement<float>::SharedElement(anodeLeft, anodeRight, 1));
+    scene.Add(LineElement<float>::SharedElement(cathodeLeft, cathodeRight, -1));
 
     //anodeLeft = QPoint(0, 0);
 }

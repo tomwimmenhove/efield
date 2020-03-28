@@ -2,6 +2,7 @@
 #define SHAREDNODE_H
 
 #include <QSharedPointer>
+#include <QPoint>
 
 class SharedNode : public QSharedPointer<QPoint>
 {

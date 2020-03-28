@@ -62,7 +62,8 @@ HEADERS += \
     graphics/sharedanchors.h \
     graphics/sceneelement.h \
     graphics/drawing.h \
-    graphics/idrawer.h
+    graphics/idrawer.h \
+    graphics/nodeelement.h
 
 FORMS += \
         mainwindow.ui
