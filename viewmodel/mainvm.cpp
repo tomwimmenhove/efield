@@ -117,9 +117,37 @@ void MainVm::MousePressedOnPixmap(QPoint mousePos, Qt::MouseButtons buttons, QSi
 
     QPoint translated = Geometry::TranslatePoint(mousePos, labelSize, surface->Size(), true);
 
-    scene.HighLightClosestElement(translated, 10);
+    scene.HighlightClosestElement(translated, 10);
 
     emit VisualizationAvailable(surface->MinValue(), surface->MaxValue());
+}
+
+void MainVm::DeleteSelectedElement()
+{
+    if (!surface)
+        return;
+
+    bool isModified = false;
+
+    QSharedPointer<DrawingElement<float>> highLighted = scene.FindHighLigted();
+
+    // Fuck off, this is a perfectly good use for dynamic casting
+    DrawingElement<float>* elemp = highLighted.data();
+    NodeElement<float>* node = dynamic_cast<NodeElement<float>*>(elemp);
+
+    // Can't delete nodes that are used by other elements */
+    if (node && node->Node()->RefCount() > 0)
+        return;
+
+    if (highLighted)
+        isModified |= scene.Remove(highLighted) != 0;
+
+    if (isModified)
+    {
+        SetFixedValues(*surface);
+
+        emit VisualizationAvailable(surface->MinValue(), surface->MaxValue());
+    }
 }
 
 void MainVm::StartSimulation()

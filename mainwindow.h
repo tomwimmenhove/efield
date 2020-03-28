@@ -44,6 +44,10 @@ signals:
     void RequestVisualization(const SimpleValueStepper& stepper, const QSize& size);
     void MouseMovedOnPixmap(QPoint mousePos, QSize labelSize);
     void MousePressedOnPixmap(QPoint mousePos, Qt::MouseButtons buttons, QSize labelSize);
+    void DeleteSelectedElement();
+
+protected:
+    void keyPressEvent(QKeyEvent *e);
 
 private:
     void FrameUpdate();

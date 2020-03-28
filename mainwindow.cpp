@@ -25,6 +25,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, &MainWindow::RequestVisualization, &mainVm, &MainVm::RequestVisualization);
     connect(this, &MainWindow::MouseMovedOnPixmap, &mainVm, &MainVm::MouseMovedOnPixmap);
     connect(this, &MainWindow::MousePressedOnPixmap, &mainVm, &MainVm::MousePressedOnPixmap);
+    connect(this, &MainWindow::DeleteSelectedElement, &mainVm, &MainVm::DeleteSelectedElement);
 
     connect(&mainVm, &MainVm::VisualizationAvailable, this, &MainWindow::MainVm_VisualizationAvailable);
     connect(&mainVm, &MainVm::NewVisualization, this, &MainWindow::MainVm_NewVisualization);
@@ -127,4 +128,12 @@ void MainWindow::on_actionStepped_triggered()
 void MainWindow::on_actionRedraw_triggered()
 {
     FrameUpdate();
+}
+
+void MainWindow::keyPressEvent(QKeyEvent* e)
+{
+    if (e->modifiers() == Qt::NoModifier && e->key() == Qt::Key_Delete)
+        emit DeleteSelectedElement();
+
+    QMainWindow::keyPressEvent(e);
 }

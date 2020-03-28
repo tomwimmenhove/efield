@@ -60,12 +60,12 @@ HEADERS += \
     graphics/sharednode.h \
     graphics/sharedint.h \
     graphics/drawingelement.h \
-    graphics/sharedanchors.h \
     graphics/sceneelement.h \
     graphics/drawing.h \
     graphics/idrawer.h \
     graphics/nodeelement.h \
-    util/geometry.h
+    util/geometry.h \
+    util/refcounted.h
 
 FORMS += \
         mainwindow.ui

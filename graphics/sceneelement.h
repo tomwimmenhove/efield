@@ -45,7 +45,7 @@ public:
         return 0.0f;
     }
 
-    void HighLight(const QSharedPointer<DrawingElement<T>>& element)
+    void Highlight(const QSharedPointer<DrawingElement<T>>& element)
     {
         for (auto const& e: elements)
             e->SetHighlighted(e == element);
@@ -57,12 +57,12 @@ public:
         QSharedPointer<DrawingElement<T>> closest = nullptr;
 
         float min = std::numeric_limits<float>::max();
-        for (auto const& element: elements)
+        for (auto const& e: elements)
         {
-            float dist = element->DistanceTo(point);
+            float dist = e->DistanceTo(point);
             if (dist < min && dist < maxDist)
             {
-                closest = element;
+                closest = e;
                 min = dist;
             }
         }
@@ -70,10 +70,21 @@ public:
         return closest;
     }
 
-    void HighLightClosestElement(const QPoint& point,
+    void HighlightClosestElement(const QPoint& point,
                           float maxDist = std::numeric_limits<float>::max())
     {
-        HighLight(ClosestElement(point, maxDist));
+        Highlight(ClosestElement(point, maxDist));
+    }
+
+    QSharedPointer<DrawingElement<T>> FindHighLigted() const
+    {
+        QSharedPointer<DrawingElement<T>> selected = nullptr;
+
+        for (auto const& e: elements)
+            if (e->IsHighlighted())
+                return e;
+
+        return selected;
     }
 
 private:

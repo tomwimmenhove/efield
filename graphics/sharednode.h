@@ -4,13 +4,15 @@
 #include <QSharedPointer>
 #include <QPoint>
 
-class SharedNode : public QSharedPointer<QPoint>
+#include "util/refcounted.h"
+
+class SharedNode : public QSharedPointer<Refcounted<QPoint>>
 {
 public:
-    inline SharedNode(const QPoint& p) { this->reset(new QPoint(p)); }
-    inline SharedNode(int x, int y) { this->reset(new QPoint(x, y)); }
+    inline SharedNode(const QPoint& p) { this->reset(new Refcounted<QPoint>(p)); }
+    inline SharedNode(int x, int y) { this->reset(new Refcounted<QPoint>(x, y)); }
 
-    inline operator const QPoint&() const { return *this->data(); }
+    inline operator QPoint() const { return *this->data(); }
 
     inline SharedNode& operator= (const QPoint& p)
     {

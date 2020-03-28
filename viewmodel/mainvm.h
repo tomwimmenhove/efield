@@ -28,6 +28,7 @@ public slots:
     void RequestVisualization(const SimpleValueStepper& stepper, const QSize& size);
     void MouseMovedOnPixmap(QPoint mousePos, QSize labelSize);
     void MousePressedOnPixmap(QPoint mousePos, Qt::MouseButtons buttons, QSize labelSize);
+    void DeleteSelectedElement();
 
 signals:
     void VisualizationAvailable(float minValue, float maxValue);

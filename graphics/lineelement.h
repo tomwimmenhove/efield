@@ -10,11 +10,20 @@ template<typename T>
 class LineElement : public DrawingElement<T>
 {
 public:
-    LineElement(const SharedNode& p1, const SharedNode& p2, const T& value)
+    LineElement(SharedNode& p1, SharedNode& p2, const T& value)
         : p1(p1), p2(p2), value(value)
-    { }
+    {
+        p1->Use();
+        p2->Use();
+    }
 
-    static QSharedPointer<DrawingElement<float>> SharedElement(const SharedNode& p1, const SharedNode& p2, const T& value)
+    ~LineElement()
+    {
+        p1->Release();
+        p2->Release();
+    }
+
+    static QSharedPointer<DrawingElement<float>> SharedElement(SharedNode& p1, SharedNode& p2, const T& value)
     {
         return  QSharedPointer<DrawingElement<float>>(new LineElement<float>(p1, p2, value));
     }

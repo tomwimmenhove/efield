@@ -43,6 +43,8 @@ public:
         return Geometry::Distance(QVector2D(p), QVector2D(point));
     }
 
+    inline SharedNode Node() const { return p; }
+
 private:
     SharedNode p;
     int margin;
