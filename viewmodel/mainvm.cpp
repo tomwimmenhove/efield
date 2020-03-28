@@ -4,10 +4,15 @@
 
 #include "model/floatsurfacedrawer.h"
 #include "visualizer/visualizer.h"
+#include "grphxelements/lineelement.h"
 
 MainVm::MainVm()
 {
-    simulator = QSharedPointer<Simulator>(new Simulator(601, 601, SetFixedValues));
+    CreateScene();
+
+    std::function<void(FloatSurface&)> setFixedValuesFunc = std::bind(&MainVm::SetFixedValues, this, std::placeholders::_1);
+
+    simulator = QSharedPointer<Simulator>(new Simulator(601, 601, setFixedValuesFunc));
 
     simulatorWorker = new SimulatorWorker(simulator);
 
@@ -135,23 +140,41 @@ void MainVm::StopSimulation()
     started = false;
 }
 
+void MainVm::CreateScene()
+{
+    SharedNode topLeft(0, 600);
+    SharedNode topRight(600, 600);
+    SharedNode bottomLeft(0, 0);
+    SharedNode bottomRight(600, 0);
+
+    SharedNode anodeLeft(100, 500);
+    SharedNode anodeRight(500, 500);
+
+    SharedNode cathodeLeft(100, 100);
+    SharedNode cathodeRight(500, 100);
+
+    DrawingElement<float>* top = new LineElement<float>(topLeft, topRight, 0);
+    DrawingElement<float>* bottom = new LineElement<float>(bottomLeft, bottomRight, 0);
+    DrawingElement<float>* left = new LineElement<float>(topLeft, bottomLeft, 0);
+    DrawingElement<float>* right = new LineElement<float>(topRight, bottomRight, 0);
+
+    DrawingElement<float>* anode = new LineElement<float>(anodeLeft, anodeRight, 1);
+    DrawingElement<float>* cathode = new LineElement<float>(cathodeLeft, cathodeRight, -1);
+
+    scene.Add(top);
+    scene.Add(bottom);
+    scene.Add(left);
+    scene.Add(right);
+
+    scene.Add(anode);
+    scene.Add(cathode);
+
+    //anodeLeft = QPoint(0, 0);
+}
+
 void MainVm::SetFixedValues(FloatSurface& surface)
 {
     FloatSurfaceDrawer drawer(surface);
-    Drawing<float> drawing(drawer);
 
-    int n = 1;
-
-    drawing.DrawLine(0/n, 0/n, 600/n, 0/n, 0);
-    drawing.DrawLine(0/n, 600/n, 600/n, 600/n, 0);
-
-    drawing.DrawLine(0/n, 0/n, 0/n, 600/n, 0);
-    drawing.DrawLine(600/n, 0/n, 600/n, 600/n, 0);
-
-    /* anode */
-    drawing.DrawLine(100/n, 500/n, 500/n, 500/n, 1);
-    //drawing.DrawLine(500/n, 500/n, 500/n, 300/n, 1);
-
-    /* cathode */
-    drawing.DrawLine(100/n, 100/n, 500/n, 100/n, -1);
+    scene.Draw(drawer);
 }

@@ -56,7 +56,13 @@ HEADERS += \
     visualizer/visualizer.h \
     visualizer/heatmap.h \
     viewmodel/mainvm.h \
-    model/simulatorworker.h
+    model/simulatorworker.h \
+    grphxelements/lineelement.h \
+    grphxelements/sharednode.h \
+    grphxelements/sharedint.h \
+    grphxelements/drawingelement.h \
+    grphxelements/sharedanchors.h \
+    grphxelements/sceneelement.h
 
 FORMS += \
         mainwindow.ui

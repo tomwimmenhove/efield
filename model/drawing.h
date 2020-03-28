@@ -1,6 +1,7 @@
 #ifndef DRAWING_H
 #define DRAWING_H
 
+#include <QPoint>
 #include "idrawer.h"
 
 template <typename T>
@@ -11,8 +12,10 @@ public:
      : drawer(drawer)
     { }
 
+    inline void DrawLine(QPoint p1, QPoint p2, const T& value) { DrawLine(p1.x(), p1.y(), p2.x(), p2.y(), value); }
+
     // XXX: Fuck this motherfucker.
-    void DrawLine(int x1, int y1, int x2, int y2, T value)
+    void DrawLine(int x1, int y1, int x2, int y2, const T& value)
     {
         int x,y,dx,dy,dx1,dy1,px,py,xe,ye,i;
         dx=x2-x1;

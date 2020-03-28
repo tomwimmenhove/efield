@@ -10,6 +10,7 @@
 #include "model/simulatorworker.h"
 #include "model/gradientsurface.h"
 #include "util/simplevaluestepper.h"
+#include "grphxelements/sceneelement.h"
 
 class MainVm : public QObject
 {
@@ -36,7 +37,10 @@ signals:
     void CancelSimulatorWorker();
 
 private:
-    static void SetFixedValues(FloatSurface& surface);
+    void CreateScene();
+    void SetFixedValues(FloatSurface& surface);
+
+    SceneElement<float> scene;
 
     QThread simulatorThread;
     SimulatorWorker* simulatorWorker = nullptr;
