@@ -25,7 +25,7 @@ public slots:
     void StartSimulation();
     void StopSimulation();
     void UpdateVisualization(bool useGradiant);
-    void RequestVisualization(const SimpleValueStepper& stepper, int width, int height);
+    void RequestVisualization(const SimpleValueStepper& stepper, const QSize& size);
     void MouseMovedOnPixmap(QPoint mousePos, QSize pixmapSize);
 
 signals:

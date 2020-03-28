@@ -71,7 +71,7 @@ void MainWindow::MainVm_UpdateDone(float minValue, float maxValue)
     double tickStep = ui->heatMapLegend->TickStep();
     SimpleValueStepper stepper = SimpleValueStepper(ui->actionStepped->isChecked() ? tickStep : 0);
 
-    emit RequestVisualization(stepper, ui->graphicsLabel->width(), ui->graphicsLabel->height());
+    emit RequestVisualization(stepper, ui->graphicsLabel->size());
 }
 
 void MainWindow::MainVm_NewVisualization(const QPixmap& pixmap)

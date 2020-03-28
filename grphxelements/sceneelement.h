@@ -27,6 +27,12 @@ public:
             element->Draw(drawer);
     }
 
+    void DrawAnnotation(QPainter& painter, const QSize& graphicsSize, const QSize& surfaceSize) override
+    {
+        for (auto const& element: elements)
+            element->DrawAnnotation(painter, graphicsSize, surfaceSize);
+    }
+
 private:
     QVector<QSharedPointer<DrawingElement<T>>> elements;
 };

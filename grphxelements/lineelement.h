@@ -20,6 +20,16 @@ public:
         drawing.DrawLine(p1, p2, value);
     }
 
+    void DrawAnnotation(QPainter& painter, const QSize& graphicsSize, const QSize& surfaceSize) override
+    {
+        int x1 = p1->x() * graphicsSize.width() / surfaceSize.width();
+        int y1 = p1->y() * graphicsSize.height() / surfaceSize.height();
+
+        int x2 = p2->x() * graphicsSize.width() / surfaceSize.width();
+        int y2 = p2->y() * graphicsSize.height() / surfaceSize.height();
+        painter.drawLine(x1, y1, x2, y2);
+    }
+
 private:
     SharedNode p1;
     SharedNode p2;

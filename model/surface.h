@@ -3,6 +3,7 @@
 
 #include <QSharedPointer>
 #include <QVector2D>
+#include <QSize>
 #include <vector>
 #include <limits>
 
@@ -24,9 +25,11 @@ public:
     inline T XYCValue(int x, int y) const { return values[x + y * w]; }
     inline int Height() const { return h; }
     inline int Width() const { return w; }
+    inline QSize Size() const { return QSize(w, h); }
 
 protected:
     inline Surface(int width, int height) : w(width), h(height), values(width * height) { }
+    inline Surface(QSize size) : Surface(size.width(), size.height()) { }
 
     int w, h;
     std::vector<T> values; // BUG: QVector is ~3x slower!

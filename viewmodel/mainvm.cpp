@@ -10,8 +10,7 @@ MainVm::MainVm()
 {
     CreateScene();
 
-    std::function<void(FloatSurface&)> setFixedValuesFunc = std::bind(&MainVm::SetFixedValues, this, std::placeholders::_1);
-
+    auto setFixedValuesFunc = std::bind(&MainVm::SetFixedValues, this, std::placeholders::_1);
     simulator = QSharedPointer<Simulator>(new Simulator(601, 601, setFixedValuesFunc));
 
     simulatorWorker = new SimulatorWorker(simulator);
@@ -51,20 +50,23 @@ void MainVm::UpdateVisualization(bool useGradiant)
     emit UpdateDone(surface->MinValue(), surface->MaxValue());
 }
 
-void MainVm::RequestVisualization(const SimpleValueStepper& stepper, int width, int height)
+void MainVm::RequestVisualization(const SimpleValueStepper& stepper, const QSize& size)
 {
     QPixmap pixmapObject = QPixmap::fromImage(Visualizer::QImageFromFloatSurface(*surface, stepper));
-    QPixmap scaledPixmap = pixmapObject.scaled(width, height, Qt::KeepAspectRatio);//, Qt::SmoothTransformation);
+    QPixmap scaledPixmap = pixmapObject.scaled(size, Qt::KeepAspectRatio);//, Qt::SmoothTransformation);
+
+    QPainter painter(&scaledPixmap);
 
     if (gradient)
     {
-        QPainter painter(&scaledPixmap);
-
         painter.setPen(Qt::black);
         //painter.setRenderHint(QPainter::Antialiasing);
 
         Visualizer::PaintGradientVectors(painter, *gradient, 15);
     }
+
+    painter.setRenderHint(QPainter::Antialiasing);
+    scene.DrawAnnotation(painter, scaledPixmap.size(), surface->Size());
 
     frames++;
     if (frames % 25 == 0)
