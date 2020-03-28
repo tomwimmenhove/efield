@@ -3,7 +3,7 @@
 
 #include "sharednode.h"
 #include "drawingelement.h"
-#include "model/drawing.h"
+#include "graphics/drawing.h"
 
 template<typename T>
 class LineElement : public DrawingElement<T>

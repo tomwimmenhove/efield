@@ -44,8 +44,6 @@ HEADERS += \
         mainwindow.h \
     model/simulator.h \
     model/surface.h \
-    model/drawing.h \
-    model/idrawer.h \
     model/floatsurfacedrawer.h \
     model/floatsurface.h \
     model/gradientsurface.h \
@@ -57,12 +55,14 @@ HEADERS += \
     visualizer/heatmap.h \
     viewmodel/mainvm.h \
     model/simulatorworker.h \
-    grphxelements/lineelement.h \
-    grphxelements/sharednode.h \
-    grphxelements/sharedint.h \
-    grphxelements/drawingelement.h \
-    grphxelements/sharedanchors.h \
-    grphxelements/sceneelement.h
+    graphics/lineelement.h \
+    graphics/sharednode.h \
+    graphics/sharedint.h \
+    graphics/drawingelement.h \
+    graphics/sharedanchors.h \
+    graphics/sceneelement.h \
+    graphics/drawing.h \
+    graphics/idrawer.h
 
 FORMS += \
         mainwindow.ui

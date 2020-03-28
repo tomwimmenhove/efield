@@ -3,7 +3,7 @@
 
 #include <QPainter>
 
-#include "model/idrawer.h"
+#include "graphics/idrawer.h"
 
 template<typename T>
 class DrawingElement

@@ -4,7 +4,7 @@
 
 #include "model/floatsurfacedrawer.h"
 #include "visualizer/visualizer.h"
-#include "grphxelements/lineelement.h"
+#include "graphics/lineelement.h"
 
 MainVm::MainVm()
 {

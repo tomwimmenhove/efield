@@ -2,7 +2,7 @@
 #define SCENEELEMENT_H
 
 #include "drawingelement.h"
-#include "model/idrawer.h"
+#include "graphics/idrawer.h"
 
 #include <QVector>
 #include <QSharedPointer>

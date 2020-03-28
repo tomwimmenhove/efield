@@ -8,7 +8,7 @@
 #include <limits>
 
 #include "surface.h"
-#include "drawing.h"
+#include "graphics/drawing.h"
 
 template<typename T>
 class Surface

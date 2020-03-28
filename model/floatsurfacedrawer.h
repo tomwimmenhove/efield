@@ -2,7 +2,7 @@
 #define FLOATSURFACEDRAWER_H
 
 #include "floatsurface.h"
-#include "idrawer.h"
+#include "graphics/drawing.h"
 
 class FloatSurfaceDrawer : public IDrawer<float>
 {

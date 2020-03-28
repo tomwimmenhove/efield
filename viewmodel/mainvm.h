@@ -10,7 +10,7 @@
 #include "model/simulatorworker.h"
 #include "model/gradientsurface.h"
 #include "util/simplevaluestepper.h"
-#include "grphxelements/sceneelement.h"
+#include "graphics/sceneelement.h"
 
 class MainVm : public QObject
 {
