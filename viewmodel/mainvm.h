@@ -26,10 +26,11 @@ public slots:
     void StopSimulation();
     void UpdateVisualization(bool useGradiant);
     void RequestVisualization(const SimpleValueStepper& stepper, const QSize& size);
-    void MouseMovedOnPixmap(QPoint mousePos, QSize pixmapSize);
+    void MouseMovedOnPixmap(QPoint mousePos, QSize labelSize);
+    void MousePressedOnPixmap(QPoint mousePos, Qt::MouseButtons buttons, QSize labelSize);
 
 signals:
-    void UpdateDone(float minValue, float maxValue);
+    void VisualizationAvailable(float minValue, float maxValue);
     void NewVisualization(const QPixmap& pixmap);
     void NewStatusMessage(const QString& message);
 

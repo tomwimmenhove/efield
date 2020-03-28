@@ -23,9 +23,10 @@ public:
 
 private slots:
     void GraphLabel_MouseMoved(const QPoint& point);
+    void GraphLabel_MousePressed(const QPoint& point, Qt::MouseButtons buttons);
     void GraphLabel_Resized(const QSize& size);
 
-    void MainVm_UpdateDone(float minValue, float maxValue);
+    void MainVm_VisualizationAvailable(float minValue, float maxValue);
     void MainVm_NewVisualization(const QPixmap& pixmap);
     void MainVm_NewStatusMessage(const QString& message);
 
@@ -41,7 +42,8 @@ signals:
     void StopSimulation();
     void UpdateVisualization(bool useGradiant);
     void RequestVisualization(const SimpleValueStepper& stepper, const QSize& size);
-    void MouseMovedOnPixmap(QPoint mousePos, QSize pixmapSize);
+    void MouseMovedOnPixmap(QPoint mousePos, QSize labelSize);
+    void MousePressedOnPixmap(QPoint mousePos, Qt::MouseButtons buttons, QSize labelSize);
 
 private:
     void FrameUpdate();

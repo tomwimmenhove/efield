@@ -16,6 +16,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
 
     connect(ui->graphicsLabel, &MouseEventLabel::Mouse_Moved, this, &MainWindow::GraphLabel_MouseMoved);
+    connect(ui->graphicsLabel, &MouseEventLabel::Mouse_Pressed, this, &MainWindow::GraphLabel_MousePressed);
     connect(ui->graphicsLabel, &MouseEventLabel::Resized, this, &MainWindow::GraphLabel_Resized);
 
     connect(this, &MainWindow::StartSimulation, &mainVm, &MainVm::StartSimulation);
@@ -23,8 +24,9 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, &MainWindow::UpdateVisualization, &mainVm, &MainVm::UpdateVisualization);
     connect(this, &MainWindow::RequestVisualization, &mainVm, &MainVm::RequestVisualization);
     connect(this, &MainWindow::MouseMovedOnPixmap, &mainVm, &MainVm::MouseMovedOnPixmap);
+    connect(this, &MainWindow::MousePressedOnPixmap, &mainVm, &MainVm::MousePressedOnPixmap);
 
-    connect(&mainVm, &MainVm::UpdateDone, this, &MainWindow::MainVm_UpdateDone);
+    connect(&mainVm, &MainVm::VisualizationAvailable, this, &MainWindow::MainVm_VisualizationAvailable);
     connect(&mainVm, &MainVm::NewVisualization, this, &MainWindow::MainVm_NewVisualization);
     connect(&mainVm, &MainVm::NewStatusMessage, this, &MainWindow::MainVm_NewStatusMessage);
 
@@ -53,6 +55,11 @@ void MainWindow::GraphLabel_MouseMoved(const QPoint& point)
     emit MouseMovedOnPixmap(point, ui->graphicsLabel->size());
 }
 
+void MainWindow::GraphLabel_MousePressed(const QPoint& point, Qt::MouseButtons buttons)
+{
+    emit MousePressedOnPixmap(point, buttons, ui->graphicsLabel->size());
+}
+
 void MainWindow::GraphLabel_Resized(const QSize&)
 {
     FrameUpdate();
@@ -63,15 +70,12 @@ void MainWindow::FrameUpdate()
     emit UpdateVisualization(ui->actionGradient->isChecked());
 }
 
-void MainWindow::MainVm_UpdateDone(float minValue, float maxValue)
+void MainWindow::MainVm_VisualizationAvailable(float minValue, float maxValue)
 {
     ui->heatMapLegend->SetMin(minValue);
     ui->heatMapLegend->SetMax(maxValue);
 
-    double tickStep = ui->heatMapLegend->TickStep();
-    SimpleValueStepper stepper = SimpleValueStepper(ui->actionStepped->isChecked() ? tickStep : 0);
-
-    emit RequestVisualization(stepper, ui->graphicsLabel->size());
+    emit RequestVisualization(ui->heatMapLegend->Stepper(), ui->graphicsLabel->size());
 }
 
 void MainWindow::MainVm_NewVisualization(const QPixmap& pixmap)

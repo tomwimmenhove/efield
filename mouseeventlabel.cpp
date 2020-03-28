@@ -11,7 +11,7 @@ void MouseEventLabel::mouseMoveEvent(QMouseEvent* ev)
 
 void MouseEventLabel::mousePressEvent(QMouseEvent* ev)
 {
-    emit Mouse_Pressed(ev->pos());
+    emit Mouse_Pressed(ev->pos(), ev->buttons());
 }
 
 void MouseEventLabel::leaveEvent(QEvent*)

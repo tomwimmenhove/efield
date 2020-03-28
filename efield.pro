@@ -38,7 +38,8 @@ SOURCES += \
     visualizer/visualizer.cpp \
     visualizer/heatlegendwidget.cpp \
     viewmodel/mainvm.cpp \
-    model/simulatorworker.cpp
+    model/simulatorworker.cpp \
+    util/geometry.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -63,7 +64,8 @@ HEADERS += \
     graphics/sceneelement.h \
     graphics/drawing.h \
     graphics/idrawer.h \
-    graphics/nodeelement.h
+    graphics/nodeelement.h \
+    util/geometry.h
 
 FORMS += \
         mainwindow.ui

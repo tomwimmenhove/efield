@@ -48,7 +48,7 @@ void MainVm::UpdateVisualization(bool useGradiant)
         gradient = nullptr;
     }
 
-    emit UpdateDone(surface->MinValue(), surface->MaxValue());
+    emit VisualizationAvailable(surface->MinValue(), surface->MaxValue());
 }
 
 void MainVm::RequestVisualization(const SimpleValueStepper& stepper, const QSize& size)
@@ -78,47 +78,48 @@ void MainVm::RequestVisualization(const SimpleValueStepper& stepper, const QSize
     emit NewVisualization(scaledPixmap);
 }
 
-void MainVm::MouseMovedOnPixmap(QPoint mousePos, QSize pixmapSize)
+void MainVm::MouseMovedOnPixmap(QPoint mousePos, QSize labelSize)
 {
     if (!surface)
         return;
 
-    float scale = qMin((float) pixmapSize.width()  / surface->Width(),
-                       (float) pixmapSize.height() / surface->Height());
+    QPoint translated = Geometry::TranslatePoint(mousePos, labelSize, surface->Size(), true);
 
-    // Should we round these?
-    float scaledWidth = scale * surface->Width();
-    float scaledHeight = scale * surface->Height();
-
-    int xStart = (pixmapSize.width() - scaledWidth) / 2;
-    int yStart = (pixmapSize.height() - scaledHeight) / 2;
-
-    int valueX = (mousePos.x() - xStart) * surface->Width() / scaledWidth;
-    int valueY = (scaledHeight - (mousePos.y() - yStart) - 1) * surface->Height() / scaledHeight;
-
-    if (valueX < 0 || valueX >= surface->Width() || valueY < 0 || valueY >= surface->Height())
+    if (translated.x() < 0 || translated.x() >= surface->Width() || translated.y() < 0 || translated.y() >= surface->Height())
     {
-        emit NewStatusMessage(QString(tr("[%1, %2]")).arg(valueX).arg(valueY));
+        emit NewStatusMessage(QString(tr("[%1, %2]")).arg(translated.x()).arg(translated.y()));
         return;
     }
 
     if (gradient)
     {
-        QVector2D v = gradient->XYValue(valueX, valueY);
+        QVector2D v = gradient->XYValue(translated.x(), translated.y());
 
         emit NewStatusMessage(QString(tr("Value at [%1, %2]: %3 @%4° (Vector [%5, %6])"))
-                                 .arg(valueX)
-                                 .arg(valueY)
-                                 .arg(v.length())
-                                 .arg(atan2(v.y(), v.x()) * 180 / M_PI)
-                                 .arg(v.x())
-                                 .arg(v.y()));
+                              .arg(translated.x())
+                              .arg(translated.y())
+                              .arg(v.length())
+                              .arg(atan2(v.y(), v.x()) * 180 / M_PI)
+                              .arg(v.x())
+                              .arg(v.y()));
     }
     else
     {
-        float value = surface->XYValue(valueX, valueY);
-        emit NewStatusMessage(QString(tr("Value at [%1, %2]: %3")).arg(valueX).arg(valueY).arg(value));
+        float value = surface->XYValue(translated.x(), translated.y());
+        emit NewStatusMessage(QString(tr("Value at [%1, %2]: %3")).arg(translated.x()).arg(translated.y()).arg(value));
     }
+}
+
+void MainVm::MousePressedOnPixmap(QPoint mousePos, Qt::MouseButtons buttons, QSize labelSize)
+{
+    if (!surface)
+        return;
+
+    QPoint translated = Geometry::TranslatePoint(mousePos, labelSize, surface->Size(), true);
+
+    scene.HighLightClosestElement(translated, 10);
+
+    emit VisualizationAvailable(surface->MinValue(), surface->MaxValue());
 }
 
 void MainVm::StartSimulation()
@@ -161,7 +162,6 @@ void MainVm::CreateScene()
     scene.Add(NodeElement<float>::SharedElement(anodeLeft));
     scene.Add(NodeElement<float>::SharedElement(cathodeLeft));
     scene.Add(NodeElement<float>::SharedElement(cathodeRight));
-
 
     scene.Add(LineElement<float>::SharedElement(topLeft, topRight, 0));
     scene.Add(LineElement<float>::SharedElement(bottomLeft, bottomRight, 0));

@@ -4,6 +4,8 @@
 #include <QObject>
 #include <QWidget>
 
+#include "util/simplevaluestepper.h"
+
 class HeatLegendWidget : public QWidget
 {
     Q_OBJECT
@@ -18,6 +20,8 @@ public:
 
     bool IsStepped() const { return stepped; }
     void SetStepped(bool value);
+
+    inline SimpleValueStepper Stepper() { return SimpleValueStepper(IsStepped() ? tickStep : 0); }
 
     float GetSteppedValue(float value);
 

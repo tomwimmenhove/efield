@@ -21,7 +21,7 @@ public:
 
 signals:
     void Mouse_Moved(const QPoint& pos);
-    void Mouse_Pressed(const QPoint& pos);
+    void Mouse_Pressed(const QPoint& pos, Qt::MouseButtons buttons);
     void Mouse_Left();
     void Resized(const QSize& size);
 };

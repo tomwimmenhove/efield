@@ -4,6 +4,7 @@
 #include "sharednode.h"
 #include "drawingelement.h"
 #include "graphics/drawing.h"
+#include "util/geometry.h"
 
 template<typename T>
 class LineElement : public DrawingElement<T>
@@ -27,12 +28,23 @@ public:
 
     void DrawAnnotation(QPainter& painter, const QSize& surfaceSize) override
     {
-        int x1 = p1->x() * painter.device()->width() / surfaceSize.width();
-        int y1 = painter.device()->height() - 1 - p1->y() * painter.device()->height() / surfaceSize.height();
+        QPoint sp1 = Geometry::ScalePoint(p1, surfaceSize, QSize(painter.device()->width(), painter.device()->height()));
+        QPoint sp2 = Geometry::ScalePoint(p2, surfaceSize, QSize(painter.device()->width(), painter.device()->height()));
 
-        int x2 = p2->x() * painter.device()->width() / surfaceSize.width();
-        int y2 = painter.device()->height() - 1 - p2->y() * painter.device()->height() / surfaceSize.height();
-        painter.drawLine(x1, y1, x2, y2);
+        int mh = painter.device()->height() - 1;
+
+        if (this->IsHighlighted())
+            painter.setPen(Qt::red);
+        else
+            painter.setPen(Qt::black);
+
+        painter.drawLine(sp1.x(), mh - sp1.y(),
+                         sp2.x(), mh - sp2.y());
+    }
+
+    float DistanceTo(const QPoint& point) const override
+    {
+        return Geometry::DistToLine(QVector2D(p1), QVector2D(p2), QVector2D(point));
     }
 
 private:
