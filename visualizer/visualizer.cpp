@@ -26,7 +26,7 @@ QImage Visualizer::QImageFromFloatSurface(const FloatSurface& surface, const IVa
                 float f = (stepped - min) / range;
 
                 QRgb color = HeatMap::GetColor(f, 0);
-                image.setPixel(x, y, color);
+                image.setPixel(x, (h - y - 1), color);
             }
         }
     }
