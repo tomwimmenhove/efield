@@ -56,6 +56,15 @@ public:
         return Geometry::DistToLine(QVector2D(p1), QVector2D(p2), QVector2D(point));
     }
 
+    inline T Value() const { return value; }
+    inline void SetValue(const T& v) { value = v; }
+
+    inline SharedNode P1() const { return p1; }
+    inline void SetP1(const SharedNode& value) { p1 = value; }
+
+    inline SharedNode P2() const {return p2; }
+    inline void SetP2(const SharedNode& value) { p2 = value; }
+
 private:
     SharedNode p1;
     SharedNode p2;

@@ -49,6 +49,10 @@ signals:
     void MouseReleasedFromPixmap(QPoint mousePos, Qt::MouseButtons buttons, QSize labelSize);
     void MouseDoubleClickedOnPixmap(QPoint mousePos, Qt::MouseButtons buttons, QSize labelSize);
     void DeleteSelectedElement();
+    void EditSelectedElement();
+    void NewNodeElement(const QPoint& mousePos, const QSize& labelSize);
+    void NewLineElement(const QPoint& mousePos, const QSize& labelSize);
+    void CancelOperation();
 
 protected:
     void keyPressEvent(QKeyEvent *e);
@@ -56,10 +60,12 @@ protected:
 private:
     void FrameUpdate();
 
-    MainVm mainVm;
+    MainVm* mainVm;
 #ifdef USE_VM_THREAD
     QThread vmThread;
 #endif
+
+    QPoint graphLabelMousePos;
 
     QTimer* frameTimer;
 

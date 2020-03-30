@@ -1,14 +1,15 @@
 #include <cmath>
 
+#include <QInputDialog>
+
 #include "mainvm.h"
 #include "pointinputdialog.h"
 
 #include "model/floatsurfacedrawer.h"
 #include "visualizer/visualizer.h"
-#include "graphics/lineelement.h"
-#include "graphics/nodeelement.h"
 
-MainVm::MainVm()
+MainVm::MainVm(QWidget* parent)
+    : QObject(parent), parentWidget(parent)
 {
     CreateScene();
 
@@ -79,86 +80,215 @@ void MainVm::RequestVisualization(const SimpleValueStepper& stepper, const QSize
     emit NewVisualization(scaledPixmap);
 }
 
-void MainVm::MouseMovedOnPixmap(QPoint mousePos, QSize labelSize)
+void MainVm::MousePressedOnPixmap(QPoint mousePos, Qt::MouseButtons buttons, QSize labelSize)
 {
     if (!surface)
         return;
 
     QPoint translated = Geometry::TranslatePoint(mousePos, labelSize, surface->Size(), true);
-
     if (translated.x() < 0 || translated.x() >= surface->Width() || translated.y() < 0 || translated.y() >= surface->Height())
     {
         emit NewStatusMessage(QString(tr("[%1, %2]")).arg(translated.x()).arg(translated.y()));
         return;
     }
 
-    if (dragginNode)
+    QSharedPointer<DrawingElement<float>> closest = scene.ClosestElement(translated);
+    QSharedPointer<DrawingElement<float>> highLighted = scene.FindHighLigted();
+
+    bool doUpdate = false;
+    switch(mouseMoveStatus)
     {
-        NodeElement<float>* node = static_cast<NodeElement<float>*>(dragginNode.data());
+        case MouseMoveStatus::Normal:
+            if (buttons != Qt::LeftButton)
+                break;
 
-        SharedNode sharedNode = node->Node();
+            if (closest == highLighted)
+            {
+                NodeElement<float>* node = dynamic_cast<NodeElement<float>*>(highLighted.data());
+                if (node)
+                {
+                    mouseMoveStatus = MouseMoveStatus::DragNode;
+                    nodeSavedPos = node->Node();
+                    return;
+                }
+            }
 
-        sharedNode = translated;
+            scene.Highlight(closest);
 
+            doUpdate = true;
+
+            break;
+        case MouseMoveStatus::DragNode:
+            if (buttons == Qt::LeftButton)
+                scene.Highlight(nullptr);
+
+            if (buttons == Qt::RightButton)
+            {
+                NodeElement<float>* node = static_cast<NodeElement<float>*>(highLighted.data());
+
+                node->Node() = nodeSavedPos;
+            }
+
+            doUpdate = true;
+
+            mouseMoveStatus = MouseMoveStatus::Normal;
+            break;
+        case MouseMoveStatus::NewNode:
+            scene.Highlight(nullptr);
+            if (buttons != Qt::LeftButton)
+                scene.Remove(highLighted);
+
+            doUpdate = true;
+
+            mouseMoveStatus = MouseMoveStatus::Normal;
+            break;
+        case MouseMoveStatus::NewLineP1:
+            if (buttons == Qt::LeftButton && closest && highLighted)
+            {
+                NodeElement<float>* startNode = static_cast<NodeElement<float>*>(highLighted.data());
+                SharedNode sharedStartNode = startNode->Node();
+                SharedNode sharedEndNode = SharedNode(translated);
+                NewLine = LineElement<float>::SharedElement(sharedStartNode, sharedEndNode, 0);
+
+                scene.Add(NewLine);
+
+                mouseMoveStatus = MouseMoveStatus::NewLineP2;
+            }
+            if (buttons == Qt::RightButton)
+            {
+                scene.Highlight(nullptr);
+                mouseMoveStatus = MouseMoveStatus::Normal;
+            }
+            doUpdate = true;
+            break;
+        case MouseMoveStatus::NewLineP2:
+            if (buttons == Qt::LeftButton && highLighted)
+            {
+                NodeElement<float>* endNode = static_cast<NodeElement<float>*>(highLighted.data());
+                LineElement<float>* newLine = static_cast<LineElement<float>*>(NewLine.data());
+
+                /* Set the definitive end point for the new line segment */
+                newLine->SetP2(endNode->Node());
+                mouseMoveStatus = MouseMoveStatus::Normal;
+            }
+
+            if (buttons == Qt::RightButton)
+            {
+                scene.Remove(NewLine);
+                mouseMoveStatus = MouseMoveStatus::Normal;
+            }
+
+            scene.Highlight(nullptr);
+
+            doUpdate = true;
+
+            break;
+    }
+
+    if (doUpdate)
         emit VisualizationAvailable(surface->MinValue(), surface->MaxValue());
-    }
-
-    if (gradient)
-    {
-        QVector2D v = gradient->XYValue(translated.x(), translated.y());
-
-        emit NewStatusMessage(QString(tr("Value at [%1, %2]: %3 @%4° (Vector [%5, %6])"))
-                              .arg(translated.x())
-                              .arg(translated.y())
-                              .arg(v.length())
-                              .arg(atan2(v.y(), v.x()) * 180 / M_PI)
-                              .arg(v.x())
-                              .arg(v.y()));
-    }
-    else
-    {
-        float value = surface->XYValue(translated.x(), translated.y());
-        emit NewStatusMessage(QString(tr("Value at [%1, %2]: %3")).arg(translated.x()).arg(translated.y()).arg(value));
-    }
 }
 
-void MainVm::MousePressedOnPixmap(QPoint mousePos, Qt::MouseButtons buttons, QSize labelSize)
+void MainVm::MouseMovedOnPixmap(QPoint mousePos, QSize labelSize)
 {
     if (!surface)
         return;
 
-    if (buttons == Qt::RightButton)
+    QPoint translated = Geometry::TranslatePoint(mousePos, labelSize, surface->Size(), true);
+    if (translated.x() < 0 || translated.x() >= surface->Width() || translated.y() < 0 || translated.y() >= surface->Height())
     {
-        scene.Highlight(nullptr);
-        emit VisualizationAvailable(surface->MinValue(), surface->MaxValue());
-
+        emit NewStatusMessage(QString(tr("[%1, %2]")).arg(translated.x()).arg(translated.y()));
         return;
     }
 
-    QPoint translated = Geometry::TranslatePoint(mousePos, labelSize, surface->Size(), true);
-    QSharedPointer<DrawingElement<float>> closest = scene.ClosestElement(translated, 10);
-
+    QSharedPointer<DrawingElement<float>> closest = scene.ClosestElement(translated);
     QSharedPointer<DrawingElement<float>> highLighted = scene.FindHighLigted();
-    if (closest == highLighted)
+
+    bool doUpdate = false;
+    switch(mouseMoveStatus)
     {
-        NodeElement<float>* node = dynamic_cast<NodeElement<float>*>(highLighted.data());
-        if (node)
+        case MouseMoveStatus::Normal:
         {
-            dragginNode = highLighted;
-            return;
+            if (gradient)
+            {
+                QVector2D v = gradient->XYValue(translated.x(), translated.y());
+
+                emit NewStatusMessage(QString(tr("Value at [%1, %2]: %3 @%4° (Vector [%5, %6])"))
+                                      .arg(translated.x())
+                                      .arg(translated.y())
+                                      .arg(v.length())
+                                      .arg(atan2(v.y(), v.x()) * 180 / M_PI)
+                                      .arg(v.x())
+                                      .arg(v.y()));
+            }
+            else
+            {
+                float value = surface->XYValue(translated.x(), translated.y());
+                emit NewStatusMessage(QString(tr("Value at [%1, %2]: %3")).arg(translated.x()).arg(translated.y()).arg(value));
+            }
+            break;
         }
+        case MouseMoveStatus::DragNode:
+        case MouseMoveStatus::NewNode:
+        {
+            NodeElement<float>* node = static_cast<NodeElement<float>*>(highLighted.data());
+
+            SharedNode sharedNode = node->Node();
+
+            sharedNode = translated;
+
+            doUpdate = true;
+            break;
+        }
+        case MouseMoveStatus::NewLineP1:
+            /* Highlight close nodes */
+            if (!closest)
+                scene.Highlight(nullptr);
+            else if (dynamic_cast<NodeElement<float>*>(closest.data()))
+                scene.Highlight(closest);
+
+            doUpdate = true;
+            break;
+        case MouseMoveStatus::NewLineP2:
+            if (!closest)
+                scene.Highlight(nullptr);
+            else if (dynamic_cast<NodeElement<float>*>(closest.data()))
+                scene.Highlight(closest);
+
+            LineElement<float>* newLine = static_cast<LineElement<float>*>(NewLine.data());
+
+            SharedNode sharedEndNode = newLine->P2();
+
+            sharedEndNode = translated;
+
+            doUpdate = true;
+            break;
     }
 
-//    QSharedPointer<DrawingElement<T>> closest = scene.ClosestElement(translated, 10);
-    scene.Highlight(closest);
-//    scene.HighlightClosestElement(translated, 10);
-
-    emit VisualizationAvailable(surface->MinValue(), surface->MaxValue());
+    if (doUpdate)
+        emit VisualizationAvailable(surface->MinValue(), surface->MaxValue());
 }
 
 void MainVm::MouseReleasedFromPixmap(QPoint mousePos, Qt::MouseButtons buttons, QSize labelSize)
 {
-    dragginNode = nullptr;
+    if (buttons == Qt::RightButton)
+        return;
+
+    switch(mouseMoveStatus)
+    {
+        case MouseMoveStatus::Normal:
+            break;
+        case MouseMoveStatus::DragNode:
+            mouseMoveStatus = MouseMoveStatus::Normal;
+            scene.Highlight(nullptr);
+            break;
+        case MouseMoveStatus::NewNode:
+            break;
+        case MouseMoveStatus::NewLineP1:
+            break;
+        case MouseMoveStatus::NewLineP2:
+            break;
+    }
 }
 
 void MainVm::MouseDoubleClickedOnPixmap(QPoint mousePos, Qt::MouseButtons buttons, QSize labelSize)
@@ -167,21 +297,23 @@ void MainVm::MouseDoubleClickedOnPixmap(QPoint mousePos, Qt::MouseButtons button
         return;
 
     QPoint translated = Geometry::TranslatePoint(mousePos, labelSize, surface->Size(), true);
-    QSharedPointer<DrawingElement<float>> closest = scene.ClosestElement(translated, 10);
+    if (translated.x() < 0 || translated.x() >= surface->Width() || translated.y() < 0 || translated.y() >= surface->Height())
+    {
+        emit NewStatusMessage(QString(tr("[%1, %2]")).arg(translated.x()).arg(translated.y()));
+        return;
+    }
+
+    QSharedPointer<DrawingElement<float>> closest = scene.ClosestElement(translated);
+
+    LineElement<float>* line = dynamic_cast<LineElement<float>*>(closest.data());
+    if (line)
+        EditLine(line);
 
     NodeElement<float>* node = dynamic_cast<NodeElement<float>*>(closest.data());
     if (!node)
         return;
 
-    SharedNode sharedNode = node->Node();
-
-    PointInputDialog d(sharedNode, QPoint(0, 0), QPoint(surface->Width() - 1, surface->Height() - 1));
-    if (d.exec() != QDialog::Accepted)
-        return;
-
-    sharedNode = d.Point();
-
-    emit VisualizationAvailable(surface->MinValue(), surface->MaxValue());
+    EditNode(node);
 }
 
 void MainVm::DeleteSelectedElement()
@@ -210,6 +342,69 @@ void MainVm::DeleteSelectedElement()
 
         emit VisualizationAvailable(surface->MinValue(), surface->MaxValue());
     }
+}
+
+void MainVm::EditNode(NodeElement<float>* node)
+{
+    SharedNode sharedNode = node->Node();
+
+    PointInputDialog d(sharedNode, QPoint(0, 0), QPoint(surface->Width() - 1, surface->Height() - 1), parentWidget);
+    if (d.exec() != QDialog::Accepted)
+        return;
+
+    sharedNode = d.Point();
+
+    emit VisualizationAvailable(surface->MinValue(), surface->MaxValue());
+}
+
+void MainVm::EditLine(LineElement<float>* line)
+{
+    bool ok;
+    int def = line->Value();
+
+    int volt = QInputDialog::getInt(parentWidget, tr("Edit line"),
+                                    tr("Voltage: "),  def, -2147483647, 2147483647, 1, &ok);
+    if (ok)
+        line->SetValue(volt);
+}
+
+
+void MainVm::EditSelectedElement()
+{
+    if (!surface || mouseMoveStatus != MouseMoveStatus::Normal)
+        return;
+
+    QSharedPointer<DrawingElement<float>> selected = scene.FindHighLigted();
+
+    LineElement<float>* line = dynamic_cast<LineElement<float>*>(selected.data());
+    if (line)
+        EditLine(line);
+
+    NodeElement<float>* node = dynamic_cast<NodeElement<float>*>(selected.data());
+    if (node)
+        EditNode(node);
+}
+
+void MainVm::NewNodeElement(const QPoint& mousePos, const QSize& labelSize)
+{
+    if (!surface || mouseMoveStatus != MouseMoveStatus::Normal)
+        return;
+
+    QPoint translated = Geometry::TranslatePoint(mousePos, labelSize, surface->Size(), true);
+
+    QSharedPointer<DrawingElement<float>> newNode = NodeElement<float>::SharedElement(SharedNode(translated));
+    scene.Add(newNode);
+    scene.Highlight(newNode);
+
+    mouseMoveStatus = MouseMoveStatus::NewNode;
+}
+
+void MainVm::NewLineElement(const QPoint& mousePos, const QSize& labelSize)
+{
+    if (!surface || mouseMoveStatus != MouseMoveStatus::Normal)
+        return;
+
+    mouseMoveStatus = MouseMoveStatus::NewLineP1;
 }
 
 void MainVm::StartSimulation()
@@ -270,3 +465,4 @@ void MainVm::SetFixedValues(FloatSurface& surface)
 
     scene.Draw(drawer);
 }
+

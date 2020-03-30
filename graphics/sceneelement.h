@@ -52,7 +52,7 @@ public:
     }
 
     QSharedPointer<DrawingElement<T>> ClosestElement(const QPoint& point,
-                                                     float maxDist = std::numeric_limits<float>::max()) const
+                                                     float maxDist = 15 /*std::numeric_limits<float>::max()*/) const
     {
         QSharedPointer<DrawingElement<T>> closest = nullptr;
 
@@ -71,7 +71,7 @@ public:
     }
 
     void HighlightClosestElement(const QPoint& point,
-                          float maxDist = std::numeric_limits<float>::max())
+                          float maxDist = 15 /*std::numeric_limits<float>::max()*/)
     {
         Highlight(ClosestElement(point, maxDist));
     }
