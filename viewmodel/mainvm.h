@@ -28,6 +28,8 @@ public slots:
     void RequestVisualization(const SimpleValueStepper& stepper, const QSize& size);
     void MouseMovedOnPixmap(QPoint mousePos, QSize labelSize);
     void MousePressedOnPixmap(QPoint mousePos, Qt::MouseButtons buttons, QSize labelSize);
+    void MouseReleasedFromPixmap(QPoint mousePos, Qt::MouseButtons buttons, QSize labelSize);
+    void MouseDoubleClickedOnPixmap(QPoint mousePos, Qt::MouseButtons buttons, QSize labelSize);
     void DeleteSelectedElement();
 
 signals:
@@ -43,6 +45,8 @@ private:
     void SetFixedValues(FloatSurface& surface);
 
     SceneElement<float> scene;
+
+    QSharedPointer<DrawingElement<float>> dragginNode = nullptr;
 
     QThread simulatorThread;
     SimulatorWorker* simulatorWorker = nullptr;

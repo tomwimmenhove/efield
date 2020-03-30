@@ -1,6 +1,7 @@
 #include <cmath>
 
 #include "mainvm.h"
+#include "pointinputdialog.h"
 
 #include "model/floatsurfacedrawer.h"
 #include "visualizer/visualizer.h"
@@ -91,6 +92,17 @@ void MainVm::MouseMovedOnPixmap(QPoint mousePos, QSize labelSize)
         return;
     }
 
+    if (dragginNode)
+    {
+        NodeElement<float>* node = static_cast<NodeElement<float>*>(dragginNode.data());
+
+        SharedNode sharedNode = node->Node();
+
+        sharedNode = translated;
+
+        emit VisualizationAvailable(surface->MinValue(), surface->MaxValue());
+    }
+
     if (gradient)
     {
         QVector2D v = gradient->XYValue(translated.x(), translated.y());
@@ -115,9 +127,59 @@ void MainVm::MousePressedOnPixmap(QPoint mousePos, Qt::MouseButtons buttons, QSi
     if (!surface)
         return;
 
-    QPoint translated = Geometry::TranslatePoint(mousePos, labelSize, surface->Size(), true);
+    if (buttons == Qt::RightButton)
+    {
+        scene.Highlight(nullptr);
+        emit VisualizationAvailable(surface->MinValue(), surface->MaxValue());
 
-    scene.HighlightClosestElement(translated, 10);
+        return;
+    }
+
+    QPoint translated = Geometry::TranslatePoint(mousePos, labelSize, surface->Size(), true);
+    QSharedPointer<DrawingElement<float>> closest = scene.ClosestElement(translated, 10);
+
+    QSharedPointer<DrawingElement<float>> highLighted = scene.FindHighLigted();
+    if (closest == highLighted)
+    {
+        NodeElement<float>* node = dynamic_cast<NodeElement<float>*>(highLighted.data());
+        if (node)
+        {
+            dragginNode = highLighted;
+            return;
+        }
+    }
+
+//    QSharedPointer<DrawingElement<T>> closest = scene.ClosestElement(translated, 10);
+    scene.Highlight(closest);
+//    scene.HighlightClosestElement(translated, 10);
+
+    emit VisualizationAvailable(surface->MinValue(), surface->MaxValue());
+}
+
+void MainVm::MouseReleasedFromPixmap(QPoint mousePos, Qt::MouseButtons buttons, QSize labelSize)
+{
+    dragginNode = nullptr;
+}
+
+void MainVm::MouseDoubleClickedOnPixmap(QPoint mousePos, Qt::MouseButtons buttons, QSize labelSize)
+{
+    if (!surface)
+        return;
+
+    QPoint translated = Geometry::TranslatePoint(mousePos, labelSize, surface->Size(), true);
+    QSharedPointer<DrawingElement<float>> closest = scene.ClosestElement(translated, 10);
+
+    NodeElement<float>* node = dynamic_cast<NodeElement<float>*>(closest.data());
+    if (!node)
+        return;
+
+    SharedNode sharedNode = node->Node();
+
+    PointInputDialog d(sharedNode, QPoint(0, 0), QPoint(surface->Width() - 1, surface->Height() - 1));
+    if (d.exec() != QDialog::Accepted)
+        return;
+
+    sharedNode = d.Point();
 
     emit VisualizationAvailable(surface->MinValue(), surface->MaxValue());
 }

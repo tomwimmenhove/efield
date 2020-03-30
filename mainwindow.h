@@ -24,6 +24,8 @@ public:
 private slots:
     void GraphLabel_MouseMoved(const QPoint& point);
     void GraphLabel_MousePressed(const QPoint& point, Qt::MouseButtons buttons);
+    void GraphLabel_MouseReleased(const QPoint& point, Qt::MouseButtons buttons);
+    void GraphLabel_MouseDoubleClicked(const QPoint& point, Qt::MouseButtons buttons);
     void GraphLabel_Resized(const QSize& size);
 
     void MainVm_VisualizationAvailable(float minValue, float maxValue);
@@ -44,6 +46,8 @@ signals:
     void RequestVisualization(const SimpleValueStepper& stepper, const QSize& size);
     void MouseMovedOnPixmap(QPoint mousePos, QSize labelSize);
     void MousePressedOnPixmap(QPoint mousePos, Qt::MouseButtons buttons, QSize labelSize);
+    void MouseReleasedFromPixmap(QPoint mousePos, Qt::MouseButtons buttons, QSize labelSize);
+    void MouseDoubleClickedOnPixmap(QPoint mousePos, Qt::MouseButtons buttons, QSize labelSize);
     void DeleteSelectedElement();
 
 protected:

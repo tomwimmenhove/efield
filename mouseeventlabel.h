@@ -15,6 +15,8 @@ public:
 
     void mouseMoveEvent(QMouseEvent* ev);
     void mousePressEvent(QMouseEvent* ev);
+    void mouseReleaseEvent(QMouseEvent* ev);
+    void mouseDoubleClickEvent(QMouseEvent *ev);
     void leaveEvent(QEvent* ev);
 
     void resizeEvent(QResizeEvent* ev);
@@ -22,6 +24,8 @@ public:
 signals:
     void Mouse_Moved(const QPoint& pos);
     void Mouse_Pressed(const QPoint& pos, Qt::MouseButtons buttons);
+    void Mouse_Released(const QPoint& pos, Qt::MouseButtons buttons);
+    void Mouse_DoubleClicked(const QPoint& pos, Qt::MouseButtons buttons);
     void Mouse_Left();
     void Resized(const QSize& size);
 };

@@ -39,7 +39,8 @@ SOURCES += \
     visualizer/heatlegendwidget.cpp \
     viewmodel/mainvm.cpp \
     model/simulatorworker.cpp \
-    util/geometry.cpp
+    util/geometry.cpp \
+    pointinputdialog.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -65,7 +66,9 @@ HEADERS += \
     graphics/idrawer.h \
     graphics/nodeelement.h \
     util/geometry.h \
-    util/refcounted.h
+    util/refcounted.h \
+    pointinputdialog.h
 
 FORMS += \
-        mainwindow.ui
+        mainwindow.ui \
+    pointinputdialog.ui

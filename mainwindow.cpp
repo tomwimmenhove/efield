@@ -17,6 +17,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(ui->graphicsLabel, &MouseEventLabel::Mouse_Moved, this, &MainWindow::GraphLabel_MouseMoved);
     connect(ui->graphicsLabel, &MouseEventLabel::Mouse_Pressed, this, &MainWindow::GraphLabel_MousePressed);
+    connect(ui->graphicsLabel, &MouseEventLabel::Mouse_Released, this, &MainWindow::GraphLabel_MouseReleased);
+    connect(ui->graphicsLabel, &MouseEventLabel::Mouse_DoubleClicked, this, &MainWindow::GraphLabel_MouseDoubleClicked);
     connect(ui->graphicsLabel, &MouseEventLabel::Resized, this, &MainWindow::GraphLabel_Resized);
 
     connect(this, &MainWindow::StartSimulation, &mainVm, &MainVm::StartSimulation);
@@ -25,6 +27,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, &MainWindow::RequestVisualization, &mainVm, &MainVm::RequestVisualization);
     connect(this, &MainWindow::MouseMovedOnPixmap, &mainVm, &MainVm::MouseMovedOnPixmap);
     connect(this, &MainWindow::MousePressedOnPixmap, &mainVm, &MainVm::MousePressedOnPixmap);
+    connect(this, &MainWindow::MouseReleasedFromPixmap, &mainVm, &MainVm::MouseReleasedFromPixmap);
+    connect(this, &MainWindow::MouseDoubleClickedOnPixmap, &mainVm, &MainVm::MouseDoubleClickedOnPixmap);
     connect(this, &MainWindow::DeleteSelectedElement, &mainVm, &MainVm::DeleteSelectedElement);
 
     connect(&mainVm, &MainVm::VisualizationAvailable, this, &MainWindow::MainVm_VisualizationAvailable);
@@ -59,6 +63,16 @@ void MainWindow::GraphLabel_MouseMoved(const QPoint& point)
 void MainWindow::GraphLabel_MousePressed(const QPoint& point, Qt::MouseButtons buttons)
 {
     emit MousePressedOnPixmap(point, buttons, ui->graphicsLabel->size());
+}
+
+void MainWindow::GraphLabel_MouseReleased(const QPoint& point, Qt::MouseButtons buttons)
+{
+    emit MouseReleasedFromPixmap(point, buttons, ui->graphicsLabel->size());
+}
+
+void MainWindow::GraphLabel_MouseDoubleClicked(const QPoint& point, Qt::MouseButtons buttons)
+{
+    emit MouseDoubleClickedOnPixmap(point, buttons, ui->graphicsLabel->size());
 }
 
 void MainWindow::GraphLabel_Resized(const QSize&)
