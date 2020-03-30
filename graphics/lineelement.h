@@ -23,9 +23,9 @@ public:
         p2->Release();
     }
 
-    static QSharedPointer<DrawingElement<float>> SharedElement(SharedNode& p1, SharedNode& p2, const T& value)
+    static QSharedPointer<LineElement<float>> SharedElement(SharedNode& p1, SharedNode& p2, const T& value)
     {
-        return  QSharedPointer<DrawingElement<float>>(new LineElement<float>(p1, p2, value));
+        return QSharedPointer<LineElement<float>>(new LineElement<float>(p1, p2, value));
     }
 
     virtual DrawingElementType ElementType() const { return DrawingElementType::Line; }

@@ -14,9 +14,9 @@ public:
         : p(p), margin(margin)
     { }
 
-    static QSharedPointer<DrawingElement<float>> SharedElement(const SharedNode& p, int margin = 3)
+    static QSharedPointer<NodeElement<float>> SharedElement(const SharedNode& p, int margin = 3)
     {
-        return  QSharedPointer<DrawingElement<float>>(new NodeElement<float>(p, margin));
+        return  QSharedPointer<NodeElement<float>>(new NodeElement<float>(p, margin));
     }
 
     virtual DrawingElementType ElementType() const { return DrawingElementType::Node; }

@@ -48,8 +48,8 @@ signals:
 private:
     void CreateScene();
     void SetFixedValues(FloatSurface& surface);
-    void EditNode(NodeElement<float>* node);
-    void EditLine(LineElement<float>* line);
+    void EditNode(QSharedPointer<NodeElement<float>> node);
+    void EditLine(QSharedPointer<LineElement<float>> line);
 
     enum class MouseMoveStatus
     {
@@ -63,7 +63,7 @@ private:
     QWidget* parentWidget;
 
     MouseMoveStatus mouseMoveStatus = MouseMoveStatus::Normal;
-    QSharedPointer<DrawingElement<float>> NewLine;
+    QSharedPointer<LineElement<float>> NewLine;
 
     QPoint nodeSavedPos;
 

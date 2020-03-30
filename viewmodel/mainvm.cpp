@@ -105,9 +105,9 @@ void MainVm::MousePressedOnPixmap(QPoint mousePos, Qt::MouseButtons buttons, QSi
             if (closest && closest == highLighted && highLighted->ElementType() == DrawingElementType::Node)
             {
                 mouseMoveStatus = MouseMoveStatus::DragNode;
-                NodeElement<float>* node = static_cast<NodeElement<float>*>(highLighted.data());
+                QSharedPointer<NodeElement<float>> node = highLighted.staticCast<NodeElement<float>>();
                 nodeSavedPos = node->Node();
-                return;
+                break;
             }
 
             scene.Highlight(closest);
@@ -119,9 +119,9 @@ void MainVm::MousePressedOnPixmap(QPoint mousePos, Qt::MouseButtons buttons, QSi
             if (buttons == Qt::LeftButton)
                 scene.Highlight(nullptr);
 
-            if (buttons == Qt::RightButton)
+            if (buttons == (Qt::RightButton | Qt::LeftButton))
             {
-                NodeElement<float>* node = static_cast<NodeElement<float>*>(highLighted.data());
+                QSharedPointer<NodeElement<float>> node = highLighted.staticCast<NodeElement<float>>();
                 node->Node().SetPoint(nodeSavedPos);
             }
 
@@ -141,7 +141,7 @@ void MainVm::MousePressedOnPixmap(QPoint mousePos, Qt::MouseButtons buttons, QSi
         case MouseMoveStatus::NewLineP1:
             if (buttons == Qt::LeftButton && closest && highLighted)
             {
-                NodeElement<float>* startNode = static_cast<NodeElement<float>*>(highLighted.data());
+                QSharedPointer<NodeElement<float>> startNode = highLighted.staticCast<NodeElement<float>>();
                 SharedNode sharedStartNode = startNode->Node();
                 SharedNode sharedEndNode = SharedNode(translated);
                 NewLine = LineElement<float>::SharedElement(sharedStartNode, sharedEndNode, 0);
@@ -160,11 +160,10 @@ void MainVm::MousePressedOnPixmap(QPoint mousePos, Qt::MouseButtons buttons, QSi
         case MouseMoveStatus::NewLineP2:
             if (buttons == Qt::LeftButton && highLighted)
             {
-                NodeElement<float>* endNode = static_cast<NodeElement<float>*>(highLighted.data());
-                LineElement<float>* newLine = static_cast<LineElement<float>*>(NewLine.data());
-
                 /* Set the definitive end point for the new line segment */
-                newLine->SetP2(endNode->Node());
+                QSharedPointer<NodeElement<float>> endNode = highLighted.staticCast<NodeElement<float>>();
+                NewLine->SetP2(endNode->Node());
+
                 mouseMoveStatus = MouseMoveStatus::Normal;
             }
 
@@ -227,7 +226,7 @@ void MainVm::MouseMovedOnPixmap(QPoint mousePos, QSize labelSize)
         case MouseMoveStatus::DragNode:
         case MouseMoveStatus::NewNode:
         {
-            NodeElement<float>* node = static_cast<NodeElement<float>*>(highLighted.data());
+            QSharedPointer<NodeElement<float>> node = highLighted.staticCast<NodeElement<float>>();
             node->Node().SetPoint(translated);
 
             doUpdate = true;
@@ -248,8 +247,7 @@ void MainVm::MouseMovedOnPixmap(QPoint mousePos, QSize labelSize)
             else if (closest->ElementType() == DrawingElementType::Node)
                 scene.Highlight(closest);
 
-            LineElement<float>* newLine = static_cast<LineElement<float>*>(NewLine.data());
-            newLine->P2().SetPoint(translated);
+            NewLine->P2().SetPoint(translated);
 
             doUpdate = true;
             break;
@@ -301,10 +299,10 @@ void MainVm::MouseDoubleClickedOnPixmap(QPoint mousePos, Qt::MouseButtons button
         case DrawingElementType::Scene:
             break;
         case DrawingElementType::Node:
-            EditNode(static_cast<NodeElement<float>*>(closest.data()));
+            EditNode(closest.staticCast<NodeElement<float>>());
             break;
         case DrawingElementType::Line:
-            EditLine(static_cast<LineElement<float>*>(closest.data()));
+            EditLine(closest.staticCast<LineElement<float>>());
             break;
     }
 }
@@ -322,7 +320,7 @@ void MainVm::DeleteSelectedElement()
 
     if (highLighted->ElementType() == DrawingElementType::Node)
     {
-        NodeElement<float>* node = static_cast<NodeElement<float>*>(highLighted.data());
+        QSharedPointer<NodeElement<float>> node =highLighted.staticCast<NodeElement<float>>();
 
         // Can't delete nodes that are used by other elements */
         if (node->Node()->RefCount() > 0)
@@ -340,7 +338,7 @@ void MainVm::DeleteSelectedElement()
     }
 }
 
-void MainVm::EditNode(NodeElement<float>* node)
+void MainVm::EditNode(QSharedPointer<NodeElement<float>> node)
 {
     SharedNode sharedNode = node->Node();
 
@@ -353,7 +351,7 @@ void MainVm::EditNode(NodeElement<float>* node)
     emit VisualizationAvailable(surface->MinValue(), surface->MaxValue());
 }
 
-void MainVm::EditLine(LineElement<float>* line)
+void MainVm::EditLine(QSharedPointer<LineElement<float>> line)
 {
     bool ok;
     int def = line->Value();
@@ -379,10 +377,10 @@ void MainVm::EditSelectedElement()
         case DrawingElementType::Scene:
             break;
         case DrawingElementType::Node:
-            EditNode(static_cast<NodeElement<float>*>(highLighted.data()));
+            EditNode(highLighted.staticCast<NodeElement<float>>());
             break;
         case DrawingElementType::Line:
-            EditLine(static_cast<LineElement<float>*>(highLighted.data()));
+            EditLine(highLighted.staticCast<LineElement<float>>());
             break;
     }
 }
