@@ -8,15 +8,18 @@
 class SharedInt : public QSharedPointer<Refcounted<int>>
 {
 public:
-    inline SharedInt(int x) { this->reset(new Refcounted<int>(x)); }
+    inline explicit SharedInt(int x) { this->reset(new Refcounted<int>(x)); }
 
     inline operator int() { return *this->data(); }
 
-    inline SharedInt& operator= (int x)
-    {
-        *this->data() = x;
-        return *this;
-    }
+    inline int Int() const { return *this->data(); }
+    inline void SetInt(int x) { *this->data() = x; }
+
+//    inline SharedInt& operator= (int x)
+//    {
+//        *this->data() = x;
+//        return *this;
+//    }
 };
 
 #endif // SHAREDINT_H

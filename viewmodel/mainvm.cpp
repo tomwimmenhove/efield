@@ -125,8 +125,7 @@ void MainVm::MousePressedOnPixmap(QPoint mousePos, Qt::MouseButtons buttons, QSi
             if (buttons == Qt::RightButton)
             {
                 NodeElement<float>* node = static_cast<NodeElement<float>*>(highLighted.data());
-
-                node->Node() = nodeSavedPos;
+                node->Node().SetPoint(nodeSavedPos);
             }
 
             doUpdate = true;
@@ -232,10 +231,7 @@ void MainVm::MouseMovedOnPixmap(QPoint mousePos, QSize labelSize)
         case MouseMoveStatus::NewNode:
         {
             NodeElement<float>* node = static_cast<NodeElement<float>*>(highLighted.data());
-
-            SharedNode sharedNode = node->Node();
-
-            sharedNode = translated;
+            node->Node().SetPoint(translated);
 
             doUpdate = true;
             break;
@@ -256,10 +252,7 @@ void MainVm::MouseMovedOnPixmap(QPoint mousePos, QSize labelSize)
                 scene.Highlight(closest);
 
             LineElement<float>* newLine = static_cast<LineElement<float>*>(NewLine.data());
-
-            SharedNode sharedEndNode = newLine->P2();
-
-            sharedEndNode = translated;
+            newLine->P2().SetPoint(translated);
 
             doUpdate = true;
             break;
@@ -352,7 +345,7 @@ void MainVm::EditNode(NodeElement<float>* node)
     if (d.exec() != QDialog::Accepted)
         return;
 
-    sharedNode = d.Point();
+    sharedNode.SetPoint(d.Point());
 
     emit VisualizationAvailable(surface->MinValue(), surface->MaxValue());
 }
