@@ -44,10 +44,10 @@ signals:
     void StopSimulation();
     void UpdateVisualization(bool useGradiant);
     void RequestVisualization(const SimpleValueStepper& stepper, const QSize& size);
-    void MouseMovedOnPixmap(QPoint mousePos, QSize labelSize);
-    void MousePressedOnPixmap(QPoint mousePos, Qt::MouseButtons buttons, QSize labelSize);
-    void MouseReleasedFromPixmap(QPoint mousePos, Qt::MouseButtons buttons, QSize labelSize);
-    void MouseDoubleClickedOnPixmap(QPoint mousePos, Qt::MouseButtons buttons, QSize labelSize);
+    void MouseMovedOnPixmap(const QPoint& mousePos, const QSize& labelSize);
+    void MousePressedOnPixmap(const QPoint& mousePos, Qt::MouseButtons buttons, const QSize& labelSize);
+    void MouseReleasedFromPixmap(const QPoint& mousePos, Qt::MouseButtons buttons, const QSize& labelSize);
+    void MouseDoubleClickedOnPixmap(const QPoint& mousePos, Qt::MouseButtons buttons, const QSize& labelSize);
     void DeleteSelectedElement();
     void EditSelectedElement();
     void NewNodeElement(const QPoint& mousePos, const QSize& labelSize);

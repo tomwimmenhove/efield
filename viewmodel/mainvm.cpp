@@ -80,7 +80,7 @@ void MainVm::RequestVisualization(const SimpleValueStepper& stepper, const QSize
     emit NewVisualization(scaledPixmap);
 }
 
-void MainVm::MousePressedOnPixmap(QPoint mousePos, Qt::MouseButtons buttons, QSize labelSize)
+void MainVm::MousePressedOnPixmap(const QPoint& mousePos, Qt::MouseButtons buttons, const QSize& labelSize)
 {
     if (!surface)
         return;
@@ -184,7 +184,7 @@ void MainVm::MousePressedOnPixmap(QPoint mousePos, Qt::MouseButtons buttons, QSi
         emit VisualizationAvailable(surface->MinValue(), surface->MaxValue());
 }
 
-void MainVm::MouseMovedOnPixmap(QPoint mousePos, QSize labelSize)
+void MainVm::MouseMovedOnPixmap(const QPoint& mousePos, const QSize& labelSize)
 {
     if (!surface)
         return;
@@ -257,7 +257,7 @@ void MainVm::MouseMovedOnPixmap(QPoint mousePos, QSize labelSize)
         emit VisualizationAvailable(surface->MinValue(), surface->MaxValue());
 }
 
-void MainVm::MouseReleasedFromPixmap(QPoint mousePos, Qt::MouseButtons buttons, QSize labelSize)
+void MainVm::MouseReleasedFromPixmap(const QPoint&, Qt::MouseButtons buttons, const QSize&)
 {
     if (buttons == Qt::RightButton)
         return;
@@ -278,7 +278,7 @@ void MainVm::MouseReleasedFromPixmap(QPoint mousePos, Qt::MouseButtons buttons, 
     }
 }
 
-void MainVm::MouseDoubleClickedOnPixmap(QPoint mousePos, Qt::MouseButtons buttons, QSize labelSize)
+void MainVm::MouseDoubleClickedOnPixmap(const QPoint& mousePos, Qt::MouseButtons, const QSize& labelSize)
 {
     if (!surface)
         return;
@@ -320,7 +320,7 @@ void MainVm::DeleteSelectedElement()
 
     if (highLighted->ElementType() == DrawingElementType::Node)
     {
-        QSharedPointer<NodeElement<float>> node =highLighted.staticCast<NodeElement<float>>();
+        QSharedPointer<NodeElement<float>> node = highLighted.staticCast<NodeElement<float>>();
 
         // Can't delete nodes that are used by other elements */
         if (node->Node()->RefCount() > 0)
@@ -399,7 +399,7 @@ void MainVm::NewNodeElement(const QPoint& mousePos, const QSize& labelSize)
     mouseMoveStatus = MouseMoveStatus::NewNode;
 }
 
-void MainVm::NewLineElement(const QPoint& mousePos, const QSize& labelSize)
+void MainVm::NewLineElement(const QPoint&, const QSize&)
 {
     if (!surface || mouseMoveStatus != MouseMoveStatus::Normal)
         return;
