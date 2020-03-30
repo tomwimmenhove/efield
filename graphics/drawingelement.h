@@ -6,10 +6,18 @@
 
 #include "graphics/idrawer.h"
 
+enum class DrawingElementType
+{
+    Scene,
+    Node,
+    Line,
+};
+
 template<typename T>
 class DrawingElement
 {
 public:
+    virtual DrawingElementType ElementType() const = 0;
     virtual void Draw(IDrawer<T>& drawer) = 0;
     virtual void DrawAnnotation(QPainter& painter, const QSize& surfaceSize) = 0;
     virtual float DistanceTo(const QPoint& point) const = 0;

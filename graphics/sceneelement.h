@@ -16,6 +16,8 @@ public:
     SceneElement()
     { }
 
+    virtual DrawingElementType ElementType() const { return DrawingElementType::Scene; }
+
     void Add(const QSharedPointer<DrawingElement<T>>& element)
     {
         elements.push_back(element);

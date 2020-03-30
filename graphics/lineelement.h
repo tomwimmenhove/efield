@@ -28,6 +28,8 @@ public:
         return  QSharedPointer<DrawingElement<float>>(new LineElement<float>(p1, p2, value));
     }
 
+    virtual DrawingElementType ElementType() const { return DrawingElementType::Line; }
+
     void Draw(IDrawer<T>& drawer) override
     {
         Drawing<T> drawing(drawer);

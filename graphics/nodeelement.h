@@ -19,6 +19,8 @@ public:
         return  QSharedPointer<DrawingElement<float>>(new NodeElement<float>(p, margin));
     }
 
+    virtual DrawingElementType ElementType() const { return DrawingElementType::Node; }
+
     void Draw(IDrawer<T>&) override { } /* Annotation only */
 
     void DrawAnnotation(QPainter& painter, const QSize& surfaceSize) override

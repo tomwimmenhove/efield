@@ -102,15 +102,12 @@ void MainVm::MousePressedOnPixmap(QPoint mousePos, Qt::MouseButtons buttons, QSi
             if (buttons != Qt::LeftButton)
                 break;
 
-            if (closest == highLighted)
+            if (closest && closest == highLighted && highLighted->ElementType() == DrawingElementType::Node)
             {
-                NodeElement<float>* node = dynamic_cast<NodeElement<float>*>(highLighted.data());
-                if (node)
-                {
-                    mouseMoveStatus = MouseMoveStatus::DragNode;
-                    nodeSavedPos = node->Node();
-                    return;
-                }
+                mouseMoveStatus = MouseMoveStatus::DragNode;
+                NodeElement<float>* node = static_cast<NodeElement<float>*>(highLighted.data());
+                nodeSavedPos = node->Node();
+                return;
             }
 
             scene.Highlight(closest);
@@ -240,7 +237,7 @@ void MainVm::MouseMovedOnPixmap(QPoint mousePos, QSize labelSize)
             /* Highlight close nodes */
             if (!closest)
                 scene.Highlight(nullptr);
-            else if (dynamic_cast<NodeElement<float>*>(closest.data()))
+            else if (closest->ElementType() == DrawingElementType::Node)
                 scene.Highlight(closest);
 
             doUpdate = true;
@@ -248,7 +245,7 @@ void MainVm::MouseMovedOnPixmap(QPoint mousePos, QSize labelSize)
         case MouseMoveStatus::NewLineP2:
             if (!closest)
                 scene.Highlight(nullptr);
-            else if (dynamic_cast<NodeElement<float>*>(closest.data()))
+            else if (closest->ElementType() == DrawingElementType::Node)
                 scene.Highlight(closest);
 
             LineElement<float>* newLine = static_cast<LineElement<float>*>(NewLine.data());
@@ -273,7 +270,6 @@ void MainVm::MouseReleasedFromPixmap(QPoint mousePos, Qt::MouseButtons buttons, 
             break;
         case MouseMoveStatus::DragNode:
             mouseMoveStatus = MouseMoveStatus::Normal;
-            scene.Highlight(nullptr);
             break;
         case MouseMoveStatus::NewNode:
             break;
@@ -297,16 +293,20 @@ void MainVm::MouseDoubleClickedOnPixmap(QPoint mousePos, Qt::MouseButtons button
     }
 
     QSharedPointer<DrawingElement<float>> closest = scene.ClosestElement(translated);
-
-    LineElement<float>* line = dynamic_cast<LineElement<float>*>(closest.data());
-    if (line)
-        EditLine(line);
-
-    NodeElement<float>* node = dynamic_cast<NodeElement<float>*>(closest.data());
-    if (!node)
+    if (!closest)
         return;
 
-    EditNode(node);
+    switch (closest->ElementType())
+    {
+        case DrawingElementType::Scene:
+            break;
+        case DrawingElementType::Node:
+            EditNode(static_cast<NodeElement<float>*>(closest.data()));
+            break;
+        case DrawingElementType::Line:
+            EditLine(static_cast<LineElement<float>*>(closest.data()));
+            break;
+    }
 }
 
 void MainVm::DeleteSelectedElement()
@@ -317,14 +317,17 @@ void MainVm::DeleteSelectedElement()
     bool isModified = false;
 
     QSharedPointer<DrawingElement<float>> highLighted = scene.FindHighLigted();
-
-    // Fuck off, this is a perfectly good use for dynamic casting
-    DrawingElement<float>* elemp = highLighted.data();
-    NodeElement<float>* node = dynamic_cast<NodeElement<float>*>(elemp);
-
-    // Can't delete nodes that are used by other elements */
-    if (node && node->Node()->RefCount() > 0)
+    if (!highLighted)
         return;
+
+    if (highLighted->ElementType() == DrawingElementType::Node)
+    {
+        NodeElement<float>* node = static_cast<NodeElement<float>*>(highLighted.data());
+
+        // Can't delete nodes that are used by other elements */
+        if (node->Node()->RefCount() > 0)
+            return;
+    }
 
     if (highLighted)
         isModified |= scene.Remove(highLighted) != 0;
@@ -367,15 +370,21 @@ void MainVm::EditSelectedElement()
     if (!surface || mouseMoveStatus != MouseMoveStatus::Normal)
         return;
 
-    QSharedPointer<DrawingElement<float>> selected = scene.FindHighLigted();
+    QSharedPointer<DrawingElement<float>> highLighted = scene.FindHighLigted();
+    if (!highLighted)
+        return;
 
-    LineElement<float>* line = dynamic_cast<LineElement<float>*>(selected.data());
-    if (line)
-        EditLine(line);
-
-    NodeElement<float>* node = dynamic_cast<NodeElement<float>*>(selected.data());
-    if (node)
-        EditNode(node);
+    switch (highLighted->ElementType())
+    {
+        case DrawingElementType::Scene:
+            break;
+        case DrawingElementType::Node:
+            EditNode(static_cast<NodeElement<float>*>(highLighted.data()));
+            break;
+        case DrawingElementType::Line:
+            EditLine(static_cast<LineElement<float>*>(highLighted.data()));
+            break;
+    }
 }
 
 void MainVm::NewNodeElement(const QPoint& mousePos, const QSize& labelSize)
