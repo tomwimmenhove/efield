@@ -92,9 +92,19 @@
     <addaction name="actionStepped"/>
     <addaction name="actionRedraw"/>
    </widget>
+   <widget class="QMenu" name="menuActions">
+    <property name="title">
+     <string>Acti&amp;ons</string>
+    </property>
+    <addaction name="actionPlace_Node"/>
+    <addaction name="actionPlace_L"/>
+    <addaction name="actionDelete_element"/>
+    <addaction name="action_Edit_selected_element"/>
+   </widget>
    <addaction name="menuSimulation"/>
    <addaction name="menuImage"/>
    <addaction name="menuPlot"/>
+   <addaction name="menuActions"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
@@ -153,7 +163,39 @@
   </action>
   <action name="actionRedraw">
    <property name="text">
-    <string>Redraw</string>
+    <string>&amp;Redraw</string>
+   </property>
+  </action>
+  <action name="actionPlace_Node">
+   <property name="text">
+    <string>Place &amp;Node</string>
+   </property>
+   <property name="shortcut">
+    <string>N</string>
+   </property>
+  </action>
+  <action name="actionPlace_L">
+   <property name="text">
+    <string>Place &amp;Line</string>
+   </property>
+   <property name="shortcut">
+    <string>L</string>
+   </property>
+  </action>
+  <action name="actionDelete_element">
+   <property name="text">
+    <string>Delete element</string>
+   </property>
+   <property name="shortcut">
+    <string>Del</string>
+   </property>
+  </action>
+  <action name="action_Edit_selected_element">
+   <property name="text">
+    <string>&amp;Edit selected element</string>
+   </property>
+   <property name="shortcut">
+    <string>E</string>
    </property>
   </action>
  </widget>

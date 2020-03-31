@@ -53,6 +53,7 @@ private:
     void EditLine(QSharedPointer<LineElement<float>> line);
 
     void ActivateOperation(const QPoint& pointerPosition);
+    void UpdateStatusBarValue(const QPoint& pointerPosition);
 
     enum class MouseMoveStatus
     {

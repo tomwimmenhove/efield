@@ -39,6 +39,14 @@ private slots:
     void on_actionStepped_triggered();
     void on_actionRedraw_triggered();
 
+    void on_actionPlace_Node_triggered();
+
+    void on_actionPlace_L_triggered();
+
+    void on_actionDelete_element_triggered();
+
+    void on_action_Edit_selected_element_triggered();
+
 signals:
     void StartSimulation();
     void StopSimulation();

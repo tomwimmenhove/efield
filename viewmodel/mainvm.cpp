@@ -84,6 +84,30 @@ void MainVm::RequestVisualization(const SimpleValueStepper& stepper, const QSize
     emit NewVisualization(scaledPixmap);
 }
 
+void MainVm::UpdateStatusBarValue(const QPoint& pointerPosition)
+{
+    if (gradient)
+    {
+        QVector2D v = gradient->XYValue(pointerPosition.x(), pointerPosition.y());
+
+        emit NewStatusMessage(QString(tr("Value at [%1, %2]: %3 @%4° (Vector [%5, %6])"))
+                              .arg(pointerPosition.x())
+                              .arg(pointerPosition.y())
+                              .arg(v.length())
+                              .arg(atan2(v.y(), v.x()) * 180 / M_PI)
+                              .arg(v.x())
+                              .arg(v.y()));
+    }
+    else
+    {
+        float value = surface->XYValue(pointerPosition.x(), pointerPosition.y());
+        emit NewStatusMessage(QString(tr("Value at [%1, %2]: %3"))
+                              .arg(pointerPosition.x())
+                              .arg(pointerPosition.y())
+                              .arg(value));
+    }
+}
+
 void MainVm::ActivateOperation(const QPoint& pointerPosition)
 {
     QSharedPointer<DrawingElement<float>> closest = scene.ClosestElement(pointerPosition);
@@ -215,26 +239,7 @@ void MainVm::MouseMovedOnPixmap(const QPoint& mousePos, const QSize& labelSize)
     {
         case MouseMoveStatus::Normal:
         {
-            if (gradient)
-            {
-                QVector2D v = gradient->XYValue(translated.x(), translated.y());
-
-                emit NewStatusMessage(QString(tr("Value at [%1, %2]: %3 @%4° (Vector [%5, %6])"))
-                                      .arg(translated.x())
-                                      .arg(translated.y())
-                                      .arg(v.length())
-                                      .arg(atan2(v.y(), v.x()) * 180 / M_PI)
-                                      .arg(v.x())
-                                      .arg(v.y()));
-            }
-            else
-            {
-                float value = surface->XYValue(translated.x(), translated.y());
-                emit NewStatusMessage(QString(tr("Value at [%1, %2]: %3"))
-                                      .arg(translated.x())
-                                      .arg(translated.y())
-                                      .arg(value));
-            }
+            UpdateStatusBarValue(translated);
             return;
         }
         case MouseMoveStatus::DragNode:

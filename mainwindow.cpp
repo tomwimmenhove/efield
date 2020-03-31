@@ -158,20 +158,6 @@ void MainWindow::keyPressEvent(QKeyEvent* e)
     {
         switch (e->key())
         {
-            case Qt::Key_Delete:
-                emit DeleteSelectedElement();
-                break;
-            case Qt::Key_E:
-                emit EditSelectedElement();
-                break;
-            case Qt::Key_N:
-                if (ui->graphicsLabel->underMouse())
-                    emit NewNodeElement(graphLabelMousePos, ui->graphicsLabel->size());
-                break;
-            case Qt::Key_L:
-                if (ui->graphicsLabel->underMouse())
-                    emit NewLineElement(graphLabelMousePos, ui->graphicsLabel->size());
-                break;
             case Qt::Key_Escape:
                 emit CancelOperation();
                 break;
@@ -179,4 +165,24 @@ void MainWindow::keyPressEvent(QKeyEvent* e)
     }
 
     QMainWindow::keyPressEvent(e);
+}
+
+void MainWindow::on_actionPlace_Node_triggered()
+{
+    emit NewNodeElement(graphLabelMousePos, ui->graphicsLabel->size());
+}
+
+void MainWindow::on_actionPlace_L_triggered()
+{
+    emit NewLineElement(graphLabelMousePos, ui->graphicsLabel->size());
+}
+
+void MainWindow::on_actionDelete_element_triggered()
+{
+    emit DeleteSelectedElement();
+}
+
+void MainWindow::on_action_Edit_selected_element_triggered()
+{
+    emit EditSelectedElement();
 }
