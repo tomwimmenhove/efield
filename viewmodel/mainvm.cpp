@@ -113,12 +113,14 @@ void MainVm::ActivateOperation(const QPoint& pointerPosition)
     QSharedPointer<DrawingElement<float>> closest = scene.ClosestElement(pointerPosition);
     QSharedPointer<DrawingElement<float>> highLighted = scene.FindHighLigted();
 
+    MouseOperationStatus oldState = mouseOperationState;
+
     switch(mouseOperationState)
     {
-        case MouseMoveStatus::Normal:
+        case MouseOperationStatus::Normal:
             if (closest && closest == highLighted && highLighted->ElementType() == DrawingElementType::Node)
             {
-                mouseOperationState = MouseMoveStatus::DragNode;
+                mouseOperationState = MouseOperationStatus::DragNode;
                 QSharedPointer<NodeElement<float>> node = highLighted.staticCast<NodeElement<float>>();
                 nodeSavedPos = node->Node();
                 break;
@@ -126,15 +128,15 @@ void MainVm::ActivateOperation(const QPoint& pointerPosition)
 
             scene.Highlight(closest);
             break;
-        case MouseMoveStatus::DragNode:
+        case MouseOperationStatus::DragNode:
             scene.Highlight(nullptr);
-            mouseOperationState = MouseMoveStatus::Normal;
+            mouseOperationState = MouseOperationStatus::Normal;
             break;
-        case MouseMoveStatus::NewNode:
+        case MouseOperationStatus::NewNode:
             scene.Highlight(nullptr);
-            mouseOperationState = MouseMoveStatus::Normal;
+            mouseOperationState = MouseOperationStatus::Normal;
             break;
-        case MouseMoveStatus::NewLineP1:
+        case MouseOperationStatus::NewLineP1:
             if (closest && highLighted)
             {
                 QSharedPointer<NodeElement<float>> startNode = highLighted.staticCast<NodeElement<float>>();
@@ -147,11 +149,11 @@ void MainVm::ActivateOperation(const QPoint& pointerPosition)
                 /* Weak reference, so we don't have to clean up after it. Just let it hang out. */
                 NewLine = newLine.toWeakRef();
 
-                mouseOperationState = MouseMoveStatus::NewLineP2;
+                mouseOperationState = MouseOperationStatus::NewLineP2;
                 break;
             }
             return;
-        case MouseMoveStatus::NewLineP2:
+        case MouseOperationStatus::NewLineP2:
             if (highLighted)
             {
                 /* Set the definitive end point for the new line segment */
@@ -159,11 +161,14 @@ void MainVm::ActivateOperation(const QPoint& pointerPosition)
                 Q_ASSERT(NewLine);
                 NewLine.toStrongRef()->SetP2(endNode->Node());
 
-                mouseOperationState = MouseMoveStatus::Normal;
+                mouseOperationState = MouseOperationStatus::Normal;
             }
             scene.Highlight(nullptr);
             break;
     }
+
+    if (oldState != mouseOperationState)
+        emit MouseOperationStateChanged(mouseOperationState);
 
     emit VisualizationAvailable(surface->MinValue(), surface->MaxValue());
 }
@@ -172,32 +177,37 @@ void MainVm::CancelOperation()
 {
     QSharedPointer<DrawingElement<float>> highLighted = scene.FindHighLigted();
 
+    MouseOperationStatus oldState = mouseOperationState;
+
     switch(mouseOperationState)
     {
-        case MouseMoveStatus::Normal:
+        case MouseOperationStatus::Normal:
             return;
-        case MouseMoveStatus::DragNode:
+        case MouseOperationStatus::DragNode:
         {
             QSharedPointer<NodeElement<float>> node = highLighted.staticCast<NodeElement<float>>();
             node->Node().SetPosition(nodeSavedPos);
-            mouseOperationState = MouseMoveStatus::Normal;
+            mouseOperationState = MouseOperationStatus::Normal;
             break;
         }
-        case MouseMoveStatus::NewNode:
+        case MouseOperationStatus::NewNode:
             scene.Highlight(nullptr);
             scene.Remove(highLighted);
-            mouseOperationState = MouseMoveStatus::Normal;
+            mouseOperationState = MouseOperationStatus::Normal;
             break;
-        case MouseMoveStatus::NewLineP1:
+        case MouseOperationStatus::NewLineP1:
             scene.Highlight(nullptr);
-            mouseOperationState = MouseMoveStatus::Normal;
+            mouseOperationState = MouseOperationStatus::Normal;
             break;
-        case MouseMoveStatus::NewLineP2:
+        case MouseOperationStatus::NewLineP2:
             scene.Remove(NewLine);
-            mouseOperationState = MouseMoveStatus::Normal;
+            mouseOperationState = MouseOperationStatus::Normal;
             scene.Highlight(nullptr);
             break;
     }
+
+    if (oldState != mouseOperationState)
+        emit MouseOperationStateChanged(mouseOperationState);
 
     emit VisualizationAvailable(surface->MinValue(), surface->MaxValue());
 }
@@ -237,26 +247,26 @@ void MainVm::MouseMovedOnPixmap(const QPoint& mousePos, const QSize& labelSize)
 
     switch(mouseOperationState)
     {
-        case MouseMoveStatus::Normal:
+        case MouseOperationStatus::Normal:
         {
             UpdateStatusBarValue(translated);
             return;
         }
-        case MouseMoveStatus::DragNode:
-        case MouseMoveStatus::NewNode:
+        case MouseOperationStatus::DragNode:
+        case MouseOperationStatus::NewNode:
         {
             QSharedPointer<NodeElement<float>> node = highLighted.staticCast<NodeElement<float>>();
             node->Node().SetPosition(translated);
             break;
         }
-        case MouseMoveStatus::NewLineP1:
+        case MouseOperationStatus::NewLineP1:
             /* Highlight close nodes */
             if (!closestNode)
                 scene.Highlight(nullptr);
             else if (closestNode->ElementType() == DrawingElementType::Node)
                 scene.Highlight(closestNode);
             break;
-        case MouseMoveStatus::NewLineP2:
+        case MouseOperationStatus::NewLineP2:
             if (!closestNode)
                 scene.Highlight(nullptr);
             else if (closestNode->ElementType() == DrawingElementType::Node)
@@ -277,16 +287,16 @@ void MainVm::MouseReleasedFromPixmap(const QPoint&, Qt::MouseButtons buttons, co
 
     switch(mouseOperationState)
     {
-        case MouseMoveStatus::Normal:
+        case MouseOperationStatus::Normal:
             break;
-        case MouseMoveStatus::DragNode:
-            mouseOperationState = MouseMoveStatus::Normal;
+        case MouseOperationStatus::DragNode:
+            mouseOperationState = MouseOperationStatus::Normal;
             break;
-        case MouseMoveStatus::NewNode:
+        case MouseOperationStatus::NewNode:
             break;
-        case MouseMoveStatus::NewLineP1:
+        case MouseOperationStatus::NewLineP1:
             break;
-        case MouseMoveStatus::NewLineP2:
+        case MouseOperationStatus::NewLineP2:
             break;
     }
 }
@@ -374,7 +384,7 @@ void MainVm::EditLine(QSharedPointer<LineElement<float>> line)
 
 void MainVm::EditSelectedElement()
 {
-    if (!surface || mouseOperationState != MouseMoveStatus::Normal)
+    if (!surface || mouseOperationState != MouseOperationStatus::Normal)
         return;
 
     QSharedPointer<DrawingElement<float>> highLighted = scene.FindHighLigted();
@@ -397,7 +407,7 @@ void MainVm::EditSelectedElement()
 
 void MainVm::NewNodeElement(const QPoint& mousePos, const QSize& labelSize)
 {
-    if (!surface || mouseOperationState != MouseMoveStatus::Normal)
+    if (!surface || mouseOperationState != MouseOperationStatus::Normal)
         return;
 
     QPoint translated = Geometry::TranslatePoint(mousePos, labelSize, surface->Size(), true);
@@ -406,14 +416,16 @@ void MainVm::NewNodeElement(const QPoint& mousePos, const QSize& labelSize)
     scene.Add(newNode);
     scene.Highlight(newNode);
 
-    mouseOperationState = MouseMoveStatus::NewNode;
+    mouseOperationState = MouseOperationStatus::NewNode;
+    emit MouseOperationStateChanged(mouseOperationState);
 }
 void MainVm::NewLineElement(const QPoint&, const QSize&)
 {
-    if (!surface || mouseOperationState != MouseMoveStatus::Normal)
+    if (!surface || mouseOperationState != MouseOperationStatus::Normal)
         return;
 
-    mouseOperationState = MouseMoveStatus::NewLineP1;
+    mouseOperationState = MouseOperationStatus::NewLineP1;
+    emit MouseOperationStateChanged(mouseOperationState);
 }
 
 void MainVm::StartSimulation()

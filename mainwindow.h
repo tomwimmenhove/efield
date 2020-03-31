@@ -31,6 +31,7 @@ private slots:
     void MainVm_VisualizationAvailable(float minValue, float maxValue);
     void MainVm_NewVisualization(const QPixmap& pixmap);
     void MainVm_NewStatusMessage(const QString& message);
+    void MainVm_MouseOperationStateChanged(MouseOperationStatus state);
 
     void on_actionStart_triggered();
     void on_actionS_top_triggered();
@@ -38,13 +39,9 @@ private slots:
     void on_actionGradient_triggered();
     void on_actionStepped_triggered();
     void on_actionRedraw_triggered();
-
     void on_actionPlace_Node_triggered();
-
     void on_actionPlace_L_triggered();
-
     void on_actionDelete_element_triggered();
-
     void on_action_Edit_selected_element_triggered();
 
 signals:

@@ -14,6 +14,15 @@
 #include "graphics/nodeelement.h"
 #include "graphics/lineelement.h"
 
+enum class MouseOperationStatus
+{
+    Normal,
+    DragNode,
+    NewNode,
+    NewLineP1,
+    NewLineP2,
+};
+
 class MainVm : public QObject
 {
     Q_OBJECT
@@ -46,6 +55,8 @@ signals:
     void RunSimulatorWorker();
     void CancelSimulatorWorker();
 
+    void MouseOperationStateChanged(MouseOperationStatus state);
+
 private:
     void CreateScene();
     void SetFixedValues(FloatSurface& surface);
@@ -55,18 +66,9 @@ private:
     void ActivateOperation(const QPoint& pointerPosition);
     void UpdateStatusBarValue(const QPoint& pointerPosition);
 
-    enum class MouseMoveStatus
-    {
-        Normal,
-        DragNode,
-        NewNode,
-        NewLineP1,
-        NewLineP2,
-    };
-
     QWidget* parentWidget;
 
-    MouseMoveStatus mouseOperationState = MouseMoveStatus::Normal;
+    MouseOperationStatus mouseOperationState = MouseOperationStatus::Normal;
     QWeakPointer<LineElement<float>> NewLine;
 
     QPoint nodeSavedPos;
