@@ -1,8 +1,6 @@
 #ifndef REFCOUNTED_H
 #define REFCOUNTED_H
 
-#include <QDebug>
-
 #include <utility>
 
 template<typename T>
@@ -22,8 +20,8 @@ public:
         return *this;
     }
 
-    inline void Use() { refCount++; qDebug() << "Refcounted " << (void*) this << ": inc: " << refCount; }
-    inline void Release() { refCount--; qDebug() << "Refcounted " << (void*) this << ": dec: " << refCount; }
+    inline void Use() { refCount++; }
+    inline void Release() { refCount--; }
     inline int RefCount() { return refCount; }
 
 private:

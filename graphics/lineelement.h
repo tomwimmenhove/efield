@@ -13,14 +13,12 @@ public:
     LineElement(SharedNode& p1, SharedNode& p2, const T& value)
         : p1(p1), p2(p2), value(value)
     {
-        qDebug() << "LineElement " << (void*) this << ": construction";
         p1->Use();
         p2->Use();
     }
 
     ~LineElement()
     {
-        qDebug() << "LineElement " << (void*) this << ": destruction";
         p1->Release();
         p2->Release();
     }

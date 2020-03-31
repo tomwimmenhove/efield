@@ -455,7 +455,6 @@ void MainVm::CreateScene()
     SharedNode cathodeLeft(100, 100);
     SharedNode cathodeRight(500, 100);
 
-
     scene.Add(NodeElement<float>::SharedElement(anodeRight));
     scene.Add(NodeElement<float>::SharedElement(anodeLeft));
     scene.Add(NodeElement<float>::SharedElement(cathodeLeft));
@@ -468,8 +467,6 @@ void MainVm::CreateScene()
 
     scene.Add(LineElement<float>::SharedElement(anodeLeft, anodeRight, 1));
     scene.Add(LineElement<float>::SharedElement(cathodeLeft, cathodeRight, -1));
-
-    //anodeLeft = QPoint(0, 0);
 }
 
 void MainVm::SetFixedValues(FloatSurface& surface)
