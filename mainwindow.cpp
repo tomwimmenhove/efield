@@ -35,6 +35,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, &MainWindow::EditSelectedElement, mainVm, &MainVm::EditSelectedElement);
     connect(this, &MainWindow::NewNodeElement, mainVm, &MainVm::NewNodeElement);
     connect(this, &MainWindow::NewLineElement, mainVm, &MainVm::NewLineElement);
+    connect(this, &MainWindow::CancelOperation, mainVm, &MainVm::CancelOperation);
 
     connect(mainVm, &MainVm::VisualizationAvailable, this, &MainWindow::MainVm_VisualizationAvailable);
     connect(mainVm, &MainVm::NewVisualization, this, &MainWindow::MainVm_NewVisualization);

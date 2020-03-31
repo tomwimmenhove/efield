@@ -36,6 +36,7 @@ public slots:
     void EditSelectedElement();
     void NewNodeElement(const QPoint& mousePos, const QSize& labelSize);
     void NewLineElement(const QPoint& mousePos, const QSize& labelSize);
+    void CancelOperation();
 
 signals:
     void VisualizationAvailable(float minValue, float maxValue);
@@ -51,6 +52,8 @@ private:
     void EditNode(QSharedPointer<NodeElement<float>> node);
     void EditLine(QSharedPointer<LineElement<float>> line);
 
+    void ActivateOperation(const QPoint& pointerPosition);
+
     enum class MouseMoveStatus
     {
         Normal,
@@ -62,7 +65,7 @@ private:
 
     QWidget* parentWidget;
 
-    MouseMoveStatus mouseMoveStatus = MouseMoveStatus::Normal;
+    MouseMoveStatus mouseOperationState = MouseMoveStatus::Normal;
     QWeakPointer<LineElement<float>> NewLine;
 
     QPoint nodeSavedPos;
