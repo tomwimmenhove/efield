@@ -42,7 +42,8 @@ public:
 
     float DistanceTo(const QPoint& point) const override
     {
-        return Geometry::Distance(QVector2D(p), QVector2D(point));
+        float dist = Geometry::Distance(QVector2D(p), QVector2D(point)) - margin;
+        return dist > 0 ? dist : 0;
     }
 
     inline SharedNode Node() const { return p; }

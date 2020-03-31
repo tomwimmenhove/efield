@@ -54,13 +54,17 @@ public:
     }
 
     QSharedPointer<DrawingElement<T>> ClosestElement(const QPoint& point,
-                                                     float maxDist = 15 /*std::numeric_limits<float>::max()*/) const
+                                                     float maxDist = 15 /*std::numeric_limits<float>::max()*/,
+                                                     DrawingElementType type = DrawingElementType::None) const
     {
         QSharedPointer<DrawingElement<T>> closest = nullptr;
 
         float min = std::numeric_limits<float>::max();
         for (auto const& e: elements)
         {
+            if (type != DrawingElementType::None && type != e->ElementType())
+                continue;
+
             float dist = e->DistanceTo(point);
             if (dist < min && dist < maxDist)
             {

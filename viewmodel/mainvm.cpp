@@ -196,7 +196,7 @@ void MainVm::MouseMovedOnPixmap(const QPoint& mousePos, const QSize& labelSize)
         return;
     }
 
-    QSharedPointer<DrawingElement<float>> closest = scene.ClosestElement(translated);
+    QSharedPointer<DrawingElement<float>> closestNode = scene.ClosestElement(translated, 15, DrawingElementType::Node);
     QSharedPointer<DrawingElement<float>> highLighted = scene.FindHighLigted();
 
     bool doUpdate = false;
@@ -234,18 +234,18 @@ void MainVm::MouseMovedOnPixmap(const QPoint& mousePos, const QSize& labelSize)
         }
         case MouseMoveStatus::NewLineP1:
             /* Highlight close nodes */
-            if (!closest)
+            if (!closestNode)
                 scene.Highlight(nullptr);
-            else if (closest->ElementType() == DrawingElementType::Node)
-                scene.Highlight(closest);
+            else if (closestNode->ElementType() == DrawingElementType::Node)
+                scene.Highlight(closestNode);
 
             doUpdate = true;
             break;
         case MouseMoveStatus::NewLineP2:
-            if (!closest)
+            if (!closestNode)
                 scene.Highlight(nullptr);
-            else if (closest->ElementType() == DrawingElementType::Node)
-                scene.Highlight(closest);
+            else if (closestNode->ElementType() == DrawingElementType::Node)
+                scene.Highlight(closestNode);
 
             NewLine->P2().SetPoint(translated);
 
@@ -296,6 +296,7 @@ void MainVm::MouseDoubleClickedOnPixmap(const QPoint& mousePos, Qt::MouseButtons
 
     switch (closest->ElementType())
     {
+        case DrawingElementType::None:
         case DrawingElementType::Scene:
             break;
         case DrawingElementType::Node:
@@ -374,6 +375,7 @@ void MainVm::EditSelectedElement()
 
     switch (highLighted->ElementType())
     {
+        case DrawingElementType::None:
         case DrawingElementType::Scene:
             break;
         case DrawingElementType::Node:
@@ -398,7 +400,6 @@ void MainVm::NewNodeElement(const QPoint& mousePos, const QSize& labelSize)
 
     mouseMoveStatus = MouseMoveStatus::NewNode;
 }
-
 void MainVm::NewLineElement(const QPoint&, const QSize&)
 {
     if (!surface || mouseMoveStatus != MouseMoveStatus::Normal)

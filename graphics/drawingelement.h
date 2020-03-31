@@ -8,6 +8,7 @@
 
 enum class DrawingElementType
 {
+    None = -1,
     Scene,
     Node,
     Line,
