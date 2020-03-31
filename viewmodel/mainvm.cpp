@@ -133,8 +133,7 @@ void MainVm::ActivateOperation(const QPoint& pointerPosition)
             mouseOperationState = MouseOperationStatus::Normal;
             break;
         case MouseOperationStatus::NewNode:
-            scene.Highlight(nullptr);
-            mouseOperationState = MouseOperationStatus::Normal;
+            PlaceNewNodeElement(pointerPosition);
             break;
         case MouseOperationStatus::NewLineP1:
             if (closest && highLighted)
@@ -161,7 +160,7 @@ void MainVm::ActivateOperation(const QPoint& pointerPosition)
                 Q_ASSERT(NewLine);
                 NewLine.toStrongRef()->SetP2(endNode->Node());
 
-                mouseOperationState = MouseOperationStatus::Normal;
+                mouseOperationState = MouseOperationStatus::NewLineP1;
             }
             scene.Highlight(nullptr);
             break;
@@ -405,6 +404,13 @@ void MainVm::EditSelectedElement()
     }
 }
 
+void MainVm::PlaceNewNodeElement(const QPoint& pointerPosition)
+{
+    QSharedPointer<DrawingElement<float>> newNode = NodeElement<float>::SharedElement(SharedNode(pointerPosition));
+    scene.Add(newNode);
+    scene.Highlight(newNode);
+}
+
 void MainVm::NewNodeElement(const QPoint& mousePos, const QSize& labelSize)
 {
     if (!surface || mouseOperationState != MouseOperationStatus::Normal)
@@ -412,13 +418,12 @@ void MainVm::NewNodeElement(const QPoint& mousePos, const QSize& labelSize)
 
     QPoint translated = Geometry::TranslatePoint(mousePos, labelSize, surface->Size(), true);
 
-    QSharedPointer<DrawingElement<float>> newNode = NodeElement<float>::SharedElement(SharedNode(translated));
-    scene.Add(newNode);
-    scene.Highlight(newNode);
+    PlaceNewNodeElement(translated);
 
     mouseOperationState = MouseOperationStatus::NewNode;
     emit MouseOperationStateChanged(mouseOperationState);
 }
+
 void MainVm::NewLineElement(const QPoint&, const QSize&)
 {
     if (!surface || mouseOperationState != MouseOperationStatus::Normal)
