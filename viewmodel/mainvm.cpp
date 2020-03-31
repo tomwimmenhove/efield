@@ -53,10 +53,22 @@ void MainVm::UpdateVisualization(bool useGradiant)
     emit VisualizationAvailable(surface->MinValue(), surface->MaxValue());
 }
 
+static bool werein = false;
+
 void MainVm::RequestVisualization(const SimpleValueStepper& stepper, const QSize& size)
 {
+    if (werein)
+    {
+        qDebug() << "We be fucked";
+    }
+
+    werein = true;
     QPixmap pixmapObject = QPixmap::fromImage(Visualizer::QImageFromFloatSurface(*surface, stepper));
     QPixmap scaledPixmap = pixmapObject.scaled(size, Qt::KeepAspectRatio);//, Qt::SmoothTransformation);
+
+//    Test if the normal queued connection fucks shit up? This happened OUTSIDE of simulation
+//    Check if this function is even re-entered. I don't think it can...
+//    Also, size of 1104x546? Seems high? Maybe not...
 
     QPainter painter(&scaledPixmap);
 
@@ -78,6 +90,7 @@ void MainVm::RequestVisualization(const SimpleValueStepper& stepper, const QSize
     }
 
     emit NewVisualization(scaledPixmap);
+    werein = false;
 }
 
 void MainVm::MousePressedOnPixmap(const QPoint& mousePos, Qt::MouseButtons buttons, const QSize& labelSize)
@@ -144,9 +157,11 @@ void MainVm::MousePressedOnPixmap(const QPoint& mousePos, Qt::MouseButtons butto
                 QSharedPointer<NodeElement<float>> startNode = highLighted.staticCast<NodeElement<float>>();
                 SharedNode sharedStartNode = startNode->Node();
                 SharedNode sharedEndNode = SharedNode(translated);
-                NewLine = LineElement<float>::SharedElement(sharedStartNode, sharedEndNode, 0);
+                QSharedPointer<LineElement<float>> newLine = LineElement<float>::SharedElement(sharedStartNode, sharedEndNode, 0);
 
-                scene.Add(NewLine);
+                scene.Add(newLine);
+
+                NewLine = newLine.toWeakRef();
 
                 mouseMoveStatus = MouseMoveStatus::NewLineP2;
             }
@@ -162,7 +177,11 @@ void MainVm::MousePressedOnPixmap(const QPoint& mousePos, Qt::MouseButtons butto
             {
                 /* Set the definitive end point for the new line segment */
                 QSharedPointer<NodeElement<float>> endNode = highLighted.staticCast<NodeElement<float>>();
-                NewLine->SetP2(endNode->Node());
+
+                Q_ASSERT(NewLine);
+                QSharedPointer<LineElement<float>> newLine = NewLine.toStrongRef();
+
+                newLine->SetP2(endNode->Node());
 
                 mouseMoveStatus = MouseMoveStatus::Normal;
             }
@@ -247,7 +266,10 @@ void MainVm::MouseMovedOnPixmap(const QPoint& mousePos, const QSize& labelSize)
             else if (closestNode->ElementType() == DrawingElementType::Node)
                 scene.Highlight(closestNode);
 
-            NewLine->P2().SetPoint(translated);
+            Q_ASSERT(NewLine);
+            QSharedPointer<LineElement<float>> newLine = NewLine.toStrongRef();
+
+            newLine->P2().SetPoint(translated);
 
             doUpdate = true;
             break;

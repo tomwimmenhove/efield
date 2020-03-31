@@ -13,12 +13,14 @@ public:
     LineElement(SharedNode& p1, SharedNode& p2, const T& value)
         : p1(p1), p2(p2), value(value)
     {
+        qDebug() << "LineElement " << (void*) this << ": construction";
         p1->Use();
         p2->Use();
     }
 
     ~LineElement()
     {
+        qDebug() << "LineElement " << (void*) this << ": destruction";
         p1->Release();
         p2->Release();
     }
@@ -62,10 +64,20 @@ public:
     inline void SetValue(const T& v) { value = v; }
 
     inline SharedNode P1() const { return p1; }
-    inline void SetP1(const SharedNode& value) { p1 = value; }
+    inline void SetP1(const SharedNode& value)
+    {
+        p1->Release();
+        p1 = value;
+        p1->Use();
+    }
 
     inline SharedNode P2() const {return p2; }
-    inline void SetP2(const SharedNode& value) { p2 = value; }
+    inline void SetP2(const SharedNode& value)
+    {
+        p2->Release();
+        p2 = value;
+        p2->Use();
+    }
 
 private:
     SharedNode p1;

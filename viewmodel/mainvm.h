@@ -63,7 +63,7 @@ private:
     QWidget* parentWidget;
 
     MouseMoveStatus mouseMoveStatus = MouseMoveStatus::Normal;
-    QSharedPointer<LineElement<float>> NewLine;
+    QWeakPointer<LineElement<float>> NewLine;
 
     QPoint nodeSavedPos;
 
