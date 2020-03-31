@@ -345,11 +345,7 @@ void MainVm::DeleteSelectedElement()
         isModified |= scene.Remove(highLighted) != 0;
 
     if (isModified)
-    {
-        SetFixedValues(*surface);
-
         emit VisualizationAvailable(surface->MinValue(), surface->MaxValue());
-    }
 }
 
 void MainVm::EditNode(QSharedPointer<NodeElement<float>> node)
