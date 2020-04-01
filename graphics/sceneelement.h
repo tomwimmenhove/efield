@@ -8,6 +8,9 @@
 #include <limits>
 #include <QVector>
 #include <QSharedPointer>
+#include <QDomDocument>
+#include <QUuid>
+#include "nodeelement.h"
 
 template<typename T>
 class SceneElement : public DrawingElement<T>
@@ -91,6 +94,12 @@ public:
                 return e;
 
         return selected;
+    }
+
+    void SerializeTo(QDomElement& element, QDomDocument& document) override
+    {
+        for (auto e: elements)
+            e->SerializeTo(element, document);
     }
 
 private:

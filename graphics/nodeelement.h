@@ -48,6 +48,15 @@ public:
 
     inline SharedNode Node() const { return p; }
 
+    void SerializeTo(QDomElement& element, QDomDocument& document) override
+    {
+        QDomElement node = document.createElement("Node");
+        node.setAttribute("X", QString::number(p.Point().x()));
+        node.setAttribute("Y", QString::number(p.Point().y()));
+        node.setAttribute("ID", p->GetQUuid().toString());
+        element.appendChild(node);
+    }
+
 private:
     SharedNode p;
     int margin;

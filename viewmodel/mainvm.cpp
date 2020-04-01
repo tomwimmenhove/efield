@@ -481,6 +481,31 @@ void MainVm::CreateScene()
 
     scene.Add(LineElement<float>::SharedElement(anodeLeft, anodeRight, 1));
     scene.Add(LineElement<float>::SharedElement(cathodeLeft, cathodeRight, -1));
+
+    QMap<QSharedPointer<DrawingElement<float>>, int> nodeMap;
+
+
+    QDomDocument doc("MyML");
+    QDomElement root = doc.createElement("MyML");
+    doc.appendChild(root);
+
+    QDomElement sceneXmlElement = doc.createElement("Scene");
+    root.appendChild(sceneXmlElement);
+
+    //SceneElementSerializer::SerializeTo<float>(scene, nodesXmlElement, doc);
+
+    scene.SerializeTo(sceneXmlElement, doc);
+
+
+
+
+    QString xml = doc.toString(4);
+    QStringList l = xml.split('\n');
+    for (const auto& i : l)
+        //qDebug() << i;
+        printf("%s\n", i.toStdString().c_str());
+
+    fflush(stdout);
 }
 
 void MainVm::SetFixedValues(FloatSurface& surface)

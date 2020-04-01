@@ -77,6 +77,14 @@ public:
         p2->Use();
     }
 
+    void SerializeTo(QDomElement& element, QDomDocument& document) override
+    {
+        QDomElement line = document.createElement("Line");
+        line.setAttribute("Node1", p1->GetQUuid().toString());
+        line.setAttribute("Node2", p2->GetQUuid().toString());
+        element.appendChild(line);
+    }
+
 private:
     SharedNode p1;
     SharedNode p2;

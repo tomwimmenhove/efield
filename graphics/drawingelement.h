@@ -3,6 +3,7 @@
 
 #include <QPoint>
 #include <QPainter>
+#include <QDomDocument>
 
 #include "graphics/idrawer.h"
 
@@ -23,10 +24,12 @@ public:
     virtual void DrawAnnotation(QPainter& painter, const QSize& surfaceSize) = 0;
     virtual float DistanceTo(const QPoint& point) const = 0;
 
-    virtual ~DrawingElement() { }
-
     inline bool IsHighlighted() const { return highlighted; }
     inline void SetHighlighted(bool value) { highlighted = value; }
+
+    virtual void SerializeTo(QDomElement& element, QDomDocument& document) = 0;
+
+    virtual ~DrawingElement() { }
 
 protected:
     bool highlighted = false;

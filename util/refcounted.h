@@ -1,6 +1,8 @@
 #ifndef REFCOUNTED_H
 #define REFCOUNTED_H
 
+#include <QUuid>
+
 #include <utility>
 
 template<typename T>
@@ -20,6 +22,14 @@ public:
         return *this;
     }
 
+    QUuid GetQUuid()
+    {
+        if (uuid.isNull())
+            uuid = QUuid::createUuid();
+
+        return uuid;
+    }
+
     inline void Use() { refCount++; }
     inline void Release() { refCount--; }
     inline int RefCount() { return refCount; }
@@ -27,6 +37,7 @@ public:
 private:
     T value;
     int refCount = 0;
+    QUuid uuid;
 };
 
 #endif // REFCOUNTED_H
