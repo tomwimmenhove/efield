@@ -58,7 +58,7 @@ signals:
     void MouseOperationStateChanged(MouseOperationStatus state);
 
 private:
-    void PlateNewNodeElement(const QPoint& pointerPosition);
+    void PlaceNewNodeElement(const QPoint& pointerPosition);
     void CreateScene();
     void SetFixedValues(FloatSurface& surface);
     void EditNode(QSharedPointer<NodeElement<float>> node);

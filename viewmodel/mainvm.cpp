@@ -58,9 +58,9 @@ void MainVm::RequestVisualization(const SimpleValueStepper& stepper, const QSize
     QPixmap pixmapObject = QPixmap::fromImage(Visualizer::QImageFromFloatSurface(*surface, stepper));
     QPixmap scaledPixmap = pixmapObject.scaled(size, Qt::KeepAspectRatio);//, Qt::SmoothTransformation);
 
+//   XXX: Irreproducible crash!?
 //    Test if the normal queued connection fucks shit up? This happened OUTSIDE of simulation
 //    Check if this function is even re-entered. I don't think it can...
-//    Also, size of 1104x546? Seems high? Maybe not...
 
     QPainter painter(&scaledPixmap);
 
@@ -290,6 +290,7 @@ void MainVm::MouseReleasedFromPixmap(const QPoint&, Qt::MouseButtons buttons, co
             break;
         case MouseOperationStatus::DragNode:
             mouseOperationState = MouseOperationStatus::Normal;
+            emit MouseOperationStateChanged(mouseOperationState);
             break;
         case MouseOperationStatus::NewNode:
             break;
