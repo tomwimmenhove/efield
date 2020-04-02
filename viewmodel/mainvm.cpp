@@ -489,26 +489,58 @@ void MainVm::CreateScene()
     scene.Add(LineElement<float>::SharedElement(anodeLeft, anodeRight, 1));
     scene.Add(LineElement<float>::SharedElement(cathodeLeft, cathodeRight, -1));
 
-    QMap<QSharedPointer<DrawingElement<float>>, int> nodeMap;
+    QString xml;
 
+    {
+        QDomDocument doc("EFieldSim");
+        QDomElement root = doc.createElement("EFieldSim");
+        doc.appendChild(root);
 
-    QDomDocument doc("EFieldSim");
-    QDomElement root = doc.createElement("EFieldSim");
-    doc.appendChild(root);
+        QDomElement sceneXmlElement = doc.createElement("Scene");
+        root.appendChild(sceneXmlElement);
 
-    QDomElement sceneXmlElement = doc.createElement("Scene");
-    root.appendChild(sceneXmlElement);
+        SceneSerializeVisitor<float> testSerializeVisitor(sceneXmlElement, doc);
+        testSerializeVisitor.Visit(scene);
 
-    SceneSerializeVisitor<float> testSerializeVisitor(sceneXmlElement, doc);
-    testSerializeVisitor.Visit(scene);
+        xml = doc.toString(4);
+        QStringList l = xml.split('\n');
+        for (const auto& i : l)
+            //qDebug() << i;
+            printf("%s\n", i.toStdString().c_str());
+        fflush(stdout);
+    }
 
-    QString xml = doc.toString(4);
-    QStringList l = xml.split('\n');
-    for (const auto& i : l)
-        //qDebug() << i;
-        printf("%s\n", i.toStdString().c_str());
+    scene.Clear();
 
-    fflush(stdout);
+    {
+        QDomDocument doc;
+        doc.setContent(xml);
+
+        auto nodeXmlElements = doc.elementsByTagName("Node");
+        QMap<int, SharedNode>nodeMap;
+        for(int i = 0; i < nodeXmlElements.count(); i++)
+        {
+            QDomNamedNodeMap attributes = nodeXmlElements.item(i).attributes();
+            SharedNode sharedNode(attributes.namedItem("X").nodeValue().toInt(),
+                                  attributes.namedItem("Y").nodeValue().toInt());
+            int id = attributes.namedItem("ID").nodeValue().toInt();
+            sharedNode->SetId(id);
+            nodeMap[id] = sharedNode;
+            scene.Add(NodeElement<float>::SharedElement(sharedNode));
+        }
+
+        auto lineXmlElements = doc.elementsByTagName("Line");
+        for(int i = 0; i < nodeXmlElements.count(); i++)
+        {
+            QDomNode node = lineXmlElements.item(i);
+            QDomNamedNodeMap attributes = node.attributes();
+            int nodeId1 = attributes.namedItem("Node1").nodeValue().toInt();
+            int nodeId2 = attributes.namedItem("Node2").nodeValue().toInt();
+            float value = node.nodeValue().toFloat();
+
+            scene.Add(LineElement<float>::SharedElement(nodeMap[nodeId1], nodeMap[nodeId2], value));
+        }
+    }
 }
 
 void MainVm::SetFixedValues(FloatSurface& surface)

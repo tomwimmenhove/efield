@@ -34,6 +34,7 @@ public:
 //    }
 
     inline uint64_t GetId() const { return id; }
+    inline void SetId(uint64_t i) { id = i; }
 
     inline void Use() { refCount++; }
     inline void Release() { refCount--; }

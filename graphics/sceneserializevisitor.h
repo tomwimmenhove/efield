@@ -39,7 +39,7 @@ private:
         QDomElement line = domDocument.createElement("Line");
         line.setAttribute("Node1", QString::number(element.P1()->GetId()));
         line.setAttribute("Node2", QString::number(element.P2()->GetId()));
-        line.setAttribute("Value", ValueToString(element.Value()));
+        line.appendChild(domDocument.createTextNode(ValueToString(element.Value())));
         domElement.appendChild(line);
     }
 
