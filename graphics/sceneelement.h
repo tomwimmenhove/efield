@@ -33,6 +33,8 @@ public:
 
     void Clear() { elements.clear(); }
 
+    const QVector<QSharedPointer<DrawingElement<T>>>& Elements() const { return elements; }
+
     void Draw(IDrawer<T>& drawer) override
     {
         for (auto const& e: elements)
@@ -96,11 +98,7 @@ public:
         return selected;
     }
 
-    void SerializeTo(QDomElement& element, QDomDocument& document) override
-    {
-        for (auto e: elements)
-            e->SerializeTo(element, document);
-    }
+    void Accept(DrawingElementVisitor<T>& visitor) override { visitor.Visit(*this); }
 
 private:
     QVector<QSharedPointer<DrawingElement<T>>> elements;

@@ -7,6 +7,7 @@
 
 #include "model/floatsurfacedrawer.h"
 #include "visualizer/visualizer.h"
+#include "graphics/sceneserializevisitor.h"
 
 MainVm::MainVm(QWidget* parent)
     : QObject(parent), parentWidget(parent)
@@ -456,6 +457,7 @@ void MainVm::StopSimulation()
     started = false;
 }
 
+
 void MainVm::CreateScene()
 {
     SharedNode topLeft(0, 600);
@@ -468,6 +470,11 @@ void MainVm::CreateScene()
 
     SharedNode cathodeLeft(100, 100);
     SharedNode cathodeRight(500, 100);
+
+    scene.Add(NodeElement<float>::SharedElement(topLeft));
+    scene.Add(NodeElement<float>::SharedElement(topRight));
+    scene.Add(NodeElement<float>::SharedElement(bottomLeft));
+    scene.Add(NodeElement<float>::SharedElement(bottomRight));
 
     scene.Add(NodeElement<float>::SharedElement(anodeRight));
     scene.Add(NodeElement<float>::SharedElement(anodeLeft));
@@ -485,19 +492,15 @@ void MainVm::CreateScene()
     QMap<QSharedPointer<DrawingElement<float>>, int> nodeMap;
 
 
-    QDomDocument doc("MyML");
-    QDomElement root = doc.createElement("MyML");
+    QDomDocument doc("EFieldSim");
+    QDomElement root = doc.createElement("EFieldSim");
     doc.appendChild(root);
 
     QDomElement sceneXmlElement = doc.createElement("Scene");
     root.appendChild(sceneXmlElement);
 
-    //SceneElementSerializer::SerializeTo<float>(scene, nodesXmlElement, doc);
-
-    scene.SerializeTo(sceneXmlElement, doc);
-
-
-
+    SceneSerializeVisitor<float> testSerializeVisitor(sceneXmlElement, doc);
+    testSerializeVisitor.Visit(scene);
 
     QString xml = doc.toString(4);
     QStringList l = xml.split('\n');

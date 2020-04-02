@@ -1,7 +1,8 @@
 #ifndef REFCOUNTED_H
 #define REFCOUNTED_H
 
-#include <QUuid>
+//#include <QUuid>
+#include <QAtomicInteger>
 
 #include <utility>
 
@@ -12,7 +13,9 @@ public:
     template<typename... Args>
     Refcounted(Args && ...arguments)
         : value(std::forward<Args>(arguments)...)
-    { }
+    {
+        id = idCounter++;
+    }
 
     inline operator T() { return value; }
 
@@ -22,13 +25,15 @@ public:
         return *this;
     }
 
-    QUuid GetQUuid()
-    {
-        if (uuid.isNull())
-            uuid = QUuid::createUuid();
+//    QUuid GetQUuid()
+//    {
+//        if (uuid.isNull())
+//            uuid = QUuid::createUuid();
 
-        return uuid;
-    }
+//        return uuid;
+//    }
+
+    inline uint64_t GetId() const { return id; }
 
     inline void Use() { refCount++; }
     inline void Release() { refCount--; }
@@ -37,7 +42,10 @@ public:
 private:
     T value;
     int refCount = 0;
-    QUuid uuid;
+    //QUuid uuid;
+
+    uint64_t id;
+    inline static QAtomicInteger<uint64_t> idCounter;
 };
 
 #endif // REFCOUNTED_H

@@ -6,6 +6,7 @@
 #include <QDomDocument>
 
 #include "graphics/idrawer.h"
+#include "drawingelementvisitor.h"
 
 enum class DrawingElementType
 {
@@ -27,7 +28,7 @@ public:
     inline bool IsHighlighted() const { return highlighted; }
     inline void SetHighlighted(bool value) { highlighted = value; }
 
-    virtual void SerializeTo(QDomElement& element, QDomDocument& document) = 0;
+    virtual void Accept(DrawingElementVisitor<T>& visitor) = 0;
 
     virtual ~DrawingElement() { }
 

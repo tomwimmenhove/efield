@@ -67,7 +67,9 @@ HEADERS += \
     graphics/nodeelement.h \
     util/geometry.h \
     util/refcounted.h \
-    pointinputdialog.h
+    pointinputdialog.h \
+    graphics/sceneserializevisitor.h \
+    graphics/drawingelementvisitor.h
 
 FORMS += \
         mainwindow.ui \

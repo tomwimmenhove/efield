@@ -77,13 +77,7 @@ public:
         p2->Use();
     }
 
-    void SerializeTo(QDomElement& element, QDomDocument& document) override
-    {
-        QDomElement line = document.createElement("Line");
-        line.setAttribute("Node1", p1->GetQUuid().toString());
-        line.setAttribute("Node2", p2->GetQUuid().toString());
-        element.appendChild(line);
-    }
+    void Accept(DrawingElementVisitor<T>& visitor) override { visitor.Visit(*this); }
 
 private:
     SharedNode p1;
