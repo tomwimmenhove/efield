@@ -69,7 +69,8 @@ HEADERS += \
     util/refcounted.h \
     pointinputdialog.h \
     graphics/sceneserializevisitor.h \
-    graphics/drawingelementvisitor.h
+    graphics/drawingelementvisitor.h \
+    graphics/scenedeserializevisitor.h
 
 FORMS += \
         mainwindow.ui \

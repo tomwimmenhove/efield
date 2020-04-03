@@ -10,13 +10,16 @@ template<typename T>
 class NodeElement : public DrawingElement<T>
 {
 public:
-    NodeElement(const SharedNode& p, int margin = 3)
-        : p(p), margin(margin)
+    NodeElement()
     { }
 
-    static QSharedPointer<NodeElement<T>> SharedElement(const SharedNode& p, int margin = 3)
+    NodeElement(const SharedNode& p)
+        : p(p)
+    { }
+
+    static QSharedPointer<NodeElement<T>> SharedElement(const SharedNode& p)
     {
-        return  QSharedPointer<NodeElement<T>>(new NodeElement<T>(p, margin));
+        return  QSharedPointer<NodeElement<T>>(new NodeElement<T>(p));
     }
 
     virtual DrawingElementType ElementType() const { return DrawingElementType::Node; }
@@ -47,12 +50,13 @@ public:
     }
 
     inline SharedNode Node() const { return p; }
+    inline void SetNode(SharedNode node) { p = node; }
 
     void Accept(DrawingElementVisitor<T>& visitor) override { visitor.Visit(*this); }
 
 private:
+    const int margin = 3;
     SharedNode p;
-    int margin;
 };
 
 #endif // NODEELEMENT_H

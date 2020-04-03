@@ -16,8 +16,7 @@ template<typename T>
 class SceneElement : public DrawingElement<T>
 {
 public:
-    SceneElement()
-    { }
+    SceneElement() { }
 
     virtual DrawingElementType ElementType() const { return DrawingElementType::Scene; }
 

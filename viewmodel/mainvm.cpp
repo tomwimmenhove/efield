@@ -8,6 +8,7 @@
 #include "model/floatsurfacedrawer.h"
 #include "visualizer/visualizer.h"
 #include "graphics/sceneserializevisitor.h"
+#include "graphics/scenedeserializevisitor.h"
 
 MainVm::MainVm(QWidget* parent)
     : QObject(parent), parentWidget(parent)
@@ -515,30 +516,34 @@ void MainVm::CreateScene()
     {
         QDomDocument doc;
         doc.setContent(xml);
+        auto root = doc.documentElement();
 
-        auto nodeXmlElements = doc.elementsByTagName("Node");
-        QMap<int, SharedNode>nodeMap;
-        for(int i = 0; i < nodeXmlElements.count(); i++)
-        {
-            QDomNamedNodeMap attributes = nodeXmlElements.item(i).attributes();
-            SharedNode sharedNode(attributes.namedItem("X").nodeValue().toInt(),
-                                  attributes.namedItem("Y").nodeValue().toInt());
-            int id = attributes.namedItem("ID").nodeValue().toInt();
-            nodeMap[id] = sharedNode;
-            scene.Add(NodeElement<float>::SharedElement(sharedNode));
-        }
+        SceneDeserializeVisitor<float> testDeserializerVisitor(root);
+        testDeserializerVisitor.Visit(scene);
 
-        auto lineXmlElements = doc.elementsByTagName("Line");
-        for(int i = 0; i < nodeXmlElements.count(); i++)
-        {
-            QDomNode node = lineXmlElements.item(i);
-            QDomNamedNodeMap attributes = node.attributes();
-            int nodeId1 = attributes.namedItem("Node1").nodeValue().toInt();
-            int nodeId2 = attributes.namedItem("Node2").nodeValue().toInt();
-            float value = node.nodeValue().toFloat();
+//        auto nodeXmlElements = root.elementsByTagName("Node");
+//        QMap<int, SharedNode>nodeMap;
+//        for(int i = 0; i < nodeXmlElements.count(); i++)
+//        {
+//            QDomNamedNodeMap attributes = nodeXmlElements.item(i).attributes();
+//            SharedNode sharedNode(attributes.namedItem("X").nodeValue().toInt(),
+//                                  attributes.namedItem("Y").nodeValue().toInt());
+//            int id = attributes.namedItem("ID").nodeValue().toInt();
+//            nodeMap[id] = sharedNode;
+//            scene.Add(NodeElement<float>::SharedElement(sharedNode));
+//        }
 
-            scene.Add(LineElement<float>::SharedElement(nodeMap[nodeId1], nodeMap[nodeId2], value));
-        }
+//        auto lineXmlElements = root.elementsByTagName("Line");
+//        for(int i = 0; i < lineXmlElements.count(); i++)
+//        {
+//            QDomNode node = lineXmlElements.item(i);
+//            QDomNamedNodeMap attributes = node.attributes();
+//            int nodeId1 = attributes.namedItem("Node1").nodeValue().toInt();
+//            int nodeId2 = attributes.namedItem("Node2").nodeValue().toInt();
+//            float value = node.firstChild().nodeValue().toFloat();
+
+//            scene.Add(LineElement<float>::SharedElement(nodeMap[nodeId1], nodeMap[nodeId2], value));
+//        }
     }
 }
 

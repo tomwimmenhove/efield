@@ -10,6 +10,8 @@ template<typename T>
 class LineElement : public DrawingElement<T>
 {
 public:
+    LineElement() { }
+
     LineElement(SharedNode& p1, SharedNode& p2, const T& value)
         : p1(p1), p2(p2), value(value)
     {
@@ -64,7 +66,9 @@ public:
     inline SharedNode P1() const { return p1; }
     inline void SetP1(const SharedNode& value)
     {
-        p1->Release();
+        if (p1)
+            p1->Release();
+
         p1 = value;
         p1->Use();
     }
@@ -72,7 +76,9 @@ public:
     inline SharedNode P2() const {return p2; }
     inline void SetP2(const SharedNode& value)
     {
-        p2->Release();
+        if (p2)
+            p2->Release();
+
         p2 = value;
         p2->Use();
     }
