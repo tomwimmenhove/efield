@@ -524,7 +524,6 @@ void MainVm::CreateScene()
             SharedNode sharedNode(attributes.namedItem("X").nodeValue().toInt(),
                                   attributes.namedItem("Y").nodeValue().toInt());
             int id = attributes.namedItem("ID").nodeValue().toInt();
-            sharedNode->SetId(id);
             nodeMap[id] = sharedNode;
             scene.Add(NodeElement<float>::SharedElement(sharedNode));
         }
