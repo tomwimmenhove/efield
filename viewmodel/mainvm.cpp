@@ -1,6 +1,9 @@
 #include <cmath>
 
 #include <QInputDialog>
+#include <QFileDialog>
+#include <QFile>
+#include <QMessageBox>
 
 #include "mainvm.h"
 #include "pointinputdialog.h"
@@ -13,23 +16,20 @@
 MainVm::MainVm(QWidget* parent)
     : QObject(parent), parentWidget(parent)
 {
-    CreateScene();
-
-    auto setFixedValuesFunc = std::bind(&MainVm::SetFixedValues, this, std::placeholders::_1);
-    simulator = QSharedPointer<Simulator>(new Simulator(601, 601, setFixedValuesFunc));
-
-    simulatorWorker = new SimulatorWorker(simulator);
-
-#ifdef _OPENMP
-    simulatorWorker->SetNumThreads(6);
+#ifdef QT_DEBUG
+    std::unique_ptr<Project> newProject = std::unique_ptr<Project>(new Project(QSize(601, 601)));
+#else
+    std::unique_ptr<Project> newProject = std::unique_ptr<Project>(new Project(QSize(256, 256)));
 #endif
 
-    connect(&simulatorThread, &QThread::finished, simulatorWorker, &SimulatorWorker::deleteLater);
-    connect(this, &MainVm::RunSimulatorWorker, simulatorWorker, &SimulatorWorker::Run);
-    connect(this, &MainVm::CancelSimulatorWorker, simulatorWorker, &SimulatorWorker::Cancel, Qt::DirectConnection);
+    InitNewProject(newProject);
+    CreateBorder(0);
 
-    simulatorWorker->moveToThread(&simulatorThread);
     simulatorThread.start();
+
+#ifdef QT_DEBUG
+    CreateScene();
+#endif
 }
 
 MainVm::~MainVm()
@@ -41,14 +41,15 @@ MainVm::~MainVm()
 
 void MainVm::UpdateVisualization(bool useGradiant)
 {
+    QSharedPointer<FloatSurface> clonedSurface = project->SharedSimulator()->CloneSurface();
     if (useGradiant)
     {
-        gradient = QSharedPointer<GradientSurface>(new GradientSurface(*simulator->CloneSurface()));
+        gradient = QSharedPointer<GradientSurface>(new GradientSurface(*clonedSurface));
         surface = QSharedPointer<FloatSurface>(new FloatSurface(*gradient));
     }
     else
     {
-        surface = simulator->CloneSurface();
+        surface = clonedSurface;
         gradient = nullptr;
     }
 
@@ -59,10 +60,6 @@ void MainVm::RequestVisualization(const SimpleValueStepper& stepper, const QSize
 {
     QPixmap pixmapObject = QPixmap::fromImage(Visualizer::QImageFromFloatSurface(*surface, stepper));
     QPixmap scaledPixmap = pixmapObject.scaled(size, Qt::KeepAspectRatio);//, Qt::SmoothTransformation);
-
-//   XXX: Irreproducible crash!?
-//    Test if the normal queued connection fucks shit up? This happened OUTSIDE of simulation
-//    Check if this function is even re-entered. I don't think it can...
 
     QPainter painter(&scaledPixmap);
 
@@ -75,7 +72,7 @@ void MainVm::RequestVisualization(const SimpleValueStepper& stepper, const QSize
     }
 
     painter.setRenderHint(QPainter::Antialiasing);
-    scene.DrawAnnotation(painter, surface->Size());
+    project->SceneRef().DrawAnnotation(painter, surface->Size());
 
     frames++;
     if (frames % 25 == 0)
@@ -112,6 +109,8 @@ void MainVm::UpdateStatusBarValue(const QPoint& pointerPosition)
 
 void MainVm::ActivateOperation(const QPoint& pointerPosition)
 {
+    SceneElement<float>& scene = project->SceneRef();
+
     QSharedPointer<DrawingElement<float>> closest = scene.ClosestElement(pointerPosition);
     QSharedPointer<DrawingElement<float>> highLighted = scene.FindHighLigted();
 
@@ -176,6 +175,8 @@ void MainVm::ActivateOperation(const QPoint& pointerPosition)
 
 void MainVm::CancelOperation()
 {
+    SceneElement<float>& scene = project->SceneRef();
+
     QSharedPointer<DrawingElement<float>> highLighted = scene.FindHighLigted();
 
     MouseOperationStatus oldState = mouseOperationState;
@@ -213,6 +214,58 @@ void MainVm::CancelOperation()
     emit VisualizationAvailable(surface->MinValue(), surface->MaxValue());
 }
 
+void MainVm::NewSimulation()
+{
+    PointInputDialog d("Node coordinates", QPoint(256, 256), QPoint(1, 1), QPoint(1024, 1024), parentWidget);
+    if (d.exec() != QDialog::Accepted)
+        return;
+
+    std::unique_ptr<Project> newProject = std::unique_ptr<Project>(new Project(d.Size()));
+    InitNewProject(newProject);
+
+    CreateBorder(0);
+}
+
+void MainVm::ProjectOpen()
+{
+    QString fileName = QFileDialog::getOpenFileName(parentWidget, tr("Open Project"), "",
+                                                    tr("E-Field Sim files (*.efs)"));
+
+    if (!fileName.isEmpty())
+    {
+        QFile file(fileName);
+
+        if(file.open(QIODevice::ReadOnly | QIODevice::Text))
+        {
+            std::unique_ptr<Project> newProject = std::unique_ptr<Project>(new Project(file.readAll()));
+            InitNewProject(newProject);
+        }
+        else
+            QMessageBox::critical(parentWidget, "Unable to load",
+                                  QString("Unable to load %1: %2")
+                                  .arg(fileName).arg(file.errorString()));
+
+    }
+}
+
+void MainVm::ProjectSaveAs()
+{
+    QString fileName = QFileDialog::getSaveFileName(parentWidget, tr("Open Project"), "",
+                                                    tr("E-Field Sim files (*.efs)"));
+
+    if (!fileName.isEmpty())
+    {
+        QFile file(fileName);
+
+        if(file.open(QIODevice::WriteOnly | QIODevice::Truncate | QIODevice::Text))
+            file.write(project->ToXmlBytes());
+        else
+            QMessageBox::critical(parentWidget, "Unable to save",
+                                  QString("Unable to save %1: %2")
+                                  .arg(fileName).arg(file.errorString()));
+    }
+}
+
 void MainVm::MousePressedOnPixmap(const QPoint& mousePos, Qt::MouseButtons buttons, const QSize& labelSize)
 {
     if (!surface)
@@ -242,6 +295,8 @@ void MainVm::MouseMovedOnPixmap(const QPoint& mousePos, const QSize& labelSize)
         emit NewStatusMessage(QString(tr("[%1, %2]")).arg(translated.x()).arg(translated.y()));
         return;
     }
+
+    SceneElement<float>& scene = project->SceneRef();
 
     QSharedPointer<DrawingElement<float>> closestNode = scene.ClosestElement(translated, 15, DrawingElementType::Node);
     QSharedPointer<DrawingElement<float>> highLighted = scene.FindHighLigted();
@@ -315,7 +370,7 @@ void MainVm::MouseDoubleClickedOnPixmap(const QPoint& mousePos, Qt::MouseButtons
         return;
     }
 
-    QSharedPointer<DrawingElement<float>> closest = scene.ClosestElement(translated);
+    QSharedPointer<DrawingElement<float>> closest = project->SceneRef().ClosestElement(translated);
     if (!closest)
         return;
 
@@ -339,6 +394,8 @@ void MainVm::DeleteSelectedElement()
         return;
 
     bool isModified = false;
+
+    SceneElement<float>& scene = project->SceneRef();
 
     QSharedPointer<DrawingElement<float>> highLighted = scene.FindHighLigted();
     if (!highLighted)
@@ -364,7 +421,7 @@ void MainVm::EditNode(QSharedPointer<NodeElement<float>> node)
 {
     SharedNode sharedNode = node->Node();
 
-    PointInputDialog d(sharedNode, QPoint(0, 0), QPoint(surface->Width() - 1, surface->Height() - 1), parentWidget);
+    PointInputDialog d("Node coordinates", sharedNode, QPoint(0, 0), QPoint(surface->Width() - 1, surface->Height() - 1), parentWidget);
     if (d.exec() != QDialog::Accepted)
         return;
 
@@ -389,7 +446,7 @@ void MainVm::EditSelectedElement()
     if (!surface || mouseOperationState != MouseOperationStatus::Normal)
         return;
 
-    QSharedPointer<DrawingElement<float>> highLighted = scene.FindHighLigted();
+    QSharedPointer<DrawingElement<float>> highLighted = project->SceneRef().FindHighLigted();
     if (!highLighted)
         return;
 
@@ -409,6 +466,7 @@ void MainVm::EditSelectedElement()
 
 void MainVm::PlaceNewNodeElement(const QPoint& pointerPosition)
 {
+    SceneElement<float>& scene = project->SceneRef();
     QSharedPointer<DrawingElement<float>> newNode = NodeElement<float>::SharedElement(SharedNode(pointerPosition));
     scene.Add(newNode);
     scene.Highlight(newNode);
@@ -458,13 +516,30 @@ void MainVm::StopSimulation()
     started = false;
 }
 
+void MainVm::InitNewProject(std::unique_ptr<Project>& newProject)
+{
+    if (simulatorWorker)
+        simulatorWorker->deleteLater();
 
+    simulatorWorker = new SimulatorWorker(newProject->SharedSimulator());
+
+#ifdef _OPENMP
+    simulatorWorker->SetNumThreads(numThreads);
+#endif
+
+    connect(&simulatorThread, &QThread::finished, simulatorWorker, &SimulatorWorker::deleteLater);
+    connect(this, &MainVm::RunSimulatorWorker, simulatorWorker, &SimulatorWorker::Run);
+    connect(this, &MainVm::CancelSimulatorWorker, simulatorWorker, &SimulatorWorker::Cancel, Qt::DirectConnection);
+
+    simulatorWorker->moveToThread(&simulatorThread);
+
+    project = std::move(newProject);
+}
+
+#ifdef QT_DEBUG
 void MainVm::CreateScene()
 {
-    SharedNode topLeft(0, 600);
-    SharedNode topRight(600, 600);
-    SharedNode bottomLeft(0, 0);
-    SharedNode bottomRight(600, 0);
+    SceneElement<float>& scene = project->SceneRef();
 
     SharedNode anodeLeft(100, 500);
     SharedNode anodeRight(500, 500);
@@ -472,85 +547,34 @@ void MainVm::CreateScene()
     SharedNode cathodeLeft(100, 100);
     SharedNode cathodeRight(500, 100);
 
-    scene.Add(NodeElement<float>::SharedElement(topLeft));
-    scene.Add(NodeElement<float>::SharedElement(topRight));
-    scene.Add(NodeElement<float>::SharedElement(bottomLeft));
-    scene.Add(NodeElement<float>::SharedElement(bottomRight));
-
     scene.Add(NodeElement<float>::SharedElement(anodeRight));
     scene.Add(NodeElement<float>::SharedElement(anodeLeft));
     scene.Add(NodeElement<float>::SharedElement(cathodeLeft));
     scene.Add(NodeElement<float>::SharedElement(cathodeRight));
 
-    scene.Add(LineElement<float>::SharedElement(topLeft, topRight, 0));
-    scene.Add(LineElement<float>::SharedElement(bottomLeft, bottomRight, 0));
-    scene.Add(LineElement<float>::SharedElement(topLeft, bottomLeft, 0));
-    scene.Add(LineElement<float>::SharedElement(topRight, bottomRight, 0));
-
     scene.Add(LineElement<float>::SharedElement(anodeLeft, anodeRight, 1));
     scene.Add(LineElement<float>::SharedElement(cathodeLeft, cathodeRight, -1));
-
-    QString xml;
-
-    {
-        QDomDocument doc("EFieldSim");
-        QDomElement root = doc.createElement("EFieldSim");
-        doc.appendChild(root);
-
-        QDomElement sceneXmlElement = doc.createElement("Scene");
-        root.appendChild(sceneXmlElement);
-
-        SceneSerializeVisitor<float> testSerializeVisitor(sceneXmlElement, doc);
-        testSerializeVisitor.Visit(scene);
-
-        xml = doc.toString(4);
-        QStringList l = xml.split('\n');
-        for (const auto& i : l)
-            //qDebug() << i;
-            printf("%s\n", i.toStdString().c_str());
-        fflush(stdout);
-    }
-
-    scene.Clear();
-
-    {
-        QDomDocument doc;
-        doc.setContent(xml);
-        auto root = doc.documentElement();
-
-        SceneDeserializeVisitor<float> testDeserializerVisitor(root);
-        testDeserializerVisitor.Visit(scene);
-
-//        auto nodeXmlElements = root.elementsByTagName("Node");
-//        QMap<int, SharedNode>nodeMap;
-//        for(int i = 0; i < nodeXmlElements.count(); i++)
-//        {
-//            QDomNamedNodeMap attributes = nodeXmlElements.item(i).attributes();
-//            SharedNode sharedNode(attributes.namedItem("X").nodeValue().toInt(),
-//                                  attributes.namedItem("Y").nodeValue().toInt());
-//            int id = attributes.namedItem("ID").nodeValue().toInt();
-//            nodeMap[id] = sharedNode;
-//            scene.Add(NodeElement<float>::SharedElement(sharedNode));
-//        }
-
-//        auto lineXmlElements = root.elementsByTagName("Line");
-//        for(int i = 0; i < lineXmlElements.count(); i++)
-//        {
-//            QDomNode node = lineXmlElements.item(i);
-//            QDomNamedNodeMap attributes = node.attributes();
-//            int nodeId1 = attributes.namedItem("Node1").nodeValue().toInt();
-//            int nodeId2 = attributes.namedItem("Node2").nodeValue().toInt();
-//            float value = node.firstChild().nodeValue().toFloat();
-
-//            scene.Add(LineElement<float>::SharedElement(nodeMap[nodeId1], nodeMap[nodeId2], value));
-//        }
-    }
 }
+#endif
 
-void MainVm::SetFixedValues(FloatSurface& surface)
+void MainVm::CreateBorder(float voltage)
 {
-    FloatSurfaceDrawer drawer(surface);
+    SceneElement<float>& scene = project->SceneRef();
+    QSize size = project->SharedSimulator()->Size();
 
-    scene.Draw(drawer);
+    SharedNode topLeft(0, size.width() - 1);
+    SharedNode topRight(size.height() - 1, size.width() - 1);
+    SharedNode bottomLeft(0, 0);
+    SharedNode bottomRight(size.height(), 0);
+
+    scene.Add(NodeElement<float>::SharedElement(topLeft));
+    scene.Add(NodeElement<float>::SharedElement(topRight));
+    scene.Add(NodeElement<float>::SharedElement(bottomLeft));
+    scene.Add(NodeElement<float>::SharedElement(bottomRight));
+
+    scene.Add(LineElement<float>::SharedElement(topLeft, topRight, voltage));
+    scene.Add(LineElement<float>::SharedElement(bottomLeft, bottomRight, voltage));
+    scene.Add(LineElement<float>::SharedElement(topLeft, bottomLeft, voltage));
+    scene.Add(LineElement<float>::SharedElement(topRight, bottomRight, voltage));
 }
 

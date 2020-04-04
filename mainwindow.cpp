@@ -36,6 +36,9 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, &MainWindow::NewNodeElement, mainVm, &MainVm::NewNodeElement);
     connect(this, &MainWindow::NewLineElement, mainVm, &MainVm::NewLineElement);
     connect(this, &MainWindow::CancelOperation, mainVm, &MainVm::CancelOperation);
+    connect(this, &MainWindow::NewSimulation, mainVm, &MainVm::NewSimulation);
+    connect(this, &MainWindow::ProjectOpen, mainVm, &MainVm::ProjectOpen);
+    connect(this, &MainWindow::ProjectSaveAs, mainVm, &MainVm::ProjectSaveAs);
 
     connect(mainVm, &MainVm::VisualizationAvailable, this, &MainWindow::MainVm_VisualizationAvailable);
     connect(mainVm, &MainVm::NewVisualization, this, &MainWindow::MainVm_NewVisualization);
@@ -202,4 +205,21 @@ void MainWindow::on_actionDelete_element_triggered()
 void MainWindow::on_action_Edit_selected_element_triggered()
 {
     emit EditSelectedElement();
+}
+
+void MainWindow::on_action_New_triggered()
+{
+    emit NewSimulation();
+    FrameUpdate();
+}
+
+void MainWindow::on_action_Open_triggered()
+{
+    emit ProjectOpen();
+    FrameUpdate();
+}
+
+void MainWindow::on_action_Save_as_triggered()
+{
+    emit ProjectSaveAs();
 }

@@ -101,6 +101,15 @@
     <addaction name="actionDelete_element"/>
     <addaction name="action_Edit_selected_element"/>
    </widget>
+   <widget class="QMenu" name="menu_File">
+    <property name="title">
+     <string>&amp;File</string>
+    </property>
+    <addaction name="action_New"/>
+    <addaction name="action_Open"/>
+    <addaction name="action_Save_as"/>
+   </widget>
+   <addaction name="menu_File"/>
    <addaction name="menuSimulation"/>
    <addaction name="menuImage"/>
    <addaction name="menuPlot"/>
@@ -184,7 +193,7 @@
   </action>
   <action name="actionDelete_element">
    <property name="text">
-    <string>Delete element</string>
+    <string>&amp;Delete element</string>
    </property>
    <property name="shortcut">
     <string>Del</string>
@@ -196,6 +205,27 @@
    </property>
    <property name="shortcut">
     <string>E</string>
+   </property>
+  </action>
+  <action name="action_New">
+   <property name="text">
+    <string>&amp;New</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
+   </property>
+  </action>
+  <action name="action_Open">
+   <property name="text">
+    <string>&amp;Open...</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="action_Save_as">
+   <property name="text">
+    <string>&amp;Save as...</string>
    </property>
   </action>
  </widget>

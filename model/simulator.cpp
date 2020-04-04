@@ -4,12 +4,12 @@
 
 #include "simulator.h"
 
-Simulator::Simulator(int width, int height, std::function<void(FloatSurface&)> updateBoundaries)
-    : w(width), h(height), updateBoundaries(updateBoundaries)
+Simulator::Simulator(const QSize& size, std::function<void(FloatSurface&)> updateBoundariesHandler)
+    : w(size.width()), h(size.height()), updateBoundariesHandler(updateBoundariesHandler)
 {
     surfaceMutexex[curBufIdx].lock();
 
-    updateBoundaries(CurrentSurface());
+    updateBoundariesHandler(CurrentSurface());
 }
 
 QSharedPointer<FloatSurface> Simulator::CloneSurface()
@@ -126,3 +126,4 @@ float Simulator::SlowValueAverager(FloatSurface& surface, int x, int y)
 
     return total / (float) n;
 }
+

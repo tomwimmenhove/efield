@@ -43,6 +43,9 @@ private slots:
     void on_actionPlace_L_triggered();
     void on_actionDelete_element_triggered();
     void on_action_Edit_selected_element_triggered();
+    void on_action_New_triggered();
+    void on_action_Open_triggered();
+    void on_action_Save_as_triggered();
 
 signals:
     void StartSimulation();
@@ -55,9 +58,12 @@ signals:
     void MouseDoubleClickedOnPixmap(const QPoint& mousePos, Qt::MouseButtons buttons, const QSize& labelSize);
     void DeleteSelectedElement();
     void EditSelectedElement();
+    void NewSimulation();
     void NewNodeElement(const QPoint& mousePos, const QSize& labelSize);
     void NewLineElement(const QPoint& mousePos, const QSize& labelSize);
     void CancelOperation();
+    void ProjectOpen();
+    void ProjectSaveAs();
 
 protected:
     void keyPressEvent(QKeyEvent *e);

@@ -13,10 +13,11 @@ class PointInputDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit PointInputDialog(QPoint point, QPoint minPoint, QPoint maxPoint, QWidget *parent = 0);
+    explicit PointInputDialog(const QString& title, const QPoint& point, const QPoint& minPoint, const QPoint& maxPoint, QWidget *parent = 0);
     ~PointInputDialog();
 
     QPoint Point() const;
+    QSize Size() const;
 
 private:
     Ui::PointInputDialog *ui;

@@ -10,10 +10,13 @@
 class Simulator
 {
 public:
-    Simulator(int width, int height, std::function<void(FloatSurface&)> updateBoundaries);
+    Simulator()
+    { }
 
-    inline int Height() const { return h; }
-    inline int Width() const { return w; }
+    Simulator(const QSize& size, std::function<void(FloatSurface&)> updateBoundariesHandler);
+
+    inline QSize Size() const { return QSize(w, h); }
+    inline void SetSize(const QSize& size) { w = size.width(); h = size.height(); }
 
     inline FloatSurface& CurrentSurface() { return surfaces[curBufIdx]; }
 
@@ -24,7 +27,7 @@ public:
     inline int NumChunks() const { return h; }
     void PreIterateSimulationChunk();
     void IterateSimulationChunk(int startChunk, int endChunk);
-    void PostIterateSimulationChunk() { updateBoundaries(CurrentSurface()); }
+    inline void PostIterateSimulationChunk() { updateBoundariesHandler(CurrentSurface()); }
 
 private:
     inline FloatSurface& OtherSurface() { return surfaces[curBufIdx ^ 1]; }
@@ -33,7 +36,7 @@ private:
     float SlowValueAverager(FloatSurface& surface, int x, int y);
 
     int w, h;
-    std::function<void(FloatSurface&)> updateBoundaries;
+    std::function<void(FloatSurface&)> updateBoundariesHandler;
     int curBufIdx = 0;
 
     FloatSurface surfaces[2] = { FloatSurface(w, h, 0), FloatSurface(w, h, 0), };

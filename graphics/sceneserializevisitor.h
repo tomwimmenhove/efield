@@ -24,7 +24,6 @@ public:
         }
     }
 
-private:
     void Visit(NodeElement<T>& element) override
     {
         QDomElement node = domDocument.createElement("Node");
@@ -43,6 +42,7 @@ private:
         domElement.appendChild(line);
     }
 
+private:
     /* This needs to be done for any type this template will be serialized to */
     inline QString ValueToString(double x) const { return QString::number(x); }
 

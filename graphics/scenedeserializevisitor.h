@@ -5,6 +5,7 @@
 #include <array>
 #include <QDomElement>
 #include <QPair>
+#include <QMap>
 
 #include "sceneelement.h"
 #include "nodeelement.h"
@@ -40,15 +41,6 @@ public:
         }
     }
 
-private:
-    QMap<int, SharedNode> defaultMap;
-    QDomElement& domElement;
-    QMap<int, SharedNode>& nodeMap = defaultMap;
-
-    SceneDeserializeVisitor(QDomElement& domElement, QMap<int, SharedNode>& nodeMap)
-        : domElement(domElement), nodeMap(nodeMap)
-    { }
-
     void Visit(NodeElement<T>& element) override
     {
         QDomNamedNodeMap attributes = domElement.attributes();
@@ -69,6 +61,15 @@ private:
         element.SetP1(nodeMap[attributes.namedItem("Node1").nodeValue().toInt()]);
         element.SetP2(nodeMap[attributes.namedItem("Node2").nodeValue().toInt()]);
     }
+
+private:
+    QMap<int, SharedNode> defaultMap;
+    QDomElement& domElement;
+    QMap<int, SharedNode>& nodeMap = defaultMap;
+
+    SceneDeserializeVisitor(QDomElement& domElement, QMap<int, SharedNode>& nodeMap)
+        : domElement(domElement), nodeMap(nodeMap)
+    { }
 
     /* This needs to be done for any type this template will be serialized to */
     inline void StringToValue(T& result, const QString& s) { result = s.toDouble(); }

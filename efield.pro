@@ -40,7 +40,8 @@ SOURCES += \
     viewmodel/mainvm.cpp \
     model/simulatorworker.cpp \
     util/geometry.cpp \
-    pointinputdialog.cpp
+    pointinputdialog.cpp \
+    model/project.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -70,7 +71,8 @@ HEADERS += \
     pointinputdialog.h \
     graphics/sceneserializevisitor.h \
     graphics/drawingelementvisitor.h \
-    graphics/scenedeserializevisitor.h
+    graphics/scenedeserializevisitor.h \
+    model/project.h
 
 FORMS += \
         mainwindow.ui \
