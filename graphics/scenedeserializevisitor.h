@@ -41,8 +41,8 @@ public:
 
 private:
     QMap<int, SharedNode> defaultMap;
-    QMap<int, SharedNode>& nodeMap = defaultMap;
     QDomElement& domElement;
+    QMap<int, SharedNode>& nodeMap = defaultMap;
 
     struct NodeFactory
     {

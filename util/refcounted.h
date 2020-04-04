@@ -45,7 +45,9 @@ private:
     //QUuid uuid;
 
     uint64_t id;
-    inline static QAtomicInteger<uint64_t> idCounter;
+    static QAtomicInteger<uint64_t> idCounter;
 };
+
+template<typename T> QAtomicInteger<uint64_t> Refcounted<T>::idCounter;
 
 #endif // REFCOUNTED_H
