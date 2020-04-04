@@ -48,7 +48,7 @@ void Visualizer::PaintGradientVectors(QPainter& painter, const GradientSurface& 
         for (int x = 0; x < painterWidth; x += spacing)
         {
             int nx = x * surfaceWidth / painterWidth;
-            int ny = y * surfaceHeight / painterHeight;
+            int ny = (painterHeight - 1 - y) * surfaceHeight / painterHeight;
 
             QVector2D v = -gradientSurface.XYCValue(nx, ny); // Negated, because E-field lines go from positive to negative
             float a = atan2(v.y(), v.x());
