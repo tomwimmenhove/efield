@@ -72,7 +72,8 @@ HEADERS += \
     graphics/sceneserializevisitor.h \
     graphics/drawingelementvisitor.h \
     graphics/scenedeserializevisitor.h \
-    model/project.h
+    model/project.h \
+    util/derefiterator.h
 
 FORMS += \
         mainwindow.ui \

@@ -111,59 +111,66 @@ void MainVm::ActivateOperation(const QPoint& pointerPosition)
 {
     SceneElement<float>& scene = project->SceneRef();
 
-    DrawingElement<float>* closest = scene.ClosestElement(pointerPosition);
-    DrawingElement<float>* highLighted = scene.FindHighLigted();
+    auto closest = scene.ClosestElement(pointerPosition);
+    auto highLighted = scene.FindHighLigted();
 
     MouseOperationStatus oldState = mouseOperationState;
 
     switch(mouseOperationState)
     {
         case MouseOperationStatus::Normal:
-            if (closest && closest == highLighted && highLighted->ElementType() == DrawingElementType::Node)
+        {
+            if (highLighted != scene.end() && closest == highLighted &&
+                highLighted->ElementType() == DrawingElementType::Node)
             {
                 mouseOperationState = MouseOperationStatus::DragNode;
-                NodeElement<float>* node = static_cast<NodeElement<float>*>(highLighted);
-                nodeSavedPos = node->Node();
+                NodeElement<float>& node = static_cast<NodeElement<float>&>(*highLighted);
+                nodeSavedPos = node.Node();
                 break;
             }
 
             scene.Highlight(closest);
             break;
+        }
         case MouseOperationStatus::DragNode:
-            scene.Highlight(nullptr);
+            scene.Highlight(scene.end());
             mouseOperationState = MouseOperationStatus::Normal;
             break;
         case MouseOperationStatus::NewNode:
             PlaceNewNodeElement(pointerPosition);
             break;
         case MouseOperationStatus::NewLineP1:
-            if (closest && highLighted)
+            if (closest != scene.end() && highLighted != scene.end())
             {
-                NodeElement<float>* startNode = static_cast<NodeElement<float>*>(highLighted);
-                SharedNode sharedStartNode = startNode->Node();
+                Q_ASSERT(highLighted->ElementType() == DrawingElementType::Node);
+                NodeElement<float>& startNode = static_cast<NodeElement<float>&>(*highLighted);
+                SharedNode sharedStartNode = startNode.Node();
                 SharedNode sharedEndNode = SharedNode(pointerPosition);
-                std::unique_ptr<LineElement<float>> newLine = LineElement<float>::UniqueElement(sharedStartNode, sharedEndNode, 0);
-
-                NewLine = newLine.get();
-                scene.Add(std::move(newLine));
+                scene.Add(std::move(LineElement<float>::UniqueElement(sharedStartNode, sharedEndNode, 0)));
 
                 mouseOperationState = MouseOperationStatus::NewLineP2;
                 break;
             }
             return;
         case MouseOperationStatus::NewLineP2:
-            if (highLighted)
+        {
+            if (highLighted != scene.end())
             {
                 /* Set the definitive end point for the new line segment */
-                NodeElement<float>* endNode = static_cast<NodeElement<float>*>(highLighted);
-                if (endNode->Node()->Id() != NewLine->P1()->Id())
+                Q_ASSERT(highLighted->ElementType() == DrawingElementType::Node);
+                NodeElement<float>& endNode = static_cast<NodeElement<float>&>(*highLighted);
+                Q_ASSERT(scene.Back().ElementType() == DrawingElementType::Line);
+                LineElement<float>& newLine = static_cast<LineElement<float>&>(scene.Back());
+
+                if (endNode.Node()->Id() != newLine.P1()->Id())
                 {
-                    NewLine->SetP2(endNode->Node());
+                    newLine.SetP2(endNode.Node());
                     mouseOperationState = MouseOperationStatus::NewLineP1;
                 }
             }
-            scene.Highlight(nullptr);
+            scene.Highlight(scene.end());
             break;
+        }
     }
 
     if (oldState != mouseOperationState)
@@ -176,7 +183,7 @@ void MainVm::CancelOperation()
 {
     SceneElement<float>& scene = project->SceneRef();
 
-    DrawingElement<float>* highLighted = scene.FindHighLigted();
+    auto highLighted = scene.FindHighLigted();
 
     MouseOperationStatus oldState = mouseOperationState;
 
@@ -186,24 +193,27 @@ void MainVm::CancelOperation()
             return;
         case MouseOperationStatus::DragNode:
         {
-            NodeElement<float>* node = static_cast<NodeElement<float>*>(highLighted);
-            node->Node().SetPosition(nodeSavedPos);
+            Q_ASSERT(highLighted->ElementType() == DrawingElementType::Node);
+            NodeElement<float>& node = static_cast<NodeElement<float>&>(*highLighted);
+            node.Node().SetPosition(nodeSavedPos);
             mouseOperationState = MouseOperationStatus::Normal;
             break;
         }
         case MouseOperationStatus::NewNode:
-            scene.Highlight(nullptr);
-            scene.Remove(highLighted);
+            scene.Highlight(scene.end());
+            if (highLighted != scene.end())
+                scene.Remove(highLighted);
             mouseOperationState = MouseOperationStatus::Normal;
             break;
         case MouseOperationStatus::NewLineP1:
-            scene.Highlight(nullptr);
+            scene.Highlight(scene.end());
             mouseOperationState = MouseOperationStatus::Normal;
             break;
         case MouseOperationStatus::NewLineP2:
-            scene.Remove(NewLine);
+            Q_ASSERT(scene.Back().ElementType() == DrawingElementType::Line);
+            scene.PopBack();
             mouseOperationState = MouseOperationStatus::Normal;
-            scene.Highlight(nullptr);
+            scene.Highlight(scene.end());
             break;
     }
 
@@ -245,10 +255,7 @@ void MainVm::MouseMovedOnPixmap(const QPoint& mousePos, const QSize& labelSize)
     }
 
     SceneElement<float>& scene = project->SceneRef();
-
-    NodeElement<float>* closestNode =
-            static_cast<NodeElement<float>*>(scene.ClosestElement(translated, 15, DrawingElementType::Node));
-    DrawingElement<float>* highLighted = scene.FindHighLigted();
+    auto closest = scene.ClosestElement(translated, 15, DrawingElementType::Node);
 
     switch(mouseOperationState)
     {
@@ -260,26 +267,47 @@ void MainVm::MouseMovedOnPixmap(const QPoint& mousePos, const QSize& labelSize)
         case MouseOperationStatus::DragNode:
         case MouseOperationStatus::NewNode:
         {
-            NodeElement<float>* node = static_cast<NodeElement<float>*>(highLighted);
-            node->Node().SetPosition(translated);
+            auto highLighted = scene.FindHighLigted();
+            Q_ASSERT(highLighted != scene.end());
+            Q_ASSERT(highLighted->ElementType() == DrawingElementType::Node);
+            NodeElement<float>& node = static_cast<NodeElement<float>&>(*highLighted);
+            node.Node().SetPosition(translated);
             break;
         }
         case MouseOperationStatus::NewLineP1:
+        {
             /* Highlight close nodes */
-            if (!closestNode)
-                scene.Highlight(nullptr);
-            else if (closestNode->ElementType() == DrawingElementType::Node)
-                scene.Highlight(closestNode);
-            break;
-        case MouseOperationStatus::NewLineP2:
-            if (!closestNode)
-                scene.Highlight(nullptr);
-            else if (closestNode->ElementType() == DrawingElementType::Node &&
-                     closestNode->Node()->Id() != NewLine->P1()->Id())
-                scene.Highlight(closestNode);
+            if (closest == scene.end())
+            {
+                scene.Highlight(scene.end());
+                break;
+            }
 
-            NewLine->P2().SetPosition(translated);
+            if (closest->ElementType() == DrawingElementType::Node)
+            {
+                scene.Highlight(*closest);
+                break;
+            }
+
+            return;
+        }
+        case MouseOperationStatus::NewLineP2:
+        {
+            Q_ASSERT(scene.Back().ElementType() == DrawingElementType::Line);
+            LineElement<float>& newLine = static_cast<LineElement<float>&>(scene.Back());
+
+            if (closest == scene.end())
+                scene.Highlight(scene.end());
+            else
+            {
+                if (closest->ElementType() == DrawingElementType::Node &&
+                    static_cast<NodeElement<float>&>(*closest).Node()->Id() != newLine.P1()->Id())
+                    scene.Highlight(*closest);
+            }
+
+            newLine.P2().SetPosition(translated);
             break;
+        }
     }
 
     emit VisualizationAvailable(surface->MinValue(), surface->MaxValue());
@@ -319,8 +347,9 @@ void MainVm::MouseDoubleClickedOnPixmap(const QPoint& mousePos, Qt::MouseButtons
         return;
     }
 
-    DrawingElement<float>* closest = project->SceneRef().ClosestElement(translated);
-    if (!closest)
+    SceneElement<float>& scene = project->SceneRef();
+    auto closest = scene.ClosestElement(translated);
+    if (closest == scene.end())
         return;
 
     switch (closest->ElementType())
@@ -390,28 +419,24 @@ void MainVm::DeleteSelectedElement()
     if (!surface)
         return;
 
-    bool isModified = false;
-
     SceneElement<float>& scene = project->SceneRef();
 
-    DrawingElement<float>* highLighted = scene.FindHighLigted();
-    if (!highLighted)
+    auto highLighted = scene.FindHighLigted();
+    if (highLighted == scene.end())
         return;
 
     if (highLighted->ElementType() == DrawingElementType::Node)
     {
-        NodeElement<float>* node = static_cast<NodeElement<float>*>(highLighted);
+        NodeElement<float>& node = static_cast<NodeElement<float>&>(*highLighted);
 
         // Can't delete nodes that are used by other elements */
-        if (node->Node()->RefCount() > 0)
+        if (node.Node()->RefCount() > 0)
             return;
     }
 
-    if (highLighted)
-        isModified |= scene.Remove(highLighted) != 0;
+    scene.Remove(highLighted);
 
-    if (isModified)
-        emit VisualizationAvailable(surface->MinValue(), surface->MaxValue());
+    emit VisualizationAvailable(surface->MinValue(), surface->MaxValue());
 }
 
 void MainVm::EditNode(NodeElement<float>& node)
@@ -443,8 +468,10 @@ void MainVm::EditSelectedElement()
     if (!surface || mouseOperationState != MouseOperationStatus::Normal)
         return;
 
-    DrawingElement<float>* highLighted = project->SceneRef().FindHighLigted();
-    if (!highLighted)
+    SceneElement<float>& scene = project->SceneRef();
+
+    auto highLighted = scene.FindHighLigted();
+    if (highLighted == scene.end())
         return;
 
     switch (highLighted->ElementType())
@@ -464,10 +491,11 @@ void MainVm::EditSelectedElement()
 void MainVm::PlaceNewNodeElement(const QPoint& pointerPosition)
 {
     SceneElement<float>& scene = project->SceneRef();
+    scene.Highlight(scene.end());
+
     std::unique_ptr<DrawingElement<float>> newNode = NodeElement<float>::UniqueElement(SharedNode(pointerPosition));
-    DrawingElement<float>* d = newNode.get();
+    newNode->SetHighlighted(true);
     scene.Add(std::move(newNode));
-    scene.Highlight(d);
 }
 
 void MainVm::NewNodeElement(const QPoint& mousePos, const QSize& labelSize)

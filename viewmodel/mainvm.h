@@ -83,7 +83,6 @@ private:
     QWidget* parentWidget;
 
     MouseOperationStatus mouseOperationState = MouseOperationStatus::Normal;
-    LineElement<float>* NewLine;
 
     QPoint nodeSavedPos;
 

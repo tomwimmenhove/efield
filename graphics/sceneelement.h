@@ -4,6 +4,7 @@
 #include "drawingelement.h"
 #include "graphics/idrawer.h"
 #include "util/geometry.h"
+#include "util/derefiterator.h"
 
 #include <limits>
 #include <memory>
@@ -15,30 +16,27 @@
 template<typename T>
 class SceneElement : public DrawingElement<T>
 {
+    using elementsIterator = typename std::vector<std::unique_ptr<DrawingElement<T>>>::const_iterator;
+
 public:
+    struct SceneIterator : public DerefIterator<elementsIterator>
+    {
+        SceneIterator(elementsIterator i) : DerefIterator<elementsIterator>(i) { }
+    };
+
     SceneElement() { }
 
     virtual DrawingElementType ElementType() const { return DrawingElementType::Scene; }
 
-    void Add(std::unique_ptr<DrawingElement<T>>&& element)
-    {
-        elements.push_back(std::move(element));
-    }
-
-    bool Remove(const DrawingElement<T>* element)
-    {
-        for (auto i = elements.begin(); i != elements.end(); ++i)
-        {
-            if (i->get() == element)
-            {
-                elements.erase(i);
-                return true;
-            }
-        }
-        return false;
-    }
-
+    void Add(std::unique_ptr<DrawingElement<T>>&& element) { elements.push_back(std::move(element)); }
+    void Remove(SceneIterator iter) { elements.erase(iter.innerIterator()); }
+    void PopBack() { elements.pop_back(); }
     void Clear() { elements.clear(); }
+    DrawingElement<T>& Front() const { return *elements.front(); }
+    DrawingElement<T>& Back() const { return *elements.back(); }
+
+    SceneIterator begin() const { return SceneIterator(elements.begin()); }
+    SceneIterator end() const { return SceneIterator(elements.end()); }
 
     const std::vector<std::unique_ptr<DrawingElement<T>>>& Elements() const { return elements; }
 
@@ -59,28 +57,33 @@ public:
         return 0.0f;
     }
 
-    void Highlight(const DrawingElement<T>* element)
+    void Highlight(SceneIterator iter)
     {
-        for (auto const& e: elements)
-            e->SetHighlighted(e.get() == element);
+        for (auto i = begin(); i != end(); ++i)
+            i->SetHighlighted(i == iter);
     }
 
-    DrawingElement<T>* ClosestElement(const QPoint& point,
-                                                     float maxDist = 15 /*std::numeric_limits<float>::max()*/,
-                                                     DrawingElementType type = DrawingElementType::None) const
+    void Highlight(const DrawingElement<T>& element)
     {
-        DrawingElement<T>* closest = nullptr;
+        for (auto const& e: elements)
+            e->SetHighlighted(e.get() == &element);
+    }
+
+    SceneIterator ClosestElement(const QPoint& point, float maxDist = 15 /*std::numeric_limits<float>::max()*/,
+                                 DrawingElementType type = DrawingElementType::None) const
+    {
+        SceneIterator closest = end();
 
         float min = std::numeric_limits<float>::max();
-        for (auto const& e: elements)
+        for (auto i = begin(); i != end(); ++i)
         {
-            if (type != DrawingElementType::None && type != e->ElementType())
+            if (type != DrawingElementType::None && type != i->ElementType())
                 continue;
 
-            float dist = e->DistanceTo(point);
+            float dist = i->DistanceTo(point);
             if (dist < min && dist < maxDist)
             {
-                closest = e.get();
+                closest = i;
                 min = dist;
             }
         }
@@ -94,13 +97,9 @@ public:
         Highlight(ClosestElement(point, maxDist));
     }
 
-    DrawingElement<T>* FindHighLigted() const
+    SceneIterator FindHighLigted() const
     {
-        for (auto const& e: elements)
-            if (e->IsHighlighted())
-                return e.get();
-
-        return nullptr;
+        return std::find_if(begin(), end(), [](const DrawingElement<T>& e) { return e.IsHighlighted(); });
     }
 
     void Accept(DrawingElementVisitor<T>& visitor) override { visitor.Visit(*this); }
