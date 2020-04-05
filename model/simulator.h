@@ -16,7 +16,6 @@ public:
     Simulator(const QSize& size, std::function<void(FloatSurface&)> updateBoundariesHandler);
 
     inline QSize Size() const { return QSize(w, h); }
-    inline void SetSize(const QSize& size) { w = size.width(); h = size.height(); }
 
     inline FloatSurface& CurrentSurface() { return surfaces[curBufIdx]; }
 

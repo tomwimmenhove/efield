@@ -5,7 +5,7 @@
 #-------------------------------------------------
 
 QT       += core gui xml
-CONFIG += c++11
+CONFIG += c++14
 
 QMAKE_CXXFLAGS += -fopenmp
 QMAKE_LFLAGS += -fopenmp -lstdc++

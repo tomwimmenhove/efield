@@ -78,7 +78,7 @@ private:
     void ActivateOperation(const QPoint& pointerPosition);
     void UpdateStatusBarValue(const QPoint& pointerPosition);
 
-    void InitNewProject(std::unique_ptr<Project>& newProject);
+    void InitNewProject(std::unique_ptr<Project>&& newProject);
 
     QWidget* parentWidget;
 

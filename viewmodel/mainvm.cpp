@@ -17,12 +17,12 @@ MainVm::MainVm(QWidget* parent)
     : QObject(parent), parentWidget(parent)
 {
 #ifdef QT_DEBUG
-    std::unique_ptr<Project> newProject = std::unique_ptr<Project>(new Project(QSize(601, 601)));
+    std::unique_ptr<Project> newProject = std::make_unique<Project>(QSize(601, 601));
 #else
-    std::unique_ptr<Project> newProject = std::unique_ptr<Project>(new Project(QSize(256, 256)));
+    std::unique_ptr<Project> newProject = std::make_unique<Project>(QSize(256, 256));
 #endif
 
-    InitNewProject(newProject);
+    InitNewProject(std::move(newProject));
     CreateBorder(0);
 
     simulatorThread.start();
@@ -214,57 +214,6 @@ void MainVm::CancelOperation()
     emit VisualizationAvailable(surface->MinValue(), surface->MaxValue());
 }
 
-void MainVm::NewSimulation()
-{
-    PointInputDialog d("Node coordinates", QPoint(256, 256), QPoint(1, 1), QPoint(1024, 1024), parentWidget);
-    if (d.exec() != QDialog::Accepted)
-        return;
-
-    std::unique_ptr<Project> newProject = std::unique_ptr<Project>(new Project(d.Size()));
-    InitNewProject(newProject);
-
-    CreateBorder(0);
-}
-
-void MainVm::ProjectOpen()
-{
-    QString fileName = QFileDialog::getOpenFileName(parentWidget, tr("Open Project"), "",
-                                                    tr("E-Field Sim files (*.efs)"));
-
-    if (!fileName.isEmpty())
-    {
-        QFile file(fileName);
-
-        if(file.open(QIODevice::ReadOnly | QIODevice::Text))
-        {
-            std::unique_ptr<Project> newProject = std::unique_ptr<Project>(new Project(file.readAll()));
-            InitNewProject(newProject);
-        }
-        else
-            QMessageBox::critical(parentWidget, "Unable to load",
-                                  QString("Unable to load %1: %2")
-                                  .arg(fileName).arg(file.errorString()));
-
-    }
-}
-
-void MainVm::ProjectSaveAs()
-{
-    QString fileName = QFileDialog::getSaveFileName(parentWidget, tr("Open Project"), "",
-                                                    tr("E-Field Sim files (*.efs)"));
-
-    if (!fileName.isEmpty())
-    {
-        QFile file(fileName);
-
-        if(file.open(QIODevice::WriteOnly | QIODevice::Truncate | QIODevice::Text))
-            file.write(project->ToXmlBytes());
-        else
-            QMessageBox::critical(parentWidget, "Unable to save",
-                                  QString("Unable to save %1: %2")
-                                  .arg(fileName).arg(file.errorString()));
-    }
-}
 
 void MainVm::MousePressedOnPixmap(const QPoint& mousePos, Qt::MouseButtons buttons, const QSize& labelSize)
 {
@@ -328,8 +277,9 @@ void MainVm::MouseMovedOnPixmap(const QPoint& mousePos, const QSize& labelSize)
             else if (closestNode->ElementType() == DrawingElementType::Node)
                 scene.Highlight(closestNode);
 
-            Q_ASSERT(NewLine);
-            NewLine.toStrongRef()->P2().SetPosition(translated);
+            QSharedPointer<LineElement<float>> newLine = NewLine.lock();
+            Q_ASSERT(newLine);
+            newLine->P2().SetPosition(translated);
             break;
     }
 
@@ -385,6 +335,54 @@ void MainVm::MouseDoubleClickedOnPixmap(const QPoint& mousePos, Qt::MouseButtons
         case DrawingElementType::Line:
             EditLine(closest.staticCast<LineElement<float>>());
             break;
+    }
+}
+
+void MainVm::NewSimulation()
+{
+    PointInputDialog d("Node coordinates", QPoint(256, 256), QPoint(1, 1), QPoint(1024, 1024), parentWidget);
+    if (d.exec() != QDialog::Accepted)
+        return;
+
+    InitNewProject(std::make_unique<Project>(d.Size()));
+
+    CreateBorder(0);
+}
+
+void MainVm::ProjectOpen()
+{
+    QString fileName = QFileDialog::getOpenFileName(parentWidget, tr("Open Project"), "",
+                                                    tr("E-Field Sim files (*.efs)"));
+
+    if (!fileName.isEmpty())
+    {
+        QFile file(fileName);
+
+        if(file.open(QIODevice::ReadOnly | QIODevice::Text))
+            InitNewProject(std::make_unique<Project>(file.readAll()));
+        else
+            QMessageBox::critical(parentWidget, "Unable to load",
+                                  QString("Unable to load %1: %2")
+                                  .arg(fileName).arg(file.errorString()));
+
+    }
+}
+
+void MainVm::ProjectSaveAs()
+{
+    QString fileName = QFileDialog::getSaveFileName(parentWidget, tr("Open Project"), "",
+                                                    tr("E-Field Sim files (*.efs)"));
+
+    if (!fileName.isEmpty())
+    {
+        QFile file(fileName);
+
+        if(file.open(QIODevice::WriteOnly | QIODevice::Truncate | QIODevice::Text))
+            file.write(project->ToXmlBytes());
+        else
+            QMessageBox::critical(parentWidget, "Unable to save",
+                                  QString("Unable to save %1: %2")
+                                  .arg(fileName).arg(file.errorString()));
     }
 }
 
@@ -474,8 +472,10 @@ void MainVm::PlaceNewNodeElement(const QPoint& pointerPosition)
 
 void MainVm::NewNodeElement(const QPoint& mousePos, const QSize& labelSize)
 {
-    if (!surface || mouseOperationState != MouseOperationStatus::Normal)
+    if (!surface)
         return;
+
+    CancelOperation();
 
     QPoint translated = Geometry::TranslatePoint(mousePos, labelSize, surface->Size(), true);
 
@@ -487,8 +487,10 @@ void MainVm::NewNodeElement(const QPoint& mousePos, const QSize& labelSize)
 
 void MainVm::NewLineElement(const QPoint&, const QSize&)
 {
-    if (!surface || mouseOperationState != MouseOperationStatus::Normal)
+    if (!surface)
         return;
+
+    CancelOperation();
 
     mouseOperationState = MouseOperationStatus::NewLineP1;
     emit MouseOperationStateChanged(mouseOperationState);
@@ -516,7 +518,7 @@ void MainVm::StopSimulation()
     started = false;
 }
 
-void MainVm::InitNewProject(std::unique_ptr<Project>& newProject)
+void MainVm::InitNewProject(std::unique_ptr<Project>&& newProject)
 {
     if (simulatorWorker)
         simulatorWorker->deleteLater();
