@@ -3,6 +3,7 @@
 
 #include <functional>
 #include <array>
+#include <memory>
 #include <QDomElement>
 #include <QPair>
 #include <QMap>
@@ -32,11 +33,11 @@ public:
             auto nodeXmlElements = domElement.elementsByTagName(nodeFactory.first);
             for(int i = 0; i < nodeXmlElements.count(); i++)
             {
-                QSharedPointer<DrawingElement<T>> nodeElement = QSharedPointer<DrawingElement<T>>(nodeFactory.second());
+                std::unique_ptr<DrawingElement<T>> nodeElement = std::unique_ptr<DrawingElement<T>>(nodeFactory.second());
                 QDomElement nodeXmlElement = nodeXmlElements.item(i).toElement();
                 SceneDeserializeVisitor visitor(nodeXmlElement, nodeMap);
                 nodeElement->Accept(visitor);
-                element.Add(nodeElement);
+                element.Add(std::move(nodeElement));
             }
         }
     }

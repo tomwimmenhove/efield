@@ -33,7 +33,7 @@ public:
 //        return uuid;
 //    }
 
-    inline uint64_t GetId() const { return id; }
+    inline uint64_t Id() const { return id; }
 
     inline void Use() { refCount++; }
     inline void Release() { refCount--; }

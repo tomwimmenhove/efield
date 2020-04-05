@@ -72,8 +72,8 @@ private:
     void CreateScene();
 #endif
     void CreateBorder(float voltage);
-    void EditNode(QSharedPointer<NodeElement<float>> node);
-    void EditLine(QSharedPointer<LineElement<float>> line);
+    void EditNode(NodeElement<float>& node);
+    void EditLine(LineElement<float>& line);
 
     void ActivateOperation(const QPoint& pointerPosition);
     void UpdateStatusBarValue(const QPoint& pointerPosition);
@@ -83,7 +83,7 @@ private:
     QWidget* parentWidget;
 
     MouseOperationStatus mouseOperationState = MouseOperationStatus::Normal;
-    QWeakPointer<LineElement<float>> NewLine;
+    LineElement<float>* NewLine;
 
     QPoint nodeSavedPos;
 

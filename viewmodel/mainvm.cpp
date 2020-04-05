@@ -111,8 +111,8 @@ void MainVm::ActivateOperation(const QPoint& pointerPosition)
 {
     SceneElement<float>& scene = project->SceneRef();
 
-    QSharedPointer<DrawingElement<float>> closest = scene.ClosestElement(pointerPosition);
-    QSharedPointer<DrawingElement<float>> highLighted = scene.FindHighLigted();
+    DrawingElement<float>* closest = scene.ClosestElement(pointerPosition);
+    DrawingElement<float>* highLighted = scene.FindHighLigted();
 
     MouseOperationStatus oldState = mouseOperationState;
 
@@ -122,7 +122,7 @@ void MainVm::ActivateOperation(const QPoint& pointerPosition)
             if (closest && closest == highLighted && highLighted->ElementType() == DrawingElementType::Node)
             {
                 mouseOperationState = MouseOperationStatus::DragNode;
-                QSharedPointer<NodeElement<float>> node = highLighted.staticCast<NodeElement<float>>();
+                NodeElement<float>* node = static_cast<NodeElement<float>*>(highLighted);
                 nodeSavedPos = node->Node();
                 break;
             }
@@ -139,15 +139,13 @@ void MainVm::ActivateOperation(const QPoint& pointerPosition)
         case MouseOperationStatus::NewLineP1:
             if (closest && highLighted)
             {
-                QSharedPointer<NodeElement<float>> startNode = highLighted.staticCast<NodeElement<float>>();
+                NodeElement<float>* startNode = static_cast<NodeElement<float>*>(highLighted);
                 SharedNode sharedStartNode = startNode->Node();
                 SharedNode sharedEndNode = SharedNode(pointerPosition);
-                QSharedPointer<LineElement<float>> newLine = LineElement<float>::SharedElement(sharedStartNode, sharedEndNode, 0);
+                std::unique_ptr<LineElement<float>> newLine = LineElement<float>::UniqueElement(sharedStartNode, sharedEndNode, 0);
 
-                scene.Add(newLine);
-
-                /* Weak reference, so we don't have to clean up after it. Just let it hang out. */
-                NewLine = newLine.toWeakRef();
+                NewLine = newLine.get();
+                scene.Add(std::move(newLine));
 
                 mouseOperationState = MouseOperationStatus::NewLineP2;
                 break;
@@ -157,11 +155,12 @@ void MainVm::ActivateOperation(const QPoint& pointerPosition)
             if (highLighted)
             {
                 /* Set the definitive end point for the new line segment */
-                QSharedPointer<NodeElement<float>> endNode = highLighted.staticCast<NodeElement<float>>();
-                Q_ASSERT(NewLine);
-                NewLine.toStrongRef()->SetP2(endNode->Node());
-
-                mouseOperationState = MouseOperationStatus::NewLineP1;
+                NodeElement<float>* endNode = static_cast<NodeElement<float>*>(highLighted);
+                if (endNode->Node()->Id() != NewLine->P1()->Id())
+                {
+                    NewLine->SetP2(endNode->Node());
+                    mouseOperationState = MouseOperationStatus::NewLineP1;
+                }
             }
             scene.Highlight(nullptr);
             break;
@@ -177,7 +176,7 @@ void MainVm::CancelOperation()
 {
     SceneElement<float>& scene = project->SceneRef();
 
-    QSharedPointer<DrawingElement<float>> highLighted = scene.FindHighLigted();
+    DrawingElement<float>* highLighted = scene.FindHighLigted();
 
     MouseOperationStatus oldState = mouseOperationState;
 
@@ -187,7 +186,7 @@ void MainVm::CancelOperation()
             return;
         case MouseOperationStatus::DragNode:
         {
-            QSharedPointer<NodeElement<float>> node = highLighted.staticCast<NodeElement<float>>();
+            NodeElement<float>* node = static_cast<NodeElement<float>*>(highLighted);
             node->Node().SetPosition(nodeSavedPos);
             mouseOperationState = MouseOperationStatus::Normal;
             break;
@@ -247,8 +246,9 @@ void MainVm::MouseMovedOnPixmap(const QPoint& mousePos, const QSize& labelSize)
 
     SceneElement<float>& scene = project->SceneRef();
 
-    QSharedPointer<DrawingElement<float>> closestNode = scene.ClosestElement(translated, 15, DrawingElementType::Node);
-    QSharedPointer<DrawingElement<float>> highLighted = scene.FindHighLigted();
+    NodeElement<float>* closestNode =
+            static_cast<NodeElement<float>*>(scene.ClosestElement(translated, 15, DrawingElementType::Node));
+    DrawingElement<float>* highLighted = scene.FindHighLigted();
 
     switch(mouseOperationState)
     {
@@ -260,7 +260,7 @@ void MainVm::MouseMovedOnPixmap(const QPoint& mousePos, const QSize& labelSize)
         case MouseOperationStatus::DragNode:
         case MouseOperationStatus::NewNode:
         {
-            QSharedPointer<NodeElement<float>> node = highLighted.staticCast<NodeElement<float>>();
+            NodeElement<float>* node = static_cast<NodeElement<float>*>(highLighted);
             node->Node().SetPosition(translated);
             break;
         }
@@ -274,12 +274,11 @@ void MainVm::MouseMovedOnPixmap(const QPoint& mousePos, const QSize& labelSize)
         case MouseOperationStatus::NewLineP2:
             if (!closestNode)
                 scene.Highlight(nullptr);
-            else if (closestNode->ElementType() == DrawingElementType::Node)
+            else if (closestNode->ElementType() == DrawingElementType::Node &&
+                     closestNode->Node()->Id() != NewLine->P1()->Id())
                 scene.Highlight(closestNode);
 
-            QSharedPointer<LineElement<float>> newLine = NewLine.lock();
-            Q_ASSERT(newLine);
-            newLine->P2().SetPosition(translated);
+            NewLine->P2().SetPosition(translated);
             break;
     }
 
@@ -320,7 +319,7 @@ void MainVm::MouseDoubleClickedOnPixmap(const QPoint& mousePos, Qt::MouseButtons
         return;
     }
 
-    QSharedPointer<DrawingElement<float>> closest = project->SceneRef().ClosestElement(translated);
+    DrawingElement<float>* closest = project->SceneRef().ClosestElement(translated);
     if (!closest)
         return;
 
@@ -330,10 +329,10 @@ void MainVm::MouseDoubleClickedOnPixmap(const QPoint& mousePos, Qt::MouseButtons
         case DrawingElementType::Scene:
             break;
         case DrawingElementType::Node:
-            EditNode(closest.staticCast<NodeElement<float>>());
+            EditNode(static_cast<NodeElement<float>&>(*closest));
             break;
         case DrawingElementType::Line:
-            EditLine(closest.staticCast<LineElement<float>>());
+            EditLine(static_cast<LineElement<float>&>(*closest));
             break;
     }
 }
@@ -395,13 +394,13 @@ void MainVm::DeleteSelectedElement()
 
     SceneElement<float>& scene = project->SceneRef();
 
-    QSharedPointer<DrawingElement<float>> highLighted = scene.FindHighLigted();
+    DrawingElement<float>* highLighted = scene.FindHighLigted();
     if (!highLighted)
         return;
 
     if (highLighted->ElementType() == DrawingElementType::Node)
     {
-        QSharedPointer<NodeElement<float>> node = highLighted.staticCast<NodeElement<float>>();
+        NodeElement<float>* node = static_cast<NodeElement<float>*>(highLighted);
 
         // Can't delete nodes that are used by other elements */
         if (node->Node()->RefCount() > 0)
@@ -415,9 +414,9 @@ void MainVm::DeleteSelectedElement()
         emit VisualizationAvailable(surface->MinValue(), surface->MaxValue());
 }
 
-void MainVm::EditNode(QSharedPointer<NodeElement<float>> node)
+void MainVm::EditNode(NodeElement<float>& node)
 {
-    SharedNode sharedNode = node->Node();
+    SharedNode sharedNode = node.Node();
 
     PointInputDialog d("Node coordinates", sharedNode, QPoint(0, 0), QPoint(surface->Width() - 1, surface->Height() - 1), parentWidget);
     if (d.exec() != QDialog::Accepted)
@@ -428,15 +427,15 @@ void MainVm::EditNode(QSharedPointer<NodeElement<float>> node)
     emit VisualizationAvailable(surface->MinValue(), surface->MaxValue());
 }
 
-void MainVm::EditLine(QSharedPointer<LineElement<float>> line)
+void MainVm::EditLine(LineElement<float>& line)
 {
     bool ok;
-    int def = line->Value();
+    int def = line.Value();
 
     int volt = QInputDialog::getInt(parentWidget, tr("Edit line"),
                                     tr("Voltage: "),  def, -2147483647, 2147483647, 1, &ok);
     if (ok)
-        line->SetValue(volt);
+        line.SetValue(volt);
 }
 
 void MainVm::EditSelectedElement()
@@ -444,7 +443,7 @@ void MainVm::EditSelectedElement()
     if (!surface || mouseOperationState != MouseOperationStatus::Normal)
         return;
 
-    QSharedPointer<DrawingElement<float>> highLighted = project->SceneRef().FindHighLigted();
+    DrawingElement<float>* highLighted = project->SceneRef().FindHighLigted();
     if (!highLighted)
         return;
 
@@ -454,10 +453,10 @@ void MainVm::EditSelectedElement()
         case DrawingElementType::Scene:
             break;
         case DrawingElementType::Node:
-            EditNode(highLighted.staticCast<NodeElement<float>>());
+            EditNode(static_cast<NodeElement<float>&>(*highLighted));
             break;
         case DrawingElementType::Line:
-            EditLine(highLighted.staticCast<LineElement<float>>());
+            EditLine(static_cast<LineElement<float>&>(*highLighted));
             break;
     }
 }
@@ -465,9 +464,10 @@ void MainVm::EditSelectedElement()
 void MainVm::PlaceNewNodeElement(const QPoint& pointerPosition)
 {
     SceneElement<float>& scene = project->SceneRef();
-    QSharedPointer<DrawingElement<float>> newNode = NodeElement<float>::SharedElement(SharedNode(pointerPosition));
-    scene.Add(newNode);
-    scene.Highlight(newNode);
+    std::unique_ptr<DrawingElement<float>> newNode = NodeElement<float>::UniqueElement(SharedNode(pointerPosition));
+    DrawingElement<float>* d = newNode.get();
+    scene.Add(std::move(newNode));
+    scene.Highlight(d);
 }
 
 void MainVm::NewNodeElement(const QPoint& mousePos, const QSize& labelSize)
@@ -549,13 +549,13 @@ void MainVm::CreateScene()
     SharedNode cathodeLeft(100, 100);
     SharedNode cathodeRight(500, 100);
 
-    scene.Add(NodeElement<float>::SharedElement(anodeRight));
-    scene.Add(NodeElement<float>::SharedElement(anodeLeft));
-    scene.Add(NodeElement<float>::SharedElement(cathodeLeft));
-    scene.Add(NodeElement<float>::SharedElement(cathodeRight));
+    scene.Add(NodeElement<float>::UniqueElement(anodeRight));
+    scene.Add(NodeElement<float>::UniqueElement(anodeLeft));
+    scene.Add(NodeElement<float>::UniqueElement(cathodeLeft));
+    scene.Add(NodeElement<float>::UniqueElement(cathodeRight));
 
-    scene.Add(LineElement<float>::SharedElement(anodeLeft, anodeRight, 1));
-    scene.Add(LineElement<float>::SharedElement(cathodeLeft, cathodeRight, -1));
+    scene.Add(LineElement<float>::UniqueElement(anodeLeft, anodeRight, 1));
+    scene.Add(LineElement<float>::UniqueElement(cathodeLeft, cathodeRight, -1));
 }
 #endif
 
@@ -569,14 +569,14 @@ void MainVm::CreateBorder(float voltage)
     SharedNode bottomLeft(0, 0);
     SharedNode bottomRight(size.height(), 0);
 
-    scene.Add(NodeElement<float>::SharedElement(topLeft));
-    scene.Add(NodeElement<float>::SharedElement(topRight));
-    scene.Add(NodeElement<float>::SharedElement(bottomLeft));
-    scene.Add(NodeElement<float>::SharedElement(bottomRight));
+    scene.Add(NodeElement<float>::UniqueElement(topLeft));
+    scene.Add(NodeElement<float>::UniqueElement(topRight));
+    scene.Add(NodeElement<float>::UniqueElement(bottomLeft));
+    scene.Add(NodeElement<float>::UniqueElement(bottomRight));
 
-    scene.Add(LineElement<float>::SharedElement(topLeft, topRight, voltage));
-    scene.Add(LineElement<float>::SharedElement(bottomLeft, bottomRight, voltage));
-    scene.Add(LineElement<float>::SharedElement(topLeft, bottomLeft, voltage));
-    scene.Add(LineElement<float>::SharedElement(topRight, bottomRight, voltage));
+    scene.Add(LineElement<float>::UniqueElement(topLeft, topRight, voltage));
+    scene.Add(LineElement<float>::UniqueElement(bottomLeft, bottomRight, voltage));
+    scene.Add(LineElement<float>::UniqueElement(topLeft, bottomLeft, voltage));
+    scene.Add(LineElement<float>::UniqueElement(topRight, bottomRight, voltage));
 }
 

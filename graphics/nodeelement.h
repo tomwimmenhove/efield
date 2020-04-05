@@ -1,6 +1,8 @@
 #ifndef NODEELEMENT_H
 #define NODEELEMENT_H
 
+#include <memory>
+
 #include "sharednode.h"
 #include "drawingelement.h"
 #include "graphics/drawing.h"
@@ -19,7 +21,12 @@ public:
 
     static QSharedPointer<NodeElement<T>> SharedElement(const SharedNode& p)
     {
-        return  QSharedPointer<NodeElement<T>>(new NodeElement<T>(p));
+        return  QSharedPointer<NodeElement<T>>::create(p);
+    }
+
+    static std::unique_ptr<NodeElement<T>> UniqueElement(const SharedNode& p)
+    {
+        return std::make_unique<NodeElement<T>>(p);
     }
 
     virtual DrawingElementType ElementType() const { return DrawingElementType::Node; }
