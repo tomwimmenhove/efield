@@ -298,12 +298,9 @@ void MainVm::MouseMovedOnPixmap(const QPoint& mousePos, const QSize& labelSize)
 
             if (closest == scene.end())
                 scene.Highlight(scene.end());
-            else
-            {
-                if (closest->ElementType() == DrawingElementType::Node &&
-                    static_cast<NodeElement<float>&>(*closest).Node()->Id() != newLine.P1()->Id())
-                    scene.Highlight(*closest);
-            }
+            else if (closest->ElementType() == DrawingElementType::Node &&
+                     static_cast<NodeElement<float>&>(*closest).Node()->Id() != newLine.P1()->Id())
+                scene.Highlight(*closest);
 
             newLine.P2().SetPosition(translated);
             break;
