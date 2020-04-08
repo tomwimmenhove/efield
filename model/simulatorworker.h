@@ -17,26 +17,26 @@ public:
     { }
 
 #ifdef _OPENMP
-    inline void SetNumThreads(int n) { numThreads = n; }
-    inline int NumThreads() const { return numThreads; }
+    inline void setNumThreads(int n) { nThreads = n; }
+    inline int numThreads() const { return nThreads; }
 #endif
 
-    inline int Iterations() const { return iterations; }
+    inline int iterations() const { return iters; }
 
 signals:
 
 public slots:
-    void Run();
-    inline void Cancel() { cancel = true; }
+    void run();
+    inline void stop() { cancel = true; }
 
 private:
 #ifdef _OPENMP
-    void RunParallel();
+    void runParallel();
 #endif
-    void RunSequential();
+    void runSequential();
 
-    int numThreads = 1;
-    QAtomicInt iterations = 0;
+    int nThreads = 1;
+    QAtomicInt iters = 0;
     QMutex mutex;
     QSharedPointer<Simulator> simulator;
 

@@ -24,12 +24,12 @@ PointInputDialog::~PointInputDialog()
     delete ui;
 }
 
-QPoint PointInputDialog::Point() const
+QPoint PointInputDialog::point() const
 {
     return QPoint(ui->spinBoxX->value(), ui->spinBoxY->value());
 }
 
-QSize PointInputDialog::Size() const
+QSize PointInputDialog::size() const
 {
     return QSize(ui->spinBoxX->value(), ui->spinBoxY->value());
 }

@@ -15,24 +15,22 @@ public:
 
     Simulator(const QSize& size, std::function<void(FloatSurface&)> updateBoundariesHandler);
 
-    inline QSize Size() const { return QSize(w, h); }
+    inline QSize size() const { return QSize(w, h); }
+    inline FloatSurface& currentSurface() { return surfaces[curBufIdx]; }
+    QSharedPointer<FloatSurface> cloneSurface();
 
-    inline FloatSurface& CurrentSurface() { return surfaces[curBufIdx]; }
+    void iterateSimulation();
 
-    QSharedPointer<FloatSurface> CloneSurface();
-
-    void IterateSimulation();
-
-    inline int NumChunks() const { return h; }
-    void PreIterateSimulationChunk();
-    void IterateSimulationChunk(int startChunk, int endChunk);
-    inline void PostIterateSimulationChunk() { updateBoundariesHandler(CurrentSurface()); }
+    inline int numChunks() const { return h; }
+    void preIterateSimulationChunk();
+    void iterateSimulationChunk(int startChunk, int endChunk);
+    inline void postIterateSimulationChunk() { updateBoundariesHandler(currentSurface()); }
 
 private:
-    inline FloatSurface& OtherSurface() { return surfaces[curBufIdx ^ 1]; }
-    void SwitchSurface();
+    inline FloatSurface& otherSurface() { return surfaces[curBufIdx ^ 1]; }
+    void switchSurface();
 
-    float SlowValueAverager(FloatSurface& surface, int x, int y);
+    float slowValueAverager(FloatSurface& surface, int x, int y);
 
     int w, h;
     std::function<void(FloatSurface&)> updateBoundariesHandler;

@@ -12,10 +12,10 @@ public:
      : drawer(drawer)
     { }
 
-    inline void DrawLine(QPoint p1, QPoint p2, const T& value) { DrawLine(p1.x(), p1.y(), p2.x(), p2.y(), value); }
+    inline void drawLine(QPoint p1, QPoint p2, const T& value) { drawLine(p1.x(), p1.y(), p2.x(), p2.y(), value); }
 
     // XXX: Fuck this motherfucker.
-    void DrawLine(int x1, int y1, int x2, int y2, const T& value)
+    void drawLine(int x1, int y1, int x2, int y2, const T& value)
     {
         int x,y,dx,dy,dx1,dy1,px,py,xe,ye,i;
         dx=x2-x1;
@@ -38,7 +38,7 @@ public:
                 y=y2;
                 xe=x1;
             }
-            drawer.PutPixel(x, y, value);
+            drawer.putPixel(x, y, value);
             for(i=0;x<xe;i++)
             {
                 x=x+1;
@@ -58,7 +58,7 @@ public:
                     }
                     px=px+2*(dy1-dx1);
                 }
-                drawer.PutPixel(x, y, value);
+                drawer.putPixel(x, y, value);
             }
         }
         else
@@ -75,7 +75,7 @@ public:
                 y=y2;
                 ye=y1;
             }
-            drawer.PutPixel(x, y, value);
+            drawer.putPixel(x, y, value);
             for(i=0;y<ye;i++)
             {
                 y=y+1;
@@ -95,7 +95,7 @@ public:
                     }
                     py=py+2*(dx1-dy1);
                 }
-                drawer.PutPixel(x, y, value);
+                drawer.putPixel(x, y, value);
             }
         }
     }

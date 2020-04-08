@@ -8,7 +8,7 @@ class SimpleValueStepper : public IValueStepper
 public:
     SimpleValueStepper(double stepSize = 0) : stepSize(stepSize) { }
 
-    virtual double MakeStepped(double value) const override
+    virtual double makeStepped(double value) const override
     {
         return stepSize == 0 ? value : (qRound(value / stepSize)) * stepSize;
     }

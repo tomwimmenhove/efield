@@ -6,30 +6,30 @@ MouseEventLabel::MouseEventLabel(QWidget* parent)
 
 void MouseEventLabel::mouseMoveEvent(QMouseEvent* ev)
 {
-    emit Mouse_Moved(ev->pos());
+    emit mouse_Moved(ev->pos());
 }
 
 void MouseEventLabel::mousePressEvent(QMouseEvent* ev)
 {
-    emit Mouse_Pressed(ev->pos(), ev->buttons());
+    emit mouse_Pressed(ev->pos(), ev->buttons());
 }
 
 void MouseEventLabel::mouseReleaseEvent(QMouseEvent* ev)
 {
-    emit Mouse_Released(ev->pos(), ev->buttons());
+    emit mouse_Released(ev->pos(), ev->buttons());
 }
 
 void MouseEventLabel::mouseDoubleClickEvent(QMouseEvent* ev)
 {
-    emit Mouse_DoubleClicked(ev->pos(), ev->buttons());
+    emit mouse_DoubleClicked(ev->pos(), ev->buttons());
 }
 
 void MouseEventLabel::leaveEvent(QEvent*)
 {
-    emit Mouse_Left();
+    emit mouse_Left();
 }
 
 void MouseEventLabel::resizeEvent(QResizeEvent* ev)
 {
-    emit Resized(ev->size());
+    emit resized(ev->size());
 }

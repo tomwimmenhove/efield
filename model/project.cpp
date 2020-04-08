@@ -9,17 +9,17 @@ Project::Project(const QString& xml)
 {
     QDomDocument doc;
     doc.setContent(xml);
-    FromDoc(doc);
+    fromDoc(doc);
 }
 
 Project::Project(const QByteArray& xml)
 {
     QDomDocument doc;
     doc.setContent(xml);
-    FromDoc(doc);
+    fromDoc(doc);
 }
 
-void Project::FromDoc(const QDomDocument& doc)
+void Project::fromDoc(const QDomDocument& doc)
 {
     QDomElement root = doc.documentElement();
 
@@ -33,25 +33,25 @@ void Project::FromDoc(const QDomDocument& doc)
     QDomElement sceneXmlElement = root.elementsByTagName("Scene").item(0).toElement();
     SceneDeserializeVisitor<float> visitor(sceneXmlElement);
 
-    visitor.Visit(scene);
+    visitor.visit(scene);
 }
 
-QDomDocument Project::ToDoc()
+QDomDocument Project::toDoc()
 {
     QDomDocument doc("EFieldSim");
     QDomElement root = doc.createElement("EFieldSim");
     doc.appendChild(root);
 
     QDomElement sizXmleElement = doc.createElement("Size");
-    sizXmleElement.setAttribute("Width", QString::number(simulator->Size().width()));
-    sizXmleElement.setAttribute("Height", QString::number(simulator->Size().height()));
+    sizXmleElement.setAttribute("Width", QString::number(simulator->size().width()));
+    sizXmleElement.setAttribute("Height", QString::number(simulator->size().height()));
     root.appendChild(sizXmleElement);
 
     QDomElement sceneXmlElement = doc.createElement("Scene");
     root.appendChild(sceneXmlElement);
 
     SceneSerializeVisitor<float> visitor(sceneXmlElement, doc);
-    visitor.Visit(scene);
+    visitor.visit(scene);
 
     return doc;
 }

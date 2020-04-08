@@ -12,20 +12,20 @@ class HeatLegendWidget : public QWidget
 public:
     explicit HeatLegendWidget(QWidget *parent = nullptr);
 
-    double Min() const { return min; }
-    void SetMin(double value);
+    double min() const { return minVal; }
+    void setMin(double value);
 
-    double Max() const { return max; }
-    void SetMax(double value);
+    double max() const { return maxVal; }
+    void setMax(double value);
 
-    bool IsStepped() const { return stepped; }
-    void SetStepped(bool value);
+    bool isStepped() const { return stepped; }
+    void setStepped(bool value);
 
-    inline SimpleValueStepper Stepper() { return SimpleValueStepper(IsStepped() ? tickStep : 0); }
+    inline SimpleValueStepper stepper() { return SimpleValueStepper(isStepped() ? tickStepVal : 0); }
 
-    float GetSteppedValue(float value);
+    float steppedValue(float value);
 
-    double TickStep() const { return tickStep; }
+    double tickStep() const { return tickStepVal; }
 
 signals:
 
@@ -36,19 +36,19 @@ protected:
 
 private:
     /* Thanks to https://stackoverflow.com/questions/4947682/intelligently-calculating-chart-tick-positions/4948320 for these two */
-    static double NiceNumber (double value, bool round);
-    static double GetNiceTicks(double& axisStart, double& axisEnd, int maxTicks);
+    static double niceNumber (double value, bool round);
+    static double getNiceTicks(double& axisStart, double& axisEnd, int maxTicks);
 
-    void UpdateTickStep();
+    void updateTickStepu();
 
     const int maxTicks = 20;
     double axisStart = 0.0;
     double axisEnd = 1.0;
-    double min = 0.0;
-    double max = 1.0;
+    double minVal = 0.0;
+    double maxVal = 1.0;
     bool stepped = true;
 
-    double tickStep = 0.1;
+    double tickStepVal = 0.1;
 };
 
 #endif // HEATLEGENDWIDGET_H

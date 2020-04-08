@@ -17,33 +17,33 @@ MainWindow::MainWindow(QWidget *parent) :
 
     mainVm = new MainVm(this);
 
-    connect(ui->graphicsLabel, &MouseEventLabel::Mouse_Moved, this, &MainWindow::GraphLabel_MouseMoved);
-    connect(ui->graphicsLabel, &MouseEventLabel::Mouse_Pressed, this, &MainWindow::GraphLabel_MousePressed);
-    connect(ui->graphicsLabel, &MouseEventLabel::Mouse_Released, this, &MainWindow::GraphLabel_MouseReleased);
-    connect(ui->graphicsLabel, &MouseEventLabel::Mouse_DoubleClicked, this, &MainWindow::GraphLabel_MouseDoubleClicked);
-    connect(ui->graphicsLabel, &MouseEventLabel::Resized, this, &MainWindow::GraphLabel_Resized);
+    connect(ui->graphicsLabel, &MouseEventLabel::mouse_Moved, this, &MainWindow::graphLabel_MouseMoved);
+    connect(ui->graphicsLabel, &MouseEventLabel::mouse_Pressed, this, &MainWindow::graphLabel_MousePressed);
+    connect(ui->graphicsLabel, &MouseEventLabel::mouse_Released, this, &MainWindow::graphLabel_MouseReleased);
+    connect(ui->graphicsLabel, &MouseEventLabel::mouse_DoubleClicked, this, &MainWindow::graphLabel_MouseDoubleClicked);
+    connect(ui->graphicsLabel, &MouseEventLabel::resized, this, &MainWindow::graphLabel_Resized);
 
-    connect(this, &MainWindow::StartSimulation, mainVm, &MainVm::StartSimulation);
-    connect(this, &MainWindow::StopSimulation, mainVm, &MainVm::StopSimulation);
-    connect(this, &MainWindow::UpdateVisualization, mainVm, &MainVm::UpdateVisualization);
-    connect(this, &MainWindow::RequestVisualization, mainVm, &MainVm::RequestVisualization);
-    connect(this, &MainWindow::MouseMovedOnPixmap, mainVm, &MainVm::MouseMovedOnPixmap);
-    connect(this, &MainWindow::MousePressedOnPixmap, mainVm, &MainVm::MousePressedOnPixmap);
-    connect(this, &MainWindow::MouseReleasedFromPixmap, mainVm, &MainVm::MouseReleasedFromPixmap);
-    connect(this, &MainWindow::MouseDoubleClickedOnPixmap, mainVm, &MainVm::MouseDoubleClickedOnPixmap);
-    connect(this, &MainWindow::DeleteSelectedElement, mainVm, &MainVm::DeleteSelectedElement);
-    connect(this, &MainWindow::EditSelectedElement, mainVm, &MainVm::EditSelectedElement);
-    connect(this, &MainWindow::NewNodeElement, mainVm, &MainVm::NewNodeElement);
-    connect(this, &MainWindow::NewLineElement, mainVm, &MainVm::NewLineElement);
-    connect(this, &MainWindow::CancelOperation, mainVm, &MainVm::CancelOperation);
-    connect(this, &MainWindow::NewSimulation, mainVm, &MainVm::NewSimulation);
-    connect(this, &MainWindow::ProjectOpen, mainVm, &MainVm::ProjectOpen);
-    connect(this, &MainWindow::ProjectSaveAs, mainVm, &MainVm::ProjectSaveAs);
+    connect(this, &MainWindow::startSimulation, mainVm, &MainVm::startSimulation);
+    connect(this, &MainWindow::stopSimulation, mainVm, &MainVm::stopSimulation);
+    connect(this, &MainWindow::updateVisualization, mainVm, &MainVm::updateVisualization);
+    connect(this, &MainWindow::requestVisualization, mainVm, &MainVm::requestVisualization);
+    connect(this, &MainWindow::mouseMovedOnPixmap, mainVm, &MainVm::mouseMovedOnPixmap);
+    connect(this, &MainWindow::mousePressedOnPixmap, mainVm, &MainVm::mousePressedOnPixmap);
+    connect(this, &MainWindow::mouseReleasedFromPixmap, mainVm, &MainVm::mouseReleasedFromPixmap);
+    connect(this, &MainWindow::mouseDoubleClickedOnPixmap, mainVm, &MainVm::mouseDoubleClickedOnPixmap);
+    connect(this, &MainWindow::deleteSelectedElement, mainVm, &MainVm::deleteSelectedElement);
+    connect(this, &MainWindow::editSelectedElement, mainVm, &MainVm::editSelectedElement);
+    connect(this, &MainWindow::newNodeElement, mainVm, &MainVm::newNodeElement);
+    connect(this, &MainWindow::newLineElement, mainVm, &MainVm::newLineElement);
+    connect(this, &MainWindow::cancelOperation, mainVm, &MainVm::cancelOperation);
+    connect(this, &MainWindow::newSimulation, mainVm, &MainVm::eewSimulation);
+    connect(this, &MainWindow::projectOpen, mainVm, &MainVm::projectOpen);
+    connect(this, &MainWindow::projectSaveAs, mainVm, &MainVm::projectSaveAs);
 
-    connect(mainVm, &MainVm::VisualizationAvailable, this, &MainWindow::MainVm_VisualizationAvailable);
-    connect(mainVm, &MainVm::NewVisualization, this, &MainWindow::MainVm_NewVisualization);
-    connect(mainVm, &MainVm::NewStatusMessage, this, &MainWindow::MainVm_NewStatusMessage);
-    connect(mainVm, &MainVm::MouseOperationStateChanged, this, &MainWindow::MainVm_MouseOperationStateChanged);
+    connect(mainVm, &MainVm::visualizationAvailable, this, &MainWindow::mainVm_VisualizationAvailable);
+    connect(mainVm, &MainVm::newVisualization, this, &MainWindow::mainVm_NewVisualization);
+    connect(mainVm, &MainVm::newStatusMessage, this, &MainWindow::mainVm_NewStatusMessage);
+    connect(mainVm, &MainVm::mouseOperationStateChanged, this, &MainWindow::mainVm_MouseOperationStateChanged);
 
 #ifdef USE_VM_THREAD
     mainVm->moveToThread(&vmThread);
@@ -51,7 +51,7 @@ MainWindow::MainWindow(QWidget *parent) :
 #endif
 
     frameTimer = new QTimer(this);
-    connect(frameTimer, &QTimer::timeout, this, &MainWindow::FrameUpdate);
+    connect(frameTimer, &QTimer::timeout, this, &MainWindow::frameUpdate);
 
     statusBar()->show();
 }
@@ -65,57 +65,57 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::GraphLabel_MouseMoved(const QPoint& point)
+void MainWindow::graphLabel_MouseMoved(const QPoint& point)
 {
-    emit MouseMovedOnPixmap(point, ui->graphicsLabel->size());
+    emit mouseMovedOnPixmap(point, ui->graphicsLabel->size());
 
     graphLabelMousePos = point;
 }
 
-void MainWindow::GraphLabel_MousePressed(const QPoint& point, Qt::MouseButtons buttons)
+void MainWindow::graphLabel_MousePressed(const QPoint& point, Qt::MouseButtons buttons)
 {
-    emit MousePressedOnPixmap(point, buttons, ui->graphicsLabel->size());
+    emit mousePressedOnPixmap(point, buttons, ui->graphicsLabel->size());
 }
 
-void MainWindow::GraphLabel_MouseReleased(const QPoint& point, Qt::MouseButtons buttons)
+void MainWindow::graphLabel_MouseReleased(const QPoint& point, Qt::MouseButtons buttons)
 {
-    emit MouseReleasedFromPixmap(point, buttons, ui->graphicsLabel->size());
+    emit mouseReleasedFromPixmap(point, buttons, ui->graphicsLabel->size());
 }
 
-void MainWindow::GraphLabel_MouseDoubleClicked(const QPoint& point, Qt::MouseButtons buttons)
+void MainWindow::graphLabel_MouseDoubleClicked(const QPoint& point, Qt::MouseButtons buttons)
 {
-    emit MouseDoubleClickedOnPixmap(point, buttons, ui->graphicsLabel->size());
+    emit mouseDoubleClickedOnPixmap(point, buttons, ui->graphicsLabel->size());
 }
 
-void MainWindow::GraphLabel_Resized(const QSize&)
+void MainWindow::graphLabel_Resized(const QSize&)
 {
-    FrameUpdate();
+    frameUpdate();
 }
 
-void MainWindow::FrameUpdate()
+void MainWindow::frameUpdate()
 {
-    emit UpdateVisualization(ui->actionGradient->isChecked());
+    emit updateVisualization(ui->actionGradient->isChecked());
 }
 
-void MainWindow::MainVm_VisualizationAvailable(float minValue, float maxValue)
+void MainWindow::mainVm_VisualizationAvailable(float minValue, float maxValue)
 {
-    ui->heatMapLegend->SetMin(minValue);
-    ui->heatMapLegend->SetMax(maxValue);
+    ui->heatMapLegend->setMin(minValue);
+    ui->heatMapLegend->setMax(maxValue);
 
-    emit RequestVisualization(ui->heatMapLegend->Stepper(), ui->graphicsLabel->size());
+    emit requestVisualization(ui->heatMapLegend->stepper(), ui->graphicsLabel->size());
 }
 
-void MainWindow::MainVm_NewVisualization(const QPixmap& pixmap)
+void MainWindow::mainVm_NewVisualization(const QPixmap& pixmap)
 {
     ui->graphicsLabel->setPixmap(pixmap);
 }
 
-void MainWindow::MainVm_NewStatusMessage(const QString& message)
+void MainWindow::mainVm_NewStatusMessage(const QString& message)
 {
     ui->statusBar->showMessage(message);
 }
 
-void MainWindow::MainVm_MouseOperationStateChanged(MouseOperationStatus state)
+void MainWindow::mainVm_MouseOperationStateChanged(MouseOperationStatus state)
 {
     switch (state)
     {
@@ -133,14 +133,14 @@ void MainWindow::MainVm_MouseOperationStateChanged(MouseOperationStatus state)
 
 void MainWindow::on_actionStart_triggered()
 {
-    emit StartSimulation();
+    emit startSimulation();
     frameTimer->start(40);
 }
 
 void MainWindow::on_actionS_top_triggered()
 {
     frameTimer->stop();
-    emit StopSimulation();
+    emit stopSimulation();
 }
 
 void MainWindow::on_actionSave_Image_triggered()
@@ -157,19 +157,19 @@ void MainWindow::on_actionSave_Image_triggered()
 
 void MainWindow::on_actionGradient_triggered()
 {
-    FrameUpdate();
+    frameUpdate();
 }
 
 void MainWindow::on_actionStepped_triggered()
 {
-    ui->heatMapLegend->SetStepped(ui->actionStepped->isChecked());
+    ui->heatMapLegend->setStepped(ui->actionStepped->isChecked());
 
-    FrameUpdate();
+    frameUpdate();
 }
 
 void MainWindow::on_actionRedraw_triggered()
 {
-    FrameUpdate();
+    frameUpdate();
 }
 
 void MainWindow::keyPressEvent(QKeyEvent* e)
@@ -179,7 +179,7 @@ void MainWindow::keyPressEvent(QKeyEvent* e)
         switch (e->key())
         {
             case Qt::Key_Escape:
-                emit CancelOperation();
+                emit cancelOperation();
                 break;
         }
     }
@@ -189,37 +189,37 @@ void MainWindow::keyPressEvent(QKeyEvent* e)
 
 void MainWindow::on_actionPlace_Node_triggered()
 {
-    emit NewNodeElement(graphLabelMousePos, ui->graphicsLabel->size());
+    emit newNodeElement(graphLabelMousePos, ui->graphicsLabel->size());
 }
 
 void MainWindow::on_actionPlace_L_triggered()
 {
-    emit NewLineElement(graphLabelMousePos, ui->graphicsLabel->size());
+    emit newLineElement(graphLabelMousePos, ui->graphicsLabel->size());
 }
 
 void MainWindow::on_actionDelete_element_triggered()
 {
-    emit DeleteSelectedElement();
+    emit deleteSelectedElement();
 }
 
 void MainWindow::on_action_Edit_selected_element_triggered()
 {
-    emit EditSelectedElement();
+    emit editSelectedElement();
 }
 
 void MainWindow::on_action_New_triggered()
 {
-    emit NewSimulation();
-    FrameUpdate();
+    emit newSimulation();
+    frameUpdate();
 }
 
 void MainWindow::on_action_Open_triggered()
 {
-    emit ProjectOpen();
-    FrameUpdate();
+    emit projectOpen();
+    frameUpdate();
 }
 
 void MainWindow::on_action_Save_as_triggered()
 {
-    emit ProjectSaveAs();
+    emit projectSaveAs();
 }

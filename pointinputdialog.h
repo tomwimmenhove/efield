@@ -16,8 +16,8 @@ public:
     explicit PointInputDialog(const QString& title, const QPoint& point, const QPoint& minPoint, const QPoint& maxPoint, QWidget *parent = 0);
     ~PointInputDialog();
 
-    QPoint Point() const;
-    QSize Size() const;
+    QPoint point() const;
+    QSize size() const;
 
 private:
     Ui::PointInputDialog *ui;

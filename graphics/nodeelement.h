@@ -16,30 +16,25 @@ public:
     { }
 
     NodeElement(const SharedNode& p)
-        : p(p)
+        : n(p)
     { }
 
-    static QSharedPointer<NodeElement<T>> SharedElement(const SharedNode& p)
-    {
-        return  QSharedPointer<NodeElement<T>>::create(p);
-    }
-
-    static std::unique_ptr<NodeElement<T>> UniqueElement(const SharedNode& p)
+    static std::unique_ptr<NodeElement<T>> uniqueElement(const SharedNode& p)
     {
         return std::make_unique<NodeElement<T>>(p);
     }
 
-    virtual DrawingElementType ElementType() const { return DrawingElementType::Node; }
+    virtual drawingElementType elementType() const override { return drawingElementType::Node; }
 
-    void Draw(IDrawer<T>&) override { } /* Annotation only */
+    void draw(IDrawer<T>&) override { } /* Annotation only */
 
-    void DrawAnnotation(QPainter& painter, const QSize& surfaceSize) override
+    void drawAnnotation(QPainter& painter, const QSize& surfaceSize) override
     {
-        QPoint sp = Geometry::ScalePoint(p, surfaceSize, QSize(painter.device()->width(), painter.device()->height()));
+        QPoint sp = Geometry::scalePoint(n, surfaceSize, QSize(painter.device()->width(), painter.device()->height()));
 
         int y = painter.device()->height() - 1 - sp.y();
 
-        if (this->IsHighlighted())
+        if (this->isHighlighted())
             painter.setPen(Qt::red);
         else
             painter.setPen(Qt::black);
@@ -50,20 +45,20 @@ public:
         painter.drawLine(sp.x() + margin, y - margin, sp.x() + margin, y + margin);
     }
 
-    float DistanceTo(const QPoint& point) const override
+    float distanceTo(const QPoint& point) const override
     {
-        float dist = Geometry::Distance(QVector2D(p), QVector2D(point)) - margin;
+        float dist = Geometry::distance(QVector2D(n), QVector2D(point)) - margin;
         return dist > 0 ? dist : 0;
     }
 
-    inline SharedNode Node() const { return p; }
-    inline void SetNode(SharedNode node) { p = node; }
+    inline SharedNode node() const { return n; }
+    inline void setNode(SharedNode node) { n = node; }
 
-    void Accept(DrawingElementVisitor<T>& visitor) override { visitor.Visit(*this); }
+    void accept(DrawingElementVisitor<T>& visitor) override { visitor.visit(*this); }
 
 private:
     const int margin = 3;
-    SharedNode p;
+    SharedNode n;
 };
 
 #endif // NODEELEMENT_H

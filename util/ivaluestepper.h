@@ -4,7 +4,7 @@
 class IValueStepper
 {
 public:
-    virtual double MakeStepped(double value) const = 0;
+    virtual double makeStepped(double value) const = 0;
     virtual ~IValueStepper() { }
 };
 

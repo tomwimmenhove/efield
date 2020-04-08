@@ -25,7 +25,7 @@ public:
         return *this;
     }
 
-//    QUuid GetQUuid()
+//    QUuid getQUuid()
 //    {
 //        if (uuid.isNull())
 //            uuid = QUuid::createUuid();
@@ -33,11 +33,11 @@ public:
 //        return uuid;
 //    }
 
-    inline uint64_t Id() const { return id; }
+    inline uint64_t identifier() const { return id; }
 
-    inline void Use() { refCount++; }
-    inline void Release() { refCount--; }
-    inline int RefCount() { return refCount; }
+    inline void use() { refCount++; }
+    inline void release() { refCount--; }
+    inline int refCounter() { return refCount; }
 
 private:
     T value;

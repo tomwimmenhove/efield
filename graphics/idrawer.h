@@ -5,7 +5,7 @@ template <typename T>
 class IDrawer
 {
 public:
-    virtual void PutPixel(int x, int y, T value) = 0;
+    virtual void putPixel(int x, int y, T value) = 0;
     virtual ~IDrawer() { }
 };
 

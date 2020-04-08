@@ -60,7 +60,6 @@ HEADERS += \
     model/simulatorworker.h \
     graphics/lineelement.h \
     graphics/sharednode.h \
-    graphics/sharedint.h \
     graphics/drawingelement.h \
     graphics/sceneelement.h \
     graphics/drawing.h \

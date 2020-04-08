@@ -7,14 +7,14 @@
 #ifdef _OPENMP
 #include <omp.h>
 
-void SimulatorWorker::RunParallel()
+void SimulatorWorker::runParallel()
 {
-    simulator->PreIterateSimulationChunk();
+    simulator->preIterateSimulationChunk();
 
     QAtomicInt doCancel = false;
 
-    int n = simulator->NumChunks();
-    omp_set_num_threads(numThreads);
+    int n = simulator->numChunks();
+    omp_set_num_threads(nThreads);
 #pragma omp parallel
     {
         int id = omp_get_thread_num();
@@ -29,13 +29,13 @@ void SimulatorWorker::RunParallel()
 
         while (!doCancel)
         {
-            simulator->IterateSimulationChunk(istart, iend);
+            simulator->iterateSimulationChunk(istart, iend);
 
 #pragma omp barrier
             if (id == 0)
             {
-                simulator->PostIterateSimulationChunk();
-                iterations++;
+                simulator->postIterateSimulationChunk();
+                iters++;
 
                 if (cancel)
                 {
@@ -43,7 +43,7 @@ void SimulatorWorker::RunParallel()
                 }
                 else
                 {
-                    simulator->PreIterateSimulationChunk();
+                    simulator->preIterateSimulationChunk();
                 }
             }
 #pragma omp barrier
@@ -54,27 +54,27 @@ void SimulatorWorker::RunParallel()
 }
 #endif
 
-void SimulatorWorker::RunSequential()
+void SimulatorWorker::runSequential()
 {
     qDebug() << "Simulation starting";
     while (!cancel)
     {
-        simulator->IterateSimulation();
-        iterations++;
+        simulator->iterateSimulation();
+        iters++;
     }
     qDebug() << "Simulation finished";
 }
 
-void SimulatorWorker::Run()
+void SimulatorWorker::run()
 {
     cancel = false;
 
-    iterations = 0;
+    iters = 0;
 
 #ifdef _OPENMP
-    if (numThreads > 1)
-        RunParallel();
+    if (nThreads > 1)
+        runParallel();
     else
 #endif
-        RunSequential();
+        runSequential();
 }

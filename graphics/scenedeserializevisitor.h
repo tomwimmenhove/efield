@@ -20,7 +20,7 @@ public:
         : domElement(domElement)
     { }
 
-    void Visit(SceneElement<T>& element) override
+    void visit(SceneElement<T>& element) override
     {
         std::array<QPair<QString, std::function<DrawingElement<T>*(void)>>, 2> nodeFactories
         {{
@@ -36,31 +36,31 @@ public:
                 std::unique_ptr<DrawingElement<T>> nodeElement = std::unique_ptr<DrawingElement<T>>(nodeFactory.second());
                 QDomElement nodeXmlElement = nodeXmlElements.item(i).toElement();
                 SceneDeserializeVisitor visitor(nodeXmlElement, nodeMap);
-                nodeElement->Accept(visitor);
-                element.Add(std::move(nodeElement));
+                nodeElement->accept(visitor);
+                element.add(std::move(nodeElement));
             }
         }
     }
 
-    void Visit(NodeElement<T>& element) override
+    void visit(NodeElement<T>& element) override
     {
         QDomNamedNodeMap attributes = domElement.attributes();
         SharedNode sharedNode(attributes.namedItem("X").nodeValue().toInt(),
                               attributes.namedItem("Y").nodeValue().toInt());
         int id = attributes.namedItem("ID").nodeValue().toInt();
         nodeMap[id] = sharedNode;
-        element.SetNode(sharedNode);
+        element.setNode(sharedNode);
     }
 
-    void Visit(LineElement<T>& element) override
+    void visit(LineElement<T>& element) override
     {
         QDomNamedNodeMap attributes = domElement.attributes();
         float value;
-        StringToValue(value, domElement.firstChild().nodeValue());
+        stringToValue(value, domElement.firstChild().nodeValue());
 
-        element.SetValue(value);
-        element.SetP1(nodeMap[attributes.namedItem("Node1").nodeValue().toInt()]);
-        element.SetP2(nodeMap[attributes.namedItem("Node2").nodeValue().toInt()]);
+        element.setValue(value);
+        element.setPoint1(nodeMap[attributes.namedItem("Node1").nodeValue().toInt()]);
+        element.setPoint2(nodeMap[attributes.namedItem("Node2").nodeValue().toInt()]);
     }
 
 private:
@@ -73,7 +73,7 @@ private:
     { }
 
     /* This needs to be done for any type this template will be serialized to */
-    inline void StringToValue(T& result, const QString& s) { result = s.toDouble(); }
+    inline void stringToValue(T& result, const QString& s) { result = s.toDouble(); }
 };
 
 #endif // SCENEDESERIALIZEVISITOR_H

@@ -11,7 +11,7 @@ public:
      : surface(surface)
     { }
 
-    void PutPixel(int x, int y, float value) override { surface.XYValue(x, y) = value; }
+    void putPixel(int x, int y, float value) override { surface.setValue(x, y, value); }
 
 private:
     FloatSurface& surface;

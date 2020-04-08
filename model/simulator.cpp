@@ -9,117 +9,117 @@ Simulator::Simulator(const QSize& size, std::function<void(FloatSurface&)> updat
 {
     surfaceMutexex[curBufIdx].lock();
 
-    updateBoundariesHandler(CurrentSurface());
+    updateBoundariesHandler(currentSurface());
 }
 
-QSharedPointer<FloatSurface> Simulator::CloneSurface()
+QSharedPointer<FloatSurface> Simulator::cloneSurface()
 {
     QMutexLocker locker(&surfaceMutexex[curBufIdx ^ 1]);
 
-    return QSharedPointer<FloatSurface>(new FloatSurface(OtherSurface()));
+    return QSharedPointer<FloatSurface>(new FloatSurface(otherSurface()));
 }
 
-void Simulator::SwitchSurface()
+void Simulator::switchSurface()
 {
     surfaceMutexex[curBufIdx].unlock();
     curBufIdx ^= 1;
     surfaceMutexex[curBufIdx].lock();
 }
 
-void Simulator::IterateSimulation()
+void Simulator::iterateSimulation()
 {
-    PreIterateSimulationChunk();
-    IterateSimulationChunk(1, h - 1); // First and last are done by PreIterateSimulationChunk()
-    PostIterateSimulationChunk();
+    preIterateSimulationChunk();
+    iterateSimulationChunk(1, h - 1); // First and last are done by PreIterateSimulationChunk()
+    postIterateSimulationChunk();
 }
 
-void Simulator::PreIterateSimulationChunk()
+void Simulator::preIterateSimulationChunk()
 {
-    FloatSurface& oldSurface = CurrentSurface();
-    SwitchSurface();
-    FloatSurface& curSurface = CurrentSurface();
+    FloatSurface& oldSurface = currentSurface();
+    switchSurface();
+    FloatSurface& curSurface = currentSurface();
 
     for (int x = 0; x < w; x++)
-        curSurface.XYValue(x, 0) = SlowValueAverager(oldSurface, x, 0);
+        curSurface.setValue(x, 0, slowValueAverager(oldSurface, x, 0));
 
     for (int x = 0; x < w; x++)
-        curSurface.XYValue(x, h - 1) = SlowValueAverager(oldSurface, x, h - 1);
+        curSurface.setValue(x, h - 1, slowValueAverager(oldSurface, x, h - 1));
 
     for (int y = 0; y < h; y++)
-        curSurface.XYValue(0, y) = SlowValueAverager(oldSurface, 0, y);
+        curSurface.setValue(0, y, slowValueAverager(oldSurface, 0, y));
 
     for (int y = 0; y < h; y++)
-        curSurface.XYValue(w - 1, y) = SlowValueAverager(oldSurface, w - 1, y);
+        curSurface.setValue(w - 1, y, slowValueAverager(oldSurface, w - 1, y));
 }
 
-void Simulator::IterateSimulationChunk(int startChunk, int endChunk)
+void Simulator::iterateSimulationChunk(int startChunk, int endChunk)
 {
-    FloatSurface& oldSurface = OtherSurface();
+    FloatSurface& oldSurface = otherSurface();
 
     for (int y = startChunk >= 1 ? startChunk : 1; y < endChunk; y++)
     {
         for (int x = 1; x < w - 1; x++)
         {
-            CurrentSurface().XYValue(x, y) = (oldSurface.XYValue(x - 1, y - 1) +
-                                              oldSurface.XYValue(x    , y - 1) +
-                                              oldSurface.XYValue(x + 1, y - 1) +
+            currentSurface().setValue(x, y, (oldSurface.value(x - 1, y - 1) +
+                                               oldSurface.value(x    , y - 1) +
+                                               oldSurface.value(x + 1, y - 1) +
 
-                                              oldSurface.XYValue(x - 1, y    ) +
-                                              oldSurface.XYValue(x + 1, y    ) +
+                                               oldSurface.value(x - 1, y    ) +
+                                               oldSurface.value(x + 1, y    ) +
 
-                                              oldSurface.XYValue(x - 1, y + 1) +
-                                              oldSurface.XYValue(x    , y + 1) +
-                                              oldSurface.XYValue(x + 1, y + 1)
-                                              ) / 8.0f;
+                                               oldSurface.value(x - 1, y + 1) +
+                                               oldSurface.value(x    , y + 1) +
+                                               oldSurface.value(x + 1, y + 1)
+                                               ) / 8.0f);
         }
     }
 }
 
-float Simulator::SlowValueAverager(FloatSurface& surface, int x, int y)
+float Simulator::slowValueAverager(FloatSurface& surface, int x, int y)
 {
     float total = 0;
     int n = 0;
     if (y > 0)
     {
-        total += surface.XYValue(x, y - 1);
+        total += surface.value(x, y - 1);
         n++;
         if (x < w - 2)
         {
-            total += surface.XYValue(x + 1, y - 1);
+            total += surface.value(x + 1, y - 1);
             n++;
         }
     }
 
     if (x > 0)
     {
-        total += surface.XYValue(x - 1, y);
+        total += surface.value(x - 1, y);
         n++;
         if (y < h - 2)
         {
-            total += surface.XYValue(x - 1, y + 1);
+            total += surface.value(x - 1, y + 1);
             n++;
         }
         if (y > 0)
         {
-            total += surface.XYValue(x - 1, y - 1);
+            total += surface.value(x - 1, y - 1);
             n++;
         }
     }
 
     if (x < w - 2)
     {
-        total += surface.XYValue(x + 1, y    );
+        total += surface.value(x + 1, y    );
         n++;
         if (y < h - 2)
         {
-            total += surface.XYValue(x + 1, y + 1);
+            total += surface.value(x + 1, y + 1);
             n++;
         }
     }
 
     if (y < h - 2)
     {
-        total += surface.XYValue(x, y + 1);
+        total += surface.value(x, y + 1);
         n++;
     }
 

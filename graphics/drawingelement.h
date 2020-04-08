@@ -8,7 +8,7 @@
 #include "graphics/idrawer.h"
 #include "drawingelementvisitor.h"
 
-enum class DrawingElementType
+enum class drawingElementType
 {
     None = -1,
     Scene,
@@ -20,15 +20,15 @@ template<typename T>
 class DrawingElement
 {
 public:
-    virtual DrawingElementType ElementType() const = 0;
-    virtual void Draw(IDrawer<T>& drawer) = 0;
-    virtual void DrawAnnotation(QPainter& painter, const QSize& surfaceSize) = 0;
-    virtual float DistanceTo(const QPoint& point) const = 0;
+    virtual drawingElementType elementType() const = 0;
+    virtual void draw(IDrawer<T>& drawer) = 0;
+    virtual void drawAnnotation(QPainter& painter, const QSize& surfaceSize) = 0;
+    virtual float distanceTo(const QPoint& point) const = 0;
 
-    inline bool IsHighlighted() const { return highlighted; }
-    inline void SetHighlighted(bool value) { highlighted = value; }
+    inline bool isHighlighted() const { return highlighted; }
+    inline void setHighlighted(bool value) { highlighted = value; }
 
-    virtual void Accept(DrawingElementVisitor<T>& visitor) = 0;
+    virtual void accept(DrawingElementVisitor<T>& visitor) = 0;
 
     virtual ~DrawingElement() { }
 

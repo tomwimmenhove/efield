@@ -15,14 +15,8 @@ public:
 
     inline operator QPoint() const { return *this->data(); }
 
-    inline QPoint Point() const { return *this->data(); }
-    inline void SetPosition(const QPoint& p) { *this->data() = p; }
-
-//    inline SharedNode& operator= (const QPoint& p)
-//    {
-//        *this->data() = p;
-//        return *this;
-//    }
+    inline QPoint point() const { return *this->data(); }
+    inline void setPoint(const QPoint& p) { *this->data() = p; }
 };
 
 #endif // SHAREDNODE_H

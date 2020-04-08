@@ -20,23 +20,23 @@ public:
     Project(const QByteArray& xml);
 
     /* Save */
-    QString ToXmlString() { return ToDoc().toString(4); }
-    QByteArray ToXmlBytes() { return ToDoc().toByteArray(4); }
+    QString toXmlString() { return toDoc().toString(4); }
+    QByteArray toXmlBytes() { return toDoc().toByteArray(4); }
 
-    SceneElement<float>& SceneRef() { return scene; }
-    QSharedPointer<Simulator> SharedSimulator() { return simulator; }
+    SceneElement<float>& sceneRef() { return scene; }
+    QSharedPointer<Simulator> sharedSimulator() { return simulator; }
 
 private:
     const std::function<void (FloatSurface&)> updateBoundariesHandler =
-            std::bind(&Project::SetFixedValues, this, std::placeholders::_1);
+            std::bind(&Project::setFixedValues, this, std::placeholders::_1);
 
-    void FromDoc(const QDomDocument& doc);
-    QDomDocument ToDoc();
+    void fromDoc(const QDomDocument& doc);
+    QDomDocument toDoc();
 
-    void SetFixedValues(FloatSurface& surface)
+    void setFixedValues(FloatSurface& surface)
     {
         FloatSurfaceDrawer drawer(surface);
-        scene.Draw(drawer);
+        scene.draw(drawer);
     }
 
     SceneElement<float> scene;

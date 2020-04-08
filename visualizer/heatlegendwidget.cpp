@@ -11,25 +11,25 @@ HeatLegendWidget::HeatLegendWidget(QWidget *parent)
     : QWidget(parent)
 { }
 
-void HeatLegendWidget::SetMin(double value)
+void HeatLegendWidget::setMin(double value)
 {
-    min = value;
+    minVal = value;
 
-    UpdateTickStep();
+    updateTickStepu();
 
     update();
 }
 
-void HeatLegendWidget::SetMax(double value)
+void HeatLegendWidget::setMax(double value)
 {
-    max = value;
+    maxVal = value;
 
-    UpdateTickStep();
+    updateTickStepu();
 
     update();
 }
 
-double HeatLegendWidget::NiceNumber (double value, bool round)
+double HeatLegendWidget::niceNumber (double value, bool round)
 {
     double niceFraction;
 
@@ -60,7 +60,7 @@ double HeatLegendWidget::NiceNumber (double value, bool round)
     return niceFraction*pow(10, (double)exponent);
 }
 
-double HeatLegendWidget::GetNiceTicks(double& axisStart, double& axisEnd, int maxTicks)
+double HeatLegendWidget::getNiceTicks(double& axisStart, double& axisEnd, int maxTicks)
 {
       /* Check for special cases */
     double axisWidth = axisEnd - axisStart;
@@ -68,8 +68,8 @@ double HeatLegendWidget::GetNiceTicks(double& axisStart, double& axisEnd, int ma
         return 0;
 
       /* Compute the new nice range and ticks */
-    double nceRange = NiceNumber(axisEnd - axisStart, 0);
-    double niceTick = NiceNumber(nceRange / ((float) maxTicks - 1), 1);
+    double nceRange = niceNumber(axisEnd - axisStart, 0);
+    double niceTick = niceNumber(nceRange / ((float) maxTicks - 1), 1);
 
       /* Compute the new nice start and end values */
     axisStart = floor(axisStart / niceTick) * niceTick;
@@ -78,24 +78,24 @@ double HeatLegendWidget::GetNiceTicks(double& axisStart, double& axisEnd, int ma
     return niceTick;
 }
 
-void HeatLegendWidget::UpdateTickStep()
+void HeatLegendWidget::updateTickStepu()
 {
-    axisStart = min;
-    axisEnd = max;
-    tickStep = GetNiceTicks(axisStart, axisEnd, maxTicks);
+    axisStart = minVal;
+    axisEnd = maxVal;
+    tickStepVal = getNiceTicks(axisStart, axisEnd, maxTicks);
 }
 
-void HeatLegendWidget::SetStepped(bool value)
+void HeatLegendWidget::setStepped(bool value)
 {
     stepped = value;
 
     update();
 }
 
-float HeatLegendWidget::GetSteppedValue(float value)
+float HeatLegendWidget::steppedValue(float value)
 {
     if (stepped)
-        return (qRound(value / tickStep)) * tickStep;
+        return (qRound(value / tickStepVal)) * tickStepVal;
 
     return value;
 }
@@ -113,21 +113,21 @@ void HeatLegendWidget::paintEvent(QPaintEvent*)
     int barTop = h - textHeight / 2 - barHeight;
     int barBottom = h - textHeight / 2 - 1;
 
-    UpdateTickStep();
+    updateTickStepu();
 
-    if (tickStep == 0)
+    if (tickStepVal == 0)
         return;
 
     /* Draw the ticks */
     int n = 0;
     int lastY = std::numeric_limits<int>::max();
-    for (double l = axisStart; l <= axisEnd && l <= max; ++n, l = axisStart + (double) n * tickStep)
+    for (double l = axisStart; l <= axisEnd && l <= maxVal; ++n, l = axisStart + (double) n * tickStepVal)
     {
-        if (l < min)
+        if (l < minVal)
             continue;
 
         /* Interpolate pixel-position */
-        int y = (int) qRound((float) barBottom + (l - min) * ((float) barTop - (float) barBottom) / (max - min));
+        int y = (int) qRound((float) barBottom + (l - minVal) * ((float) barTop - (float) barBottom) / (maxVal - minVal));
 
         /* Draw the tick arrow */
         painter.drawLine(barWidth, y, barWidth + 5, y);
@@ -151,15 +151,15 @@ void HeatLegendWidget::paintEvent(QPaintEvent*)
     for (int y = 0; y < barHeight; ++y)
     {
         /* Convert pixel value to actual value */
-        float f = ((float) y / barHeight) * (max - min) + min;
+        float f = ((float) y / barHeight) * (maxVal - minVal) + minVal;
 
-        f = GetSteppedValue(f);
+        f = steppedValue(f);
 
         /* Convert actual value to a normalized (0..1) value */
-        float fNorm = (f - min) / (max - min);
+        float fNorm = (f - minVal) / (maxVal - minVal);
 
         /* Get the color for this value */
-        QRgb color = HeatMap::GetColor(fNorm);
+        QRgb color = HeatMap::getColor(fNorm);
 
         for (int x = 0; x < barWidth; ++x)
             pixels[x + (barBottom - y) * barWidth] = color;

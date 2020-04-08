@@ -6,7 +6,7 @@
 class HeatMap
 {
 public:
-    static QRgb GetColor(float value, int steps = 0);
+    static QRgb getColor(float value, int steps = 0);
 };
 
 #endif // HEATMAP_H

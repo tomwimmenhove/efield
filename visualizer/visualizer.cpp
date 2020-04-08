@@ -5,12 +5,12 @@
 #include "util/simplevaluestepper.h"
 #include "heatmap.h"
 
-QImage Visualizer::QImageFromFloatSurface(const FloatSurface& surface, const IValueStepper& stepper)
+QImage Visualizer::imageFromFloatSurface(const FloatSurface& surface, const IValueStepper& stepper)
 {
-    int w = surface.Width();
-    int h = surface.Height();
-    float max = surface.MaxValue();
-    float min = surface.MinValue();
+    int w = surface.width();
+    int h = surface.height();
+    float max = surface.maxValue();
+    float min = surface.minValue();
     float range = max - min;
 
     QImage image(w, h, QImage::Format_ARGB32);
@@ -21,11 +21,11 @@ QImage Visualizer::QImageFromFloatSurface(const FloatSurface& surface, const IVa
             /* Scale between  0..1 */
             if (range != 0)
             {
-                float value = surface.XYCValue(x, y);
-                float stepped = stepper.MakeStepped(value);
+                float value = surface.value(x, y);
+                float stepped = stepper.makeStepped(value);
                 float f = (stepped - min) / range;
 
-                QRgb color = HeatMap::GetColor(f, 0);
+                QRgb color = HeatMap::getColor(f, 0);
                 image.setPixel(x, (h - y - 1), color);
             }
         }
@@ -34,12 +34,12 @@ QImage Visualizer::QImageFromFloatSurface(const FloatSurface& surface, const IVa
     return image;
 }
 
-void Visualizer::PaintGradientVectors(QPainter& painter, const GradientSurface& gradientSurface, int spacing)
+void Visualizer::paintGradientVectors(QPainter& painter, const GradientSurface& gradientSurface, int spacing)
 {
-    static QPixmap arrow = MakeArrow();
+    static QPixmap arrow = makeArrow();
 
-    int surfaceWidth = gradientSurface.Width();
-    int surfaceHeight = gradientSurface.Height();
+    int surfaceWidth = gradientSurface.width();
+    int surfaceHeight = gradientSurface.height();
     int painterWidth = painter.device()->width();
     int painterHeight = painter.device()->height();
 
@@ -50,7 +50,7 @@ void Visualizer::PaintGradientVectors(QPainter& painter, const GradientSurface& 
             int nx = x * surfaceWidth / painterWidth;
             int ny = (painterHeight - 1 - y) * surfaceHeight / painterHeight;
 
-            QVector2D v = -gradientSurface.XYCValue(nx, ny); // Negated, because E-field lines go from positive to negative
+            QVector2D v = -gradientSurface.value(nx, ny); // Negated, because E-field lines go from positive to negative
             float a = atan2(v.y(), v.x());
             QMatrix rm;
             rm.rotate(a * 180 / M_PI);
@@ -60,7 +60,7 @@ void Visualizer::PaintGradientVectors(QPainter& painter, const GradientSurface& 
     }
 }
 
-QPixmap Visualizer::MakeArrow()
+QPixmap Visualizer::makeArrow()
 {
     QPixmap arrow = QPixmap(9, 9);
     arrow.fill(QColor(0, 0, 0, 255));

@@ -15,36 +15,36 @@ public:
         : domElement(domElement), domDocument(domDocument)
     { }
 
-    void Visit(SceneElement<T>& element) override
+    void visit(SceneElement<T>& element) override
     {
         for (auto& e: element)
         {
             SceneSerializeVisitor visitor(domElement, domDocument);
-            e.Accept(visitor);
+            e.accept(visitor);
         }
     }
 
-    void Visit(NodeElement<T>& element) override
+    void visit(NodeElement<T>& element) override
     {
         QDomElement node = domDocument.createElement("Node");
-        node.setAttribute("X", QString::number(element.Node().Point().x()));
-        node.setAttribute("Y", QString::number(element.Node().Point().y()));
-        node.setAttribute("ID", QString::number(element.Node()->Id()));
+        node.setAttribute("X", QString::number(element.node().point().x()));
+        node.setAttribute("Y", QString::number(element.node().point().y()));
+        node.setAttribute("ID", QString::number(element.node()->identifier()));
         domElement.appendChild(node);
     }
 
-    void Visit(LineElement<T>& element) override
+    void visit(LineElement<T>& element) override
     {
         QDomElement line = domDocument.createElement("Line");
-        line.setAttribute("Node1", QString::number(element.P1()->Id()));
-        line.setAttribute("Node2", QString::number(element.P2()->Id()));
-        line.appendChild(domDocument.createTextNode(ValueToString(element.Value())));
+        line.setAttribute("Node1", QString::number(element.point1()->identifier()));
+        line.setAttribute("Node2", QString::number(element.point2()->identifier()));
+        line.appendChild(domDocument.createTextNode(valueToString(element.value())));
         domElement.appendChild(line);
     }
 
 private:
     /* This needs to be done for any type this template will be serialized to */
-    inline QString ValueToString(double x) const { return QString::number(x); }
+    inline QString valueToString(double x) const { return QString::number(x); }
 
     QDomElement& domElement;
     QDomDocument& domDocument;

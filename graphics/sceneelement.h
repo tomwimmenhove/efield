@@ -19,60 +19,60 @@ class SceneElement : public DrawingElement<T>
     using elementsIterator = typename std::vector<std::unique_ptr<DrawingElement<T>>>::const_iterator;
 
 public:
-    struct SceneIterator : public DerefIterator<elementsIterator>
+    struct SceneIterator : public DerefIterator<elementsIterator, DrawingElement<T>>
     {
-        SceneIterator(elementsIterator i) : DerefIterator<elementsIterator>(i) { }
+        SceneIterator(elementsIterator i) : DerefIterator<elementsIterator, DrawingElement<T>>(i) { }
     };
 
     SceneElement() { }
 
-    virtual DrawingElementType ElementType() const { return DrawingElementType::Scene; }
+    virtual drawingElementType elementType() const override { return drawingElementType::Scene; }
 
-    void Add(std::unique_ptr<DrawingElement<T>>&& element) { elements.push_back(std::move(element)); }
-    void Remove(SceneIterator iter) { elements.erase(iter.innerIterator()); }
-    void PopBack() { elements.pop_back(); }
-    void Clear() { elements.clear(); }
-    DrawingElement<T>& Front() const { return *elements.front(); }
-    DrawingElement<T>& Back() const { return *elements.back(); }
+    void add(std::unique_ptr<DrawingElement<T>>&& element) { elements.push_back(std::move(element)); }
+    void remove(SceneIterator iter) { elements.erase(iter.innerIterator()); }
+    void pop() { elements.pop_back(); }
+    void clear() { elements.clear(); }
+    DrawingElement<T>& front() const { return *elements.front(); }
+    DrawingElement<T>& back() const { return *elements.back(); }
 
     SceneIterator begin() const { return SceneIterator(elements.begin()); }
     SceneIterator end() const { return SceneIterator(elements.end()); }
 
-    void Draw(IDrawer<T>& drawer) override
+    void draw(IDrawer<T>& drawer) override
     {
         for (auto const& e: elements)
-            e->Draw(drawer);
+            e->draw(drawer);
     }
 
-    void DrawAnnotation(QPainter& painter, const QSize& surfaceSize) override
+    void drawAnnotation(QPainter& painter, const QSize& surfaceSize) override
     {
         for (auto const& e: elements)
-            e->DrawAnnotation(painter, surfaceSize);
+            e->drawAnnotation(painter, surfaceSize);
     }
 
-    float DistanceTo(const QPoint&) const override
+    float distanceTo(const QPoint&) const override
     {
         return 0.0f;
     }
 
-    void Highlight(SceneIterator iter)
+    void highlight(SceneIterator iter)
     {
         for (auto i = begin(); i != end(); ++i)
-            i->SetHighlighted(i == iter);
+            i->setHighlighted(i == iter);
     }
 
-    SceneIterator ClosestElement(const QPoint& point, float maxDist = 15 /*std::numeric_limits<float>::max()*/,
-                                 DrawingElementType type = DrawingElementType::None) const
+    SceneIterator closestElement(const QPoint& point, float maxDist = 15 /*std::numeric_limits<float>::max()*/,
+                                 drawingElementType type = drawingElementType::None) const
     {
         SceneIterator closest = end();
 
         float min = std::numeric_limits<float>::max();
         for (auto i = begin(); i != end(); ++i)
         {
-            if (type != DrawingElementType::None && type != i->ElementType())
+            if (type != drawingElementType::None && type != i->elementType())
                 continue;
 
-            float dist = i->DistanceTo(point);
+            float dist = i->distanceTo(point);
             if (dist < min && dist < maxDist)
             {
                 closest = i;
@@ -83,18 +83,18 @@ public:
         return closest;
     }
 
-    void HighlightClosestElement(const QPoint& point,
+    void highlightClosestElement(const QPoint& point,
                           float maxDist = 15 /*std::numeric_limits<float>::max()*/)
     {
-        Highlight(ClosestElement(point, maxDist));
+        highlight(closestElement(point, maxDist));
     }
 
-    SceneIterator FindHighLigted() const
+    SceneIterator findHighLighted() const
     {
-        return std::find_if(begin(), end(), [](const DrawingElement<T>& e) { return e.IsHighlighted(); });
+        return std::find_if(begin(), end(), [](const DrawingElement<T>& e) { return e.isHighlighted(); });
     }
 
-    void Accept(DrawingElementVisitor<T>& visitor) override { visitor.Visit(*this); }
+    void accept(DrawingElementVisitor<T>& visitor) override { visitor.visit(*this); }
 
 private:
     std::vector<std::unique_ptr<DrawingElement<T>>> elements;

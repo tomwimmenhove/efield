@@ -9,9 +9,9 @@ template<typename T>
 class DrawingElementVisitor
 {
 public:
-    virtual void Visit(SceneElement<T>& element) = 0;
-    virtual void Visit(NodeElement<T>& element) = 0;
-    virtual void Visit(LineElement<T>& element) = 0;
+    virtual void visit(SceneElement<T>& element) = 0;
+    virtual void visit(NodeElement<T>& element) = 0;
+    virtual void visit(LineElement<T>& element) = 0;
 };
 
 #endif // DRAWINGELEMENTVISITOR_H

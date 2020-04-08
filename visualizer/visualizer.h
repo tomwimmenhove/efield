@@ -12,11 +12,11 @@
 class Visualizer
 {
 public:
-    static QImage QImageFromFloatSurface(const FloatSurface& surface, const IValueStepper& stepper);
-    static void PaintGradientVectors(QPainter& painter, const GradientSurface& gradientSurface, int spacing);
+    static QImage imageFromFloatSurface(const FloatSurface& surface, const IValueStepper& stepper);
+    static void paintGradientVectors(QPainter& painter, const GradientSurface& gradientSurface, int spacing);
 
 private:
-    static QPixmap MakeArrow();
+    static QPixmap makeArrow();
 };
 
 #endif // VISUALIZER_H

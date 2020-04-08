@@ -22,26 +22,26 @@ MainVm::MainVm(QWidget* parent)
     std::unique_ptr<Project> newProject = std::make_unique<Project>(QSize(256, 256));
 #endif
 
-    InitNewProject(std::move(newProject));
-    CreateBorder(0);
+    initNewProject(std::move(newProject));
+    createBorder(0);
 
     simulatorThread.start();
 
 #ifdef QT_DEBUG
-    CreateScene();
+    createScene();
 #endif
 }
 
 MainVm::~MainVm()
 {
-    emit CancelSimulatorWorker();
+    emit cancelSimulatorWorker();
     simulatorThread.quit();
     simulatorThread.wait();
 }
 
-void MainVm::UpdateVisualization(bool useGradiant)
+void MainVm::updateVisualization(bool useGradiant)
 {
-    QSharedPointer<FloatSurface> clonedSurface = project->SharedSimulator()->CloneSurface();
+    QSharedPointer<FloatSurface> clonedSurface = project->sharedSimulator()->cloneSurface();
     if (useGradiant)
     {
         gradient = QSharedPointer<GradientSurface>(new GradientSurface(*clonedSurface));
@@ -53,12 +53,12 @@ void MainVm::UpdateVisualization(bool useGradiant)
         gradient = nullptr;
     }
 
-    emit VisualizationAvailable(surface->MinValue(), surface->MaxValue());
+    emit visualizationAvailable(surface->minValue(), surface->maxValue());
 }
 
-void MainVm::RequestVisualization(const SimpleValueStepper& stepper, const QSize& size)
+void MainVm::requestVisualization(const SimpleValueStepper& stepper, const QSize& size)
 {
-    QPixmap pixmapObject = QPixmap::fromImage(Visualizer::QImageFromFloatSurface(*surface, stepper));
+    QPixmap pixmapObject = QPixmap::fromImage(Visualizer::imageFromFloatSurface(*surface, stepper));
     QPixmap scaledPixmap = pixmapObject.scaled(size, Qt::KeepAspectRatio);//, Qt::SmoothTransformation);
 
     QPainter painter(&scaledPixmap);
@@ -68,28 +68,28 @@ void MainVm::RequestVisualization(const SimpleValueStepper& stepper, const QSize
         painter.setPen(Qt::black);
         //painter.setRenderHint(QPainter::Antialiasing);
 
-        Visualizer::PaintGradientVectors(painter, *gradient, 15);
+        Visualizer::paintGradientVectors(painter, *gradient, 15);
     }
 
     painter.setRenderHint(QPainter::Antialiasing);
-    project->SceneRef().DrawAnnotation(painter, surface->Size());
+    project->sceneRef().drawAnnotation(painter, surface->size());
 
     frames++;
     if (frames % 25 == 0)
     {
-        qDebug() << ((float) simulatorWorker->Iterations() * 1000.0 / runTimer.elapsed()) << " iterations/sec";
+        qDebug() << ((float) simulatorWorker->iterations() * 1000.0 / runTimer.elapsed()) << " iterations/sec";
     }
 
-    emit NewVisualization(scaledPixmap);
+    emit newVisualization(scaledPixmap);
 }
 
-void MainVm::UpdateStatusBarValue(const QPoint& pointerPosition)
+void MainVm::updateStatusBarValue(const QPoint& pointerPosition)
 {
     if (gradient)
     {
-        QVector2D v = gradient->XYValue(pointerPosition.x(), pointerPosition.y());
+        QVector2D v = gradient->value(pointerPosition.x(), pointerPosition.y());
 
-        emit NewStatusMessage(QString(tr("Value at [%1, %2]: %3 @%4° (Vector [%5, %6])"))
+        emit newStatusMessage(QString(tr("Value at [%1, %2]: %3 @%4° (Vector [%5, %6])"))
                               .arg(pointerPosition.x())
                               .arg(pointerPosition.y())
                               .arg(v.length())
@@ -99,20 +99,20 @@ void MainVm::UpdateStatusBarValue(const QPoint& pointerPosition)
     }
     else
     {
-        float value = surface->XYValue(pointerPosition.x(), pointerPosition.y());
-        emit NewStatusMessage(QString(tr("Value at [%1, %2]: %3"))
+        float value = surface->value(pointerPosition.x(), pointerPosition.y());
+        emit newStatusMessage(QString(tr("Value at [%1, %2]: %3"))
                               .arg(pointerPosition.x())
                               .arg(pointerPosition.y())
                               .arg(value));
     }
 }
 
-void MainVm::ActivateOperation(const QPoint& pointerPosition)
+void MainVm::activateOperation(const QPoint& pointerPosition)
 {
-    SceneElement<float>& scene = project->SceneRef();
+    SceneElement<float>& scene = project->sceneRef();
 
-    auto closest = scene.ClosestElement(pointerPosition);
-    auto highLighted = scene.FindHighLigted();
+    auto closest = scene.closestElement(pointerPosition);
+    auto highLighted = scene.findHighLighted();
 
     MouseOperationStatus oldState = mouseOperationState;
 
@@ -121,32 +121,32 @@ void MainVm::ActivateOperation(const QPoint& pointerPosition)
         case MouseOperationStatus::Normal:
         {
             if (highLighted != scene.end() && closest == highLighted &&
-                highLighted->ElementType() == DrawingElementType::Node)
+                highLighted->elementType() == drawingElementType::Node)
             {
                 mouseOperationState = MouseOperationStatus::DragNode;
                 NodeElement<float>& node = static_cast<NodeElement<float>&>(*highLighted);
-                nodeSavedPos = node.Node();
+                nodeSavedPos = node.node();
                 break;
             }
 
-            scene.Highlight(closest);
+            scene.highlight(closest);
             break;
         }
         case MouseOperationStatus::DragNode:
-            scene.Highlight(scene.end());
+            scene.highlight(scene.end());
             mouseOperationState = MouseOperationStatus::Normal;
             break;
         case MouseOperationStatus::NewNode:
-            PlaceNewNodeElement(pointerPosition);
+            placeNewNodeElement(pointerPosition);
             break;
         case MouseOperationStatus::NewLineP1:
             if (closest != scene.end() && highLighted != scene.end())
             {
-                Q_ASSERT(highLighted->ElementType() == DrawingElementType::Node);
+                Q_ASSERT(highLighted->elementType() == drawingElementType::Node);
                 NodeElement<float>& startNode = static_cast<NodeElement<float>&>(*highLighted);
-                SharedNode sharedStartNode = startNode.Node();
+                SharedNode sharedStartNode = startNode.node();
                 SharedNode sharedEndNode = SharedNode(pointerPosition);
-                scene.Add(std::move(LineElement<float>::UniqueElement(sharedStartNode, sharedEndNode, 0)));
+                scene.add(std::move(LineElement<float>::UniqueElement(sharedStartNode, sharedEndNode, 0)));
 
                 mouseOperationState = MouseOperationStatus::NewLineP2;
                 break;
@@ -157,33 +157,33 @@ void MainVm::ActivateOperation(const QPoint& pointerPosition)
             if (highLighted != scene.end())
             {
                 /* Set the definitive end point for the new line segment */
-                Q_ASSERT(highLighted->ElementType() == DrawingElementType::Node);
+                Q_ASSERT(highLighted->elementType() == drawingElementType::Node);
                 NodeElement<float>& endNode = static_cast<NodeElement<float>&>(*highLighted);
-                Q_ASSERT(scene.Back().ElementType() == DrawingElementType::Line);
-                LineElement<float>& newLine = static_cast<LineElement<float>&>(scene.Back());
+                Q_ASSERT(scene.back().elementType() == drawingElementType::Line);
+                LineElement<float>& newLine = static_cast<LineElement<float>&>(scene.back());
 
-                if (endNode.Node()->Id() != newLine.P1()->Id())
+                if (endNode.node()->identifier() != newLine.point1()->identifier())
                 {
-                    newLine.SetP2(endNode.Node());
+                    newLine.setPoint2(endNode.node());
                     mouseOperationState = MouseOperationStatus::NewLineP1;
                 }
             }
-            scene.Highlight(scene.end());
+            scene.highlight(scene.end());
             break;
         }
     }
 
     if (oldState != mouseOperationState)
-        emit MouseOperationStateChanged(mouseOperationState);
+        emit mouseOperationStateChanged(mouseOperationState);
 
-    emit VisualizationAvailable(surface->MinValue(), surface->MaxValue());
+    emit visualizationAvailable(surface->minValue(), surface->maxValue());
 }
 
-void MainVm::CancelOperation()
+void MainVm::cancelOperation()
 {
-    SceneElement<float>& scene = project->SceneRef();
+    SceneElement<float>& scene = project->sceneRef();
 
-    auto highLighted = scene.FindHighLigted();
+    auto highLighted = scene.findHighLighted();
 
     MouseOperationStatus oldState = mouseOperationState;
 
@@ -193,85 +193,85 @@ void MainVm::CancelOperation()
             return;
         case MouseOperationStatus::DragNode:
         {
-            Q_ASSERT(highLighted->ElementType() == DrawingElementType::Node);
+            Q_ASSERT(highLighted->elementType() == drawingElementType::Node);
             NodeElement<float>& node = static_cast<NodeElement<float>&>(*highLighted);
-            node.Node().SetPosition(nodeSavedPos);
+            node.node().setPoint(nodeSavedPos);
             mouseOperationState = MouseOperationStatus::Normal;
             break;
         }
         case MouseOperationStatus::NewNode:
-            scene.Highlight(scene.end());
+            scene.highlight(scene.end());
             if (highLighted != scene.end())
-                scene.Remove(highLighted);
+                scene.remove(highLighted);
             mouseOperationState = MouseOperationStatus::Normal;
             break;
         case MouseOperationStatus::NewLineP1:
-            scene.Highlight(scene.end());
+            scene.highlight(scene.end());
             mouseOperationState = MouseOperationStatus::Normal;
             break;
         case MouseOperationStatus::NewLineP2:
-            Q_ASSERT(scene.Back().ElementType() == DrawingElementType::Line);
-            scene.PopBack();
+            Q_ASSERT(scene.back().elementType() == drawingElementType::Line);
+            scene.pop();
             mouseOperationState = MouseOperationStatus::Normal;
-            scene.Highlight(scene.end());
+            scene.highlight(scene.end());
             break;
     }
 
     if (oldState != mouseOperationState)
-        emit MouseOperationStateChanged(mouseOperationState);
+        emit mouseOperationStateChanged(mouseOperationState);
 
-    emit VisualizationAvailable(surface->MinValue(), surface->MaxValue());
+    emit visualizationAvailable(surface->minValue(), surface->maxValue());
 }
 
 
-void MainVm::MousePressedOnPixmap(const QPoint& mousePos, Qt::MouseButtons buttons, const QSize& labelSize)
+void MainVm::mousePressedOnPixmap(const QPoint& mousePos, Qt::MouseButtons buttons, const QSize& labelSize)
 {
     if (!surface)
         return;
 
-    QPoint translated = Geometry::TranslatePoint(mousePos, labelSize, surface->Size(), true);
-    if (translated.x() < 0 || translated.x() >= surface->Width() || translated.y() < 0 || translated.y() >= surface->Height())
+    QPoint translated = Geometry::translatePoint(mousePos, labelSize, surface->size(), true);
+    if (translated.x() < 0 || translated.x() >= surface->width() || translated.y() < 0 || translated.y() >= surface->height())
     {
-        emit NewStatusMessage(QString(tr("[%1, %2]")).arg(translated.x()).arg(translated.y()));
+        emit newStatusMessage(QString(tr("[%1, %2]")).arg(translated.x()).arg(translated.y()));
         return;
     }
 
     if (buttons == Qt::LeftButton)
-        ActivateOperation(translated);
+        activateOperation(translated);
     else if (buttons & Qt::RightButton)
-        CancelOperation();
+        cancelOperation();
 }
 
-void MainVm::MouseMovedOnPixmap(const QPoint& mousePos, const QSize& labelSize)
+void MainVm::mouseMovedOnPixmap(const QPoint& mousePos, const QSize& labelSize)
 {
     if (!surface)
         return;
 
-    QPoint translated = Geometry::TranslatePoint(mousePos, labelSize, surface->Size(), true);
-    if (translated.x() < 0 || translated.x() >= surface->Width() || translated.y() < 0 || translated.y() >= surface->Height())
+    QPoint translated = Geometry::translatePoint(mousePos, labelSize, surface->size(), true);
+    if (translated.x() < 0 || translated.x() >= surface->width() || translated.y() < 0 || translated.y() >= surface->height())
     {
-        emit NewStatusMessage(QString(tr("[%1, %2]")).arg(translated.x()).arg(translated.y()));
+        emit newStatusMessage(QString(tr("[%1, %2]")).arg(translated.x()).arg(translated.y()));
         return;
     }
 
-    SceneElement<float>& scene = project->SceneRef();
-    auto closest = scene.ClosestElement(translated, 15, DrawingElementType::Node);
+    SceneElement<float>& scene = project->sceneRef();
+    auto closest = scene.closestElement(translated, 15, drawingElementType::Node);
 
     switch(mouseOperationState)
     {
         case MouseOperationStatus::Normal:
         {
-            UpdateStatusBarValue(translated);
+            updateStatusBarValue(translated);
             return;
         }
         case MouseOperationStatus::DragNode:
         case MouseOperationStatus::NewNode:
         {
-            auto highLighted = scene.FindHighLigted();
+            auto highLighted = scene.findHighLighted();
             Q_ASSERT(highLighted != scene.end());
-            Q_ASSERT(highLighted->ElementType() == DrawingElementType::Node);
+            Q_ASSERT(highLighted->elementType() == drawingElementType::Node);
             NodeElement<float>& node = static_cast<NodeElement<float>&>(*highLighted);
-            node.Node().SetPosition(translated);
+            node.node().setPoint(translated);
             break;
         }
         case MouseOperationStatus::NewLineP1:
@@ -279,13 +279,13 @@ void MainVm::MouseMovedOnPixmap(const QPoint& mousePos, const QSize& labelSize)
             /* Highlight close nodes */
             if (closest == scene.end())
             {
-                scene.Highlight(scene.end());
+                scene.highlight(scene.end());
                 break;
             }
 
-            if (closest->ElementType() == DrawingElementType::Node)
+            if (closest->elementType() == drawingElementType::Node)
             {
-                scene.Highlight(closest);
+                scene.highlight(closest);
                 break;
             }
 
@@ -293,24 +293,24 @@ void MainVm::MouseMovedOnPixmap(const QPoint& mousePos, const QSize& labelSize)
         }
         case MouseOperationStatus::NewLineP2:
         {
-            Q_ASSERT(scene.Back().ElementType() == DrawingElementType::Line);
-            LineElement<float>& newLine = static_cast<LineElement<float>&>(scene.Back());
+            Q_ASSERT(scene.back().elementType() == drawingElementType::Line);
+            LineElement<float>& newLine = static_cast<LineElement<float>&>(scene.back());
 
             if (closest == scene.end())
-                scene.Highlight(scene.end());
-            else if (closest->ElementType() == DrawingElementType::Node &&
-                     static_cast<NodeElement<float>&>(*closest).Node()->Id() != newLine.P1()->Id())
-                scene.Highlight(closest);
+                scene.highlight(scene.end());
+            else if (closest->elementType() == drawingElementType::Node &&
+                     static_cast<NodeElement<float>&>(*closest).node()->identifier() != newLine.point1()->identifier())
+                scene.highlight(closest);
 
-            newLine.P2().SetPosition(translated);
+            newLine.point2().setPoint(translated);
             break;
         }
     }
 
-    emit VisualizationAvailable(surface->MinValue(), surface->MaxValue());
+    emit visualizationAvailable(surface->minValue(), surface->maxValue());
 }
 
-void MainVm::MouseReleasedFromPixmap(const QPoint&, Qt::MouseButtons buttons, const QSize&)
+void MainVm::mouseReleasedFromPixmap(const QPoint&, Qt::MouseButtons buttons, const QSize&)
 {
     if (buttons == Qt::RightButton)
         return;
@@ -321,7 +321,7 @@ void MainVm::MouseReleasedFromPixmap(const QPoint&, Qt::MouseButtons buttons, co
             break;
         case MouseOperationStatus::DragNode:
             mouseOperationState = MouseOperationStatus::Normal;
-            emit MouseOperationStateChanged(mouseOperationState);
+            emit mouseOperationStateChanged(mouseOperationState);
             break;
         case MouseOperationStatus::NewNode:
             break;
@@ -332,49 +332,49 @@ void MainVm::MouseReleasedFromPixmap(const QPoint&, Qt::MouseButtons buttons, co
     }
 }
 
-void MainVm::MouseDoubleClickedOnPixmap(const QPoint& mousePos, Qt::MouseButtons, const QSize& labelSize)
+void MainVm::mouseDoubleClickedOnPixmap(const QPoint& mousePos, Qt::MouseButtons, const QSize& labelSize)
 {
     if (!surface)
         return;
 
-    QPoint translated = Geometry::TranslatePoint(mousePos, labelSize, surface->Size(), true);
-    if (translated.x() < 0 || translated.x() >= surface->Width() || translated.y() < 0 || translated.y() >= surface->Height())
+    QPoint translated = Geometry::translatePoint(mousePos, labelSize, surface->size(), true);
+    if (translated.x() < 0 || translated.x() >= surface->width() || translated.y() < 0 || translated.y() >= surface->height())
     {
-        emit NewStatusMessage(QString(tr("[%1, %2]")).arg(translated.x()).arg(translated.y()));
+        emit newStatusMessage(QString(tr("[%1, %2]")).arg(translated.x()).arg(translated.y()));
         return;
     }
 
-    SceneElement<float>& scene = project->SceneRef();
-    auto closest = scene.ClosestElement(translated);
+    SceneElement<float>& scene = project->sceneRef();
+    auto closest = scene.closestElement(translated);
     if (closest == scene.end())
         return;
 
-    switch (closest->ElementType())
+    switch (closest->elementType())
     {
-        case DrawingElementType::None:
-        case DrawingElementType::Scene:
+        case drawingElementType::None:
+        case drawingElementType::Scene:
             break;
-        case DrawingElementType::Node:
-            EditNode(static_cast<NodeElement<float>&>(*closest));
+        case drawingElementType::Node:
+            editNode(static_cast<NodeElement<float>&>(*closest));
             break;
-        case DrawingElementType::Line:
-            EditLine(static_cast<LineElement<float>&>(*closest));
+        case drawingElementType::Line:
+            editLine(static_cast<LineElement<float>&>(*closest));
             break;
     }
 }
 
-void MainVm::NewSimulation()
+void MainVm::eewSimulation()
 {
     PointInputDialog d("Node coordinates", QPoint(256, 256), QPoint(1, 1), QPoint(1024, 1024), parentWidget);
     if (d.exec() != QDialog::Accepted)
         return;
 
-    InitNewProject(std::make_unique<Project>(d.Size()));
+    initNewProject(std::make_unique<Project>(d.size()));
 
-    CreateBorder(0);
+    createBorder(0);
 }
 
-void MainVm::ProjectOpen()
+void MainVm::projectOpen()
 {
     QString fileName = QFileDialog::getOpenFileName(parentWidget, tr("Open Project"), "",
                                                     tr("E-Field Sim files (*.efs)"));
@@ -384,7 +384,7 @@ void MainVm::ProjectOpen()
         QFile file(fileName);
 
         if(file.open(QIODevice::ReadOnly | QIODevice::Text))
-            InitNewProject(std::make_unique<Project>(file.readAll()));
+            initNewProject(std::make_unique<Project>(file.readAll()));
         else
             QMessageBox::critical(parentWidget, "Unable to load",
                                   QString("Unable to load %1: %2")
@@ -393,7 +393,7 @@ void MainVm::ProjectOpen()
     }
 }
 
-void MainVm::ProjectSaveAs()
+void MainVm::projectSaveAs()
 {
     QString fileName = QFileDialog::getSaveFileName(parentWidget, tr("Open Project"), "",
                                                     tr("E-Field Sim files (*.efs)"));
@@ -403,7 +403,7 @@ void MainVm::ProjectSaveAs()
         QFile file(fileName);
 
         if(file.open(QIODevice::WriteOnly | QIODevice::Truncate | QIODevice::Text))
-            file.write(project->ToXmlBytes());
+            file.write(project->toXmlBytes());
         else
             QMessageBox::critical(parentWidget, "Unable to save",
                                   QString("Unable to save %1: %2")
@@ -411,152 +411,152 @@ void MainVm::ProjectSaveAs()
     }
 }
 
-void MainVm::DeleteSelectedElement()
+void MainVm::deleteSelectedElement()
 {
     if (!surface)
         return;
 
-    SceneElement<float>& scene = project->SceneRef();
+    SceneElement<float>& scene = project->sceneRef();
 
-    auto highLighted = scene.FindHighLigted();
+    auto highLighted = scene.findHighLighted();
     if (highLighted == scene.end())
         return;
 
-    if (highLighted->ElementType() == DrawingElementType::Node)
+    if (highLighted->elementType() == drawingElementType::Node)
     {
         NodeElement<float>& node = static_cast<NodeElement<float>&>(*highLighted);
 
         // Can't delete nodes that are used by other elements */
-        if (node.Node()->RefCount() > 0)
+        if (node.node()->refCounter() > 0)
             return;
     }
 
-    scene.Remove(highLighted);
+    scene.remove(highLighted);
 
-    emit VisualizationAvailable(surface->MinValue(), surface->MaxValue());
+    emit visualizationAvailable(surface->minValue(), surface->maxValue());
 }
 
-void MainVm::EditNode(NodeElement<float>& node)
+void MainVm::editNode(NodeElement<float>& node)
 {
-    SharedNode sharedNode = node.Node();
+    SharedNode sharedNode = node.node();
 
-    PointInputDialog d("Node coordinates", sharedNode, QPoint(0, 0), QPoint(surface->Width() - 1, surface->Height() - 1), parentWidget);
+    PointInputDialog d("Node coordinates", sharedNode, QPoint(0, 0), QPoint(surface->width() - 1, surface->height() - 1), parentWidget);
     if (d.exec() != QDialog::Accepted)
         return;
 
-    sharedNode.SetPosition(d.Point());
+    sharedNode.setPoint(d.point());
 
-    emit VisualizationAvailable(surface->MinValue(), surface->MaxValue());
+    emit visualizationAvailable(surface->minValue(), surface->maxValue());
 }
 
-void MainVm::EditLine(LineElement<float>& line)
+void MainVm::editLine(LineElement<float>& line)
 {
     bool ok;
-    int def = line.Value();
+    int def = line.value();
 
     int volt = QInputDialog::getInt(parentWidget, tr("Edit line"),
                                     tr("Voltage: "),  def, -2147483647, 2147483647, 1, &ok);
     if (ok)
-        line.SetValue(volt);
+        line.setValue(volt);
 }
 
-void MainVm::EditSelectedElement()
+void MainVm::editSelectedElement()
 {
     if (!surface || mouseOperationState != MouseOperationStatus::Normal)
         return;
 
-    SceneElement<float>& scene = project->SceneRef();
+    SceneElement<float>& scene = project->sceneRef();
 
-    auto highLighted = scene.FindHighLigted();
+    auto highLighted = scene.findHighLighted();
     if (highLighted == scene.end())
         return;
 
-    switch (highLighted->ElementType())
+    switch (highLighted->elementType())
     {
-        case DrawingElementType::None:
-        case DrawingElementType::Scene:
+        case drawingElementType::None:
+        case drawingElementType::Scene:
             break;
-        case DrawingElementType::Node:
-            EditNode(static_cast<NodeElement<float>&>(*highLighted));
+        case drawingElementType::Node:
+            editNode(static_cast<NodeElement<float>&>(*highLighted));
             break;
-        case DrawingElementType::Line:
-            EditLine(static_cast<LineElement<float>&>(*highLighted));
+        case drawingElementType::Line:
+            editLine(static_cast<LineElement<float>&>(*highLighted));
             break;
     }
 }
 
-void MainVm::PlaceNewNodeElement(const QPoint& pointerPosition)
+void MainVm::placeNewNodeElement(const QPoint& pointerPosition)
 {
-    SceneElement<float>& scene = project->SceneRef();
-    scene.Highlight(scene.end());
+    SceneElement<float>& scene = project->sceneRef();
+    scene.highlight(scene.end());
 
-    std::unique_ptr<DrawingElement<float>> newNode = NodeElement<float>::UniqueElement(SharedNode(pointerPosition));
-    newNode->SetHighlighted(true);
-    scene.Add(std::move(newNode));
+    std::unique_ptr<DrawingElement<float>> newNode = NodeElement<float>::uniqueElement(SharedNode(pointerPosition));
+    newNode->setHighlighted(true);
+    scene.add(std::move(newNode));
 }
 
-void MainVm::NewNodeElement(const QPoint& mousePos, const QSize& labelSize)
+void MainVm::newNodeElement(const QPoint& mousePos, const QSize& labelSize)
 {
     if (!surface)
         return;
 
-    CancelOperation();
+    cancelOperation();
 
-    QPoint translated = Geometry::TranslatePoint(mousePos, labelSize, surface->Size(), true);
+    QPoint translated = Geometry::translatePoint(mousePos, labelSize, surface->size(), true);
 
-    PlaceNewNodeElement(translated);
+    placeNewNodeElement(translated);
 
     mouseOperationState = MouseOperationStatus::NewNode;
-    emit MouseOperationStateChanged(mouseOperationState);
+    emit mouseOperationStateChanged(mouseOperationState);
 }
 
-void MainVm::NewLineElement(const QPoint&, const QSize&)
+void MainVm::newLineElement(const QPoint&, const QSize&)
 {
     if (!surface)
         return;
 
-    CancelOperation();
+    cancelOperation();
 
     mouseOperationState = MouseOperationStatus::NewLineP1;
-    emit MouseOperationStateChanged(mouseOperationState);
+    emit mouseOperationStateChanged(mouseOperationState);
 }
 
-void MainVm::StartSimulation()
+void MainVm::startSimulation()
 {
     if (started)
         return;
 
-    emit RunSimulatorWorker();
+    emit runSimulatorWorker();
 
     runTimer.restart();
 
     started = true;
 }
 
-void MainVm::StopSimulation()
+void MainVm::stopSimulation()
 {
     if (!started)
         return;
 
-    emit CancelSimulatorWorker();
+    emit cancelSimulatorWorker();
 
     started = false;
 }
 
-void MainVm::InitNewProject(std::unique_ptr<Project>&& newProject)
+void MainVm::initNewProject(std::unique_ptr<Project>&& newProject)
 {
     if (simulatorWorker)
         simulatorWorker->deleteLater();
 
-    simulatorWorker = new SimulatorWorker(newProject->SharedSimulator());
+    simulatorWorker = new SimulatorWorker(newProject->sharedSimulator());
 
 #ifdef _OPENMP
-    simulatorWorker->SetNumThreads(numThreads);
+    simulatorWorker->setNumThreads(numThreads);
 #endif
 
     connect(&simulatorThread, &QThread::finished, simulatorWorker, &SimulatorWorker::deleteLater);
-    connect(this, &MainVm::RunSimulatorWorker, simulatorWorker, &SimulatorWorker::Run);
-    connect(this, &MainVm::CancelSimulatorWorker, simulatorWorker, &SimulatorWorker::Cancel, Qt::DirectConnection);
+    connect(this, &MainVm::runSimulatorWorker, simulatorWorker, &SimulatorWorker::run);
+    connect(this, &MainVm::cancelSimulatorWorker, simulatorWorker, &SimulatorWorker::stop, Qt::DirectConnection);
 
     simulatorWorker->moveToThread(&simulatorThread);
 
@@ -564,9 +564,9 @@ void MainVm::InitNewProject(std::unique_ptr<Project>&& newProject)
 }
 
 #ifdef QT_DEBUG
-void MainVm::CreateScene()
+void MainVm::createScene()
 {
-    SceneElement<float>& scene = project->SceneRef();
+    SceneElement<float>& scene = project->sceneRef();
 
     SharedNode anodeLeft(100, 500);
     SharedNode anodeRight(500, 500);
@@ -574,34 +574,34 @@ void MainVm::CreateScene()
     SharedNode cathodeLeft(100, 100);
     SharedNode cathodeRight(500, 100);
 
-    scene.Add(NodeElement<float>::UniqueElement(anodeRight));
-    scene.Add(NodeElement<float>::UniqueElement(anodeLeft));
-    scene.Add(NodeElement<float>::UniqueElement(cathodeLeft));
-    scene.Add(NodeElement<float>::UniqueElement(cathodeRight));
+    scene.add(NodeElement<float>::uniqueElement(anodeRight));
+    scene.add(NodeElement<float>::uniqueElement(anodeLeft));
+    scene.add(NodeElement<float>::uniqueElement(cathodeLeft));
+    scene.add(NodeElement<float>::uniqueElement(cathodeRight));
 
-    scene.Add(LineElement<float>::UniqueElement(anodeLeft, anodeRight, 1));
-    scene.Add(LineElement<float>::UniqueElement(cathodeLeft, cathodeRight, -1));
+    scene.add(LineElement<float>::UniqueElement(anodeLeft, anodeRight, 1));
+    scene.add(LineElement<float>::UniqueElement(cathodeLeft, cathodeRight, -1));
 }
 #endif
 
-void MainVm::CreateBorder(float voltage)
+void MainVm::createBorder(float voltage)
 {
-    SceneElement<float>& scene = project->SceneRef();
-    QSize size = project->SharedSimulator()->Size();
+    SceneElement<float>& scene = project->sceneRef();
+    QSize size = project->sharedSimulator()->size();
 
     SharedNode topLeft(0, size.width() - 1);
     SharedNode topRight(size.height() - 1, size.width() - 1);
     SharedNode bottomLeft(0, 0);
     SharedNode bottomRight(size.height(), 0);
 
-    scene.Add(NodeElement<float>::UniqueElement(topLeft));
-    scene.Add(NodeElement<float>::UniqueElement(topRight));
-    scene.Add(NodeElement<float>::UniqueElement(bottomLeft));
-    scene.Add(NodeElement<float>::UniqueElement(bottomRight));
+    scene.add(NodeElement<float>::uniqueElement(topLeft));
+    scene.add(NodeElement<float>::uniqueElement(topRight));
+    scene.add(NodeElement<float>::uniqueElement(bottomLeft));
+    scene.add(NodeElement<float>::uniqueElement(bottomRight));
 
-    scene.Add(LineElement<float>::UniqueElement(topLeft, topRight, voltage));
-    scene.Add(LineElement<float>::UniqueElement(bottomLeft, bottomRight, voltage));
-    scene.Add(LineElement<float>::UniqueElement(topLeft, bottomLeft, voltage));
-    scene.Add(LineElement<float>::UniqueElement(topRight, bottomRight, voltage));
+    scene.add(LineElement<float>::UniqueElement(topLeft, topRight, voltage));
+    scene.add(LineElement<float>::UniqueElement(bottomLeft, bottomRight, voltage));
+    scene.add(LineElement<float>::UniqueElement(topLeft, bottomLeft, voltage));
+    scene.add(LineElement<float>::UniqueElement(topRight, bottomRight, voltage));
 }
 

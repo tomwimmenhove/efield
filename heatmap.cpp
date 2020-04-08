@@ -2,7 +2,7 @@
 
 #include "visualizer/heatmap.h"
 
-QRgb HeatMap::GetColor(float value, int steps)
+QRgb HeatMap::getColor(float value, int steps)
 {
     if (steps)
     {

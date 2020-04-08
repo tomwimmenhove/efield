@@ -14,11 +14,11 @@ class GradientSurface : public Surface<QVector2D>
 public:
     GradientSurface(const FloatSurface& floatSurface);
 
-    float MaxLength() const;
-    float MinLength() const;
+    float maxLength() const;
+    float minLength() const;
 
 private:
-    QVector2D GetVector(const FloatSurface& floatSurface, int x, int y) const;
+    QVector2D getVector(const FloatSurface& floatSurface, int x, int y) const;
 };
 
 #endif // GRADIENTSURFACE_H

@@ -21,11 +21,12 @@ public:
             values[i] = initValue;
     }
 
-    inline T& XYValue(int x, int y) { return values[x + y * w]; }
-    inline T XYCValue(int x, int y) const { return values[x + y * w]; }
-    inline int Height() const { return h; }
-    inline int Width() const { return w; }
-    inline QSize Size() const { return QSize(w, h); }
+    inline T value(int x, int y) const { return values[x + y * w]; }
+    inline void setValue(int x, int y, T value) { values[x + y * w] = value; }
+
+    inline int height() const { return h; }
+    inline int width() const { return w; }
+    inline QSize size() const { return QSize(w, h); }
 
 protected:
     inline Surface(int width, int height) : w(width), h(height), values(width * height) { }

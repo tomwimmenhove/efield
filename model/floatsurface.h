@@ -11,8 +11,8 @@ public:
     inline FloatSurface(int width, int height, float initValue) : Surface<float>(width, height, initValue) { }
     FloatSurface(const GradientSurface& gradientSurface);
 
-    float MaxValue() const;
-    float MinValue() const;
+    float maxValue() const;
+    float minValue() const;
 
 private:
     inline FloatSurface(int width, int height) : Surface<float>(width, height) { }

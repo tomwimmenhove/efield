@@ -22,12 +22,12 @@ public:
     void resizeEvent(QResizeEvent* ev);
 
 signals:
-    void Mouse_Moved(const QPoint& pos);
-    void Mouse_Pressed(const QPoint& pos, Qt::MouseButtons buttons);
-    void Mouse_Released(const QPoint& pos, Qt::MouseButtons buttons);
-    void Mouse_DoubleClicked(const QPoint& pos, Qt::MouseButtons buttons);
-    void Mouse_Left();
-    void Resized(const QSize& size);
+    void mouse_Moved(const QPoint& pos);
+    void mouse_Pressed(const QPoint& pos, Qt::MouseButtons buttons);
+    void mouse_Released(const QPoint& pos, Qt::MouseButtons buttons);
+    void mouse_DoubleClicked(const QPoint& pos, Qt::MouseButtons buttons);
+    void mouse_Left();
+    void resized(const QSize& size);
 };
 
 #endif // MOUSEEVENTLABEL_H
