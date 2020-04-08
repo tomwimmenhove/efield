@@ -146,7 +146,7 @@ void MainVm::activateOperation(const QPoint& pointerPosition)
                 NodeElement<float>& startNode = static_cast<NodeElement<float>&>(*highLighted);
                 SharedNode sharedStartNode = startNode.node();
                 SharedNode sharedEndNode = SharedNode(pointerPosition);
-                scene.add(std::move(LineElement<float>::UniqueElement(sharedStartNode, sharedEndNode, 0)));
+                scene.add(std::move(LineElement<float>::uniqueElement(sharedStartNode, sharedEndNode, 0)));
 
                 mouseOperationState = MouseOperationStatus::NewLineP2;
                 break;
@@ -579,8 +579,8 @@ void MainVm::createScene()
     scene.add(NodeElement<float>::uniqueElement(cathodeLeft));
     scene.add(NodeElement<float>::uniqueElement(cathodeRight));
 
-    scene.add(LineElement<float>::UniqueElement(anodeLeft, anodeRight, 1));
-    scene.add(LineElement<float>::UniqueElement(cathodeLeft, cathodeRight, -1));
+    scene.add(LineElement<float>::uniqueElement(anodeLeft, anodeRight, 1));
+    scene.add(LineElement<float>::uniqueElement(cathodeLeft, cathodeRight, -1));
 }
 #endif
 
@@ -599,9 +599,9 @@ void MainVm::createBorder(float voltage)
     scene.add(NodeElement<float>::uniqueElement(bottomLeft));
     scene.add(NodeElement<float>::uniqueElement(bottomRight));
 
-    scene.add(LineElement<float>::UniqueElement(topLeft, topRight, voltage));
-    scene.add(LineElement<float>::UniqueElement(bottomLeft, bottomRight, voltage));
-    scene.add(LineElement<float>::UniqueElement(topLeft, bottomLeft, voltage));
-    scene.add(LineElement<float>::UniqueElement(topRight, bottomRight, voltage));
+    scene.add(LineElement<float>::uniqueElement(topLeft, topRight, voltage));
+    scene.add(LineElement<float>::uniqueElement(bottomLeft, bottomRight, voltage));
+    scene.add(LineElement<float>::uniqueElement(topLeft, bottomLeft, voltage));
+    scene.add(LineElement<float>::uniqueElement(topRight, bottomRight, voltage));
 }
 

@@ -1,7 +1,7 @@
 #ifndef DEREFITERATOR_H
 #define DEREFITERATOR_H
 
-template<typename T>
+template<typename T, typename U>
 class DerefIterator
 {
 public:
@@ -10,8 +10,8 @@ public:
     { }
 
     using difference_type = typename T::difference_type;
-    using value_type = typename T::value_type::element_type;
     using iterator_category = typename T::iterator_category;
+    using value_type = U;
     using pointer = value_type*;
     using reference = value_type&;
 
