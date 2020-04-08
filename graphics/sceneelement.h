@@ -38,8 +38,6 @@ public:
     SceneIterator begin() const { return SceneIterator(elements.begin()); }
     SceneIterator end() const { return SceneIterator(elements.end()); }
 
-    const std::vector<std::unique_ptr<DrawingElement<T>>>& Elements() const { return elements; }
-
     void Draw(IDrawer<T>& drawer) override
     {
         for (auto const& e: elements)
@@ -61,12 +59,6 @@ public:
     {
         for (auto i = begin(); i != end(); ++i)
             i->SetHighlighted(i == iter);
-    }
-
-    void Highlight(const DrawingElement<T>& element)
-    {
-        for (auto const& e: elements)
-            e->SetHighlighted(e.get() == &element);
     }
 
     SceneIterator ClosestElement(const QPoint& point, float maxDist = 15 /*std::numeric_limits<float>::max()*/,

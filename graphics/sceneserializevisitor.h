@@ -17,10 +17,10 @@ public:
 
     void Visit(SceneElement<T>& element) override
     {
-        for (const auto& e: element.Elements())
+        for (auto& e: element)
         {
             SceneSerializeVisitor visitor(domElement, domDocument);
-            e->Accept(visitor);
+            e.Accept(visitor);
         }
     }
 
