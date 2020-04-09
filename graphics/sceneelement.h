@@ -16,27 +16,22 @@
 template<typename T>
 class SceneElement : public DrawingElement<T>
 {
-    using elementsIterator = typename std::vector<std::unique_ptr<DrawingElement<T>>>::const_iterator;
-
 public:
-    struct SceneIterator : public DerefIterator<elementsIterator, DrawingElement<T>>
-    {
-        SceneIterator(elementsIterator i) : DerefIterator<elementsIterator, DrawingElement<T>>(i) { }
-    };
+    using iterator = DerefIterator<typename std::vector<std::unique_ptr<DrawingElement<T>>>::const_iterator, DrawingElement<T>>;
 
     SceneElement() { }
 
     virtual drawingElementType elementType() const override { return drawingElementType::Scene; }
 
     void add(std::unique_ptr<DrawingElement<T>>&& element) { elements.push_back(std::move(element)); }
-    void remove(SceneIterator iter) { elements.erase(iter.innerIterator()); }
+    void remove(iterator iter) { elements.erase(iter.innerIterator()); }
     void pop() { elements.pop_back(); }
     void clear() { elements.clear(); }
     DrawingElement<T>& front() const { return *elements.front(); }
     DrawingElement<T>& back() const { return *elements.back(); }
 
-    SceneIterator begin() const { return SceneIterator(elements.begin()); }
-    SceneIterator end() const { return SceneIterator(elements.end()); }
+    iterator begin() const { return iterator(elements.begin()); }
+    iterator end() const { return iterator(elements.end()); }
 
     void draw(IDrawer<T>& drawer) override
     {
@@ -55,16 +50,16 @@ public:
         return 0.0f;
     }
 
-    void highlight(SceneIterator iter)
+    void highlight(iterator iter)
     {
         for (auto i = begin(); i != end(); ++i)
             i->setHighlighted(i == iter);
     }
 
-    SceneIterator closestElement(const QPoint& point, float maxDist = 15 /*std::numeric_limits<float>::max()*/,
+    iterator closestElement(const QPoint& point, float maxDist = 15 /*std::numeric_limits<float>::max()*/,
                                  drawingElementType type = drawingElementType::None) const
     {
-        SceneIterator closest = end();
+        iterator closest = end();
 
         float min = std::numeric_limits<float>::max();
         for (auto i = begin(); i != end(); ++i)
@@ -89,7 +84,7 @@ public:
         highlight(closestElement(point, maxDist));
     }
 
-    SceneIterator findHighLighted() const
+    iterator findHighLighted() const
     {
         return std::find_if(begin(), end(), [](const DrawingElement<T>& e) { return e.isHighlighted(); });
     }
