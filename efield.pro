@@ -7,7 +7,7 @@
 QT       += core gui xml
 CONFIG += c++14
 
-QMAKE_CXXFLAGS += -fopenmp
+QMAKE_CXXFLAGS += -fopenmp -Wall -Werror
 QMAKE_LFLAGS += -fopenmp -lstdc++
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
