@@ -15,15 +15,7 @@
 #include "graphics/sceneelement.h"
 #include "graphics/nodeelement.h"
 #include "graphics/lineelement.h"
-
-enum class MouseOperationStatus
-{
-    Normal,
-    DragNode,
-    NewNode,
-    NewLineP1,
-    NewLineP2,
-};
+#include "mouseoperation.h"
 
 class MainVm : public QObject
 {
@@ -60,14 +52,13 @@ signals:
     void runSimulatorWorker();
     void cancelSimulatorWorker();
 
-    void mouseOperationStateChanged(MouseOperationStatus state);
+    void mouseCursorChanged(Qt::CursorShape cursor);
 
 private:
 #ifdef _OPENMP
     const int numThreads = 6;
 #endif
 
-    void placeNewNodeElement(const QPoint& pointerPosition);
 #ifdef QT_DEBUG
     void createScene();
 #endif
@@ -80,11 +71,9 @@ private:
 
     void initNewProject(std::unique_ptr<Project>&& newProject);
 
+    std::unique_ptr<MouseOperation> mouseOperation;
+
     QWidget* parentWidget;
-
-    MouseOperationStatus mouseOperationState = MouseOperationStatus::Normal;
-
-    QPoint nodeSavedPos;
 
     std::unique_ptr<Project> project;
 

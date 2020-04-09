@@ -2,7 +2,7 @@
 
 Project::Project(const QSize& size)
 {
-    simulator = QSharedPointer<Simulator>::create(size, updateBoundariesHandler);
+    allocate(size);
 }
 
 Project::Project(const QString& xml)
@@ -19,6 +19,13 @@ Project::Project(const QByteArray& xml)
     fromDoc(doc);
 }
 
+void Project::allocate(const QSize& size)
+{
+    scene = QSharedPointer<SceneElement<float>>::create();
+    simulator = QSharedPointer<Simulator>::create(size,
+        std::bind(&Project::setFixedValues, this, std::placeholders::_1));
+}
+
 void Project::fromDoc(const QDomDocument& doc)
 {
     QDomElement root = doc.documentElement();
@@ -28,12 +35,12 @@ void Project::fromDoc(const QDomDocument& doc)
     QSize size(attributes.namedItem("Width").nodeValue().toInt(),
                attributes.namedItem("Height").nodeValue().toInt());
 
-    simulator = QSharedPointer<Simulator>::create(size, updateBoundariesHandler);
+    allocate(size);
 
     QDomElement sceneXmlElement = root.elementsByTagName("Scene").item(0).toElement();
     SceneDeserializeVisitor<float> visitor(sceneXmlElement);
 
-    visitor.visit(scene);
+    visitor.visit(*scene);
 }
 
 QDomDocument Project::toDoc()
@@ -51,7 +58,8 @@ QDomDocument Project::toDoc()
     root.appendChild(sceneXmlElement);
 
     SceneSerializeVisitor<float> visitor(sceneXmlElement, doc);
-    visitor.visit(scene);
+
+    visitor.visit(*scene);
 
     return doc;
 }

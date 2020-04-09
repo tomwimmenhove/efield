@@ -41,7 +41,8 @@ SOURCES += \
     model/simulatorworker.cpp \
     util/geometry.cpp \
     pointinputdialog.cpp \
-    model/project.cpp
+    model/project.cpp \
+    viewmodel/mouseoperation.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -72,7 +73,8 @@ HEADERS += \
     graphics/drawingelementvisitor.h \
     graphics/scenedeserializevisitor.h \
     model/project.h \
-    util/derefiterator.h
+    util/derefiterator.h \
+    viewmodel/mouseoperation.h
 
 FORMS += \
         mainwindow.ui \

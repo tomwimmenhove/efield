@@ -43,7 +43,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(mainVm, &MainVm::visualizationAvailable, this, &MainWindow::mainVm_VisualizationAvailable);
     connect(mainVm, &MainVm::newVisualization, this, &MainWindow::mainVm_NewVisualization);
     connect(mainVm, &MainVm::newStatusMessage, this, &MainWindow::mainVm_NewStatusMessage);
-    connect(mainVm, &MainVm::mouseOperationStateChanged, this, &MainWindow::mainVm_MouseOperationStateChanged);
+    connect(mainVm, &MainVm::mouseCursorChanged, this, &MainWindow::mainVm_MouseCursorChanged);
 
 #ifdef USE_VM_THREAD
     mainVm->moveToThread(&vmThread);
@@ -115,20 +115,9 @@ void MainWindow::mainVm_NewStatusMessage(const QString& message)
     ui->statusBar->showMessage(message);
 }
 
-void MainWindow::mainVm_MouseOperationStateChanged(MouseOperationStatus state)
+void MainWindow::mainVm_MouseCursorChanged(Qt::CursorShape cursor)
 {
-    switch (state)
-    {
-        case MouseOperationStatus::Normal:
-            ui->graphicsLabel->setCursor(Qt::ArrowCursor);
-            break;
-        case MouseOperationStatus::DragNode:
-        case MouseOperationStatus::NewNode:
-        case MouseOperationStatus::NewLineP1:
-        case MouseOperationStatus::NewLineP2:
-            ui->graphicsLabel->setCursor(Qt::CrossCursor);
-            break;
-    }
+    ui->graphicsLabel->setCursor(cursor);
 }
 
 void MainWindow::on_actionStart_triggered()
