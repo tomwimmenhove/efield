@@ -20,9 +20,9 @@ void MouseOperation::mouseDoubleClicked(std::unique_ptr<MouseOperation>&, const 
 
 bool MouseOperation::PopUpdate()
 {
-    if (update)
+    if (needsUpdate)
     {
-        update = false;
+        needsUpdate = false;
         return true;
     }
 

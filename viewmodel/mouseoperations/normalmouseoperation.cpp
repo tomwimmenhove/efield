@@ -18,7 +18,7 @@ void NormalMouseOperation::mousePressed(std::unique_ptr<MouseOperation>& current
 
     scene->highlight(closest);
 
-    update = true;
+    update();
 }
 
 void NormalMouseOperation::mouseDoubleClicked(std::unique_ptr<MouseOperation>&, const QPoint& pointerPosition, Qt::MouseButtons buttons)

@@ -19,7 +19,7 @@ void NewNodeMouseOperation::cancelOperation(std::unique_ptr<MouseOperation>& cur
     if (highLighted != scene->end())
         scene->remove(highLighted);
 
-    update = true;
+    update();
     current = std::move(parent);
 }
 
@@ -31,7 +31,7 @@ void NewNodeMouseOperation::mouseMoved(std::unique_ptr<MouseOperation>&, const Q
     NodeElement<float>& node = static_cast<NodeElement<float>&>(*highLighted);
     node.node().setPoint(pointerPosition);
 
-    update = true;
+    update();
 }
 
 void NewNodeMouseOperation::placeNewNodeElement(const QPoint& pointerPosition)
@@ -42,5 +42,5 @@ void NewNodeMouseOperation::placeNewNodeElement(const QPoint& pointerPosition)
     newNode->setHighlighted(true);
     scene->add(std::move(newNode));
 
-    update = true;
+    update();
 }

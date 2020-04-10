@@ -42,7 +42,7 @@ void NewLineMouseOperation::mousePressed(std::unique_ptr<MouseOperation>&, const
         }
     }
 
-    update = true;
+    update();
 }
 
 void NewLineMouseOperation::cancelOperation(std::unique_ptr<MouseOperation>& current)
@@ -55,7 +55,7 @@ void NewLineMouseOperation::cancelOperation(std::unique_ptr<MouseOperation>& cur
         scene->pop();
     }
 
-    update = true;
+    update();
     current = std::move(parent);
 }
 
@@ -98,5 +98,5 @@ void NewLineMouseOperation::mouseMoved(std::unique_ptr<MouseOperation>&, const Q
         }
     }
 
-    update = true;
+    update();
 }
