@@ -4,6 +4,8 @@ void DragNodeMouseOperation::activate(std::unique_ptr<MouseOperation>&, const QP
 {
     auto closest = scene->closestElement(pointerPosition);
     Q_ASSERT(closest->elementType() == drawingElementType::Node);
+    NodeElement<float>& closestNode = static_cast<NodeElement<float>&>(*closest);
+    nodeSavedPos = closestNode.node().point();
     scene->highlight(closest);
 
     update();
@@ -33,8 +35,6 @@ void DragNodeMouseOperation::mouseMoved(std::unique_ptr<MouseOperation>&, const 
 
 void DragNodeMouseOperation::mouseReleased(std::unique_ptr<MouseOperation>& current, const QPoint&, Qt::MouseButtons buttons)
 {
-    if (buttons == Qt::RightButton)
-        return;
-
-    current = std::move(parent);
+    if (buttons != Qt::LeftButton)
+        current = std::move(parent);
 }
