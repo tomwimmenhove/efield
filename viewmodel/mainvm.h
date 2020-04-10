@@ -40,7 +40,7 @@ public slots:
     void newNodeElement(const QPoint& mousePos, const QSize& labelSize);
     void newLineElement(const QPoint& mousePos, const QSize& labelSize);
     void cancelOperation();
-    void eewSimulation();
+    void newSimulation();
     void projectOpen();
     void projectSaveAs();
 
@@ -50,7 +50,7 @@ signals:
     void newStatusMessage(const QString& message);
     void runSimulatorWorker();
     void cancelSimulatorWorker();
-    void mouseCursorChanged(Qt::CursorShape cursor);
+    void updateMouseCursor(Qt::CursorShape cursor);
 
 private:
 #ifdef _OPENMP

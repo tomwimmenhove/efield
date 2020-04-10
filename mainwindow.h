@@ -31,7 +31,7 @@ private slots:
     void mainVm_VisualizationAvailable(float minValue, float maxValue);
     void mainVm_NewVisualization(const QPixmap& pixmap);
     void mainVm_NewStatusMessage(const QString& message);
-    void mainVm_MouseCursorChanged(Qt::CursorShape cursor);
+    void mainVm_UpdateMouseCursor(Qt::CursorShape cursor);
 
     void on_actionStart_triggered();
     void on_actionS_top_triggered();

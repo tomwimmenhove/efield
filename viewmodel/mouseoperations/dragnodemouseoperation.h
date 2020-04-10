@@ -10,42 +10,15 @@ public:
         : MouseOperation(std::move(parent), scene)
     { }
 
-    Qt::CursorShape cursorShape() const { return Qt::CrossCursor; }
+    Qt::CursorShape cursorShape() const override { return Qt::CrossCursor; }
 
-    void activateOperation(std::unique_ptr<MouseOperation>& current, const QPoint&)
-    {
-        scene->highlight(scene->end());
-        current = std::move(parent);
-    }
-
-    void cancelOperation(std::unique_ptr<MouseOperation>& current)
-    {
-        auto highLighted = scene->findHighLighted();
-        Q_ASSERT(highLighted->elementType() == drawingElementType::Node);
-        NodeElement<float>& node = static_cast<NodeElement<float>&>(*highLighted);
-        node.node().setPoint(nodeSavedPos);
-
-        current = std::move(parent);
-    }
-
-    void mouseMoved(std::unique_ptr<MouseOperation>&, const QPoint& pointerPosition)
-    {
-        auto highLighted = scene->findHighLighted();
-        Q_ASSERT(highLighted != scene->end());
-        Q_ASSERT(highLighted->elementType() == drawingElementType::Node);
-        NodeElement<float>& node = static_cast<NodeElement<float>&>(*highLighted);
-        node.node().setPoint(pointerPosition);
-    }
-
-    void mouseReleased(std::unique_ptr<MouseOperation>& current, const QPoint&, Qt::MouseButtons buttons)
-    {
-        if (buttons == Qt::RightButton)
-            return;
-
-        current = std::move(parent);
-    }
+    void activated(std::unique_ptr<MouseOperation>& current, const QPoint& pointerPosition) override;
+    void cancelOperation(std::unique_ptr<MouseOperation>& current) override;
+    void mouseMoved(std::unique_ptr<MouseOperation>& current, const QPoint& pointerPosition) override;
+    void mouseReleased(std::unique_ptr<MouseOperation>& current, const QPoint& pointerPosition, Qt::MouseButtons buttons) override;
 
 private:
     QPoint nodeSavedPos;
 };
+
 #endif // DRAGNODEMOUSEOPERATION_H

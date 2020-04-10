@@ -6,8 +6,6 @@
 #include <QSharedPointer>
 
 #include "graphics/sceneelement.h"
-#include "graphics/lineelement.h"
-#include "graphics/nodeelement.h"
 
 class MouseOperation
 {
@@ -18,36 +16,12 @@ public:
 
     virtual Qt::CursorShape cursorShape() const { return Qt::ArrowCursor; }
 
-    virtual void activateOperation(std::unique_ptr<MouseOperation>& current, const QPoint& pointerPosition)
-    {
-        (void) current;
-        (void) pointerPosition;
-    }
-
-    virtual void cancelOperation(std::unique_ptr<MouseOperation>& current)
-    {
-        (void) current;
-    }
-
-    virtual void mouseMoved(std::unique_ptr<MouseOperation>& current, const QPoint& pointerPosition)
-    {
-        (void) current;
-        (void) pointerPosition;
-    }
-
-    virtual void mouseReleased(std::unique_ptr<MouseOperation>& current, const QPoint& pointerPosition, Qt::MouseButtons buttons)
-    {
-        (void) current;
-        (void) pointerPosition;
-        (void) buttons;
-    }
-
-    virtual void mouseDoubleClicked(std::unique_ptr<MouseOperation>& current, const QPoint& pointerPosition, Qt::MouseButtons buttons)
-    {
-        (void) current;
-        (void) pointerPosition;
-        (void) buttons;
-    }
+    virtual void activated(std::unique_ptr<MouseOperation>& current, const QPoint& pointerPosition);
+    virtual void cancelOperation(std::unique_ptr<MouseOperation>& current);
+    virtual void mousePressed(std::unique_ptr<MouseOperation>& current, const QPoint& pointerPosition);
+    virtual void mouseMoved(std::unique_ptr<MouseOperation>& current, const QPoint& pointerPosition);
+    virtual void mouseReleased(std::unique_ptr<MouseOperation>& current, const QPoint& pointerPosition, Qt::MouseButtons buttons);
+    virtual void mouseDoubleClicked(std::unique_ptr<MouseOperation>& current, const QPoint& pointerPosition, Qt::MouseButtons buttons);
 
     virtual ~MouseOperation() { }
 

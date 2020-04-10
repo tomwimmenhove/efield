@@ -1,2 +1,19 @@
 #include "mouseoperation.h"
 
+void MouseOperation::activated(std::unique_ptr<MouseOperation>&, const QPoint&)
+{ }
+
+void MouseOperation::cancelOperation(std::unique_ptr<MouseOperation>&)
+{ }
+
+void MouseOperation::mousePressed(std::unique_ptr<MouseOperation>&, const QPoint&)
+{ }
+
+void MouseOperation::mouseMoved(std::unique_ptr<MouseOperation>&, const QPoint&)
+{ }
+
+void MouseOperation::mouseReleased(std::unique_ptr<MouseOperation>&, const QPoint&, Qt::MouseButtons)
+{ }
+
+void MouseOperation::mouseDoubleClicked(std::unique_ptr<MouseOperation>&, const QPoint&, Qt::MouseButtons)
+{ }

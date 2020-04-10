@@ -36,14 +36,14 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, &MainWindow::newNodeElement, mainVm, &MainVm::newNodeElement);
     connect(this, &MainWindow::newLineElement, mainVm, &MainVm::newLineElement);
     connect(this, &MainWindow::cancelOperation, mainVm, &MainVm::cancelOperation);
-    connect(this, &MainWindow::newSimulation, mainVm, &MainVm::eewSimulation);
+    connect(this, &MainWindow::newSimulation, mainVm, &MainVm::newSimulation);
     connect(this, &MainWindow::projectOpen, mainVm, &MainVm::projectOpen);
     connect(this, &MainWindow::projectSaveAs, mainVm, &MainVm::projectSaveAs);
 
     connect(mainVm, &MainVm::visualizationAvailable, this, &MainWindow::mainVm_VisualizationAvailable);
     connect(mainVm, &MainVm::newVisualization, this, &MainWindow::mainVm_NewVisualization);
     connect(mainVm, &MainVm::newStatusMessage, this, &MainWindow::mainVm_NewStatusMessage);
-    connect(mainVm, &MainVm::mouseCursorChanged, this, &MainWindow::mainVm_MouseCursorChanged);
+    connect(mainVm, &MainVm::updateMouseCursor, this, &MainWindow::mainVm_UpdateMouseCursor);
 
 #ifdef USE_VM_THREAD
     mainVm->moveToThread(&vmThread);
@@ -115,7 +115,7 @@ void MainWindow::mainVm_NewStatusMessage(const QString& message)
     ui->statusBar->showMessage(message);
 }
 
-void MainWindow::mainVm_MouseCursorChanged(Qt::CursorShape cursor)
+void MainWindow::mainVm_UpdateMouseCursor(Qt::CursorShape cursor)
 {
     ui->graphicsLabel->setCursor(cursor);
 }

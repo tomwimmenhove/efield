@@ -110,9 +110,9 @@ void MainVm::updateStatusBarValue(const QPoint& pointerPosition)
 
 void MainVm::activateOperation(const QPoint& pointerPosition)
 {
-    mouseOperation->activateOperation(mouseOperation, pointerPosition);
+    mouseOperation->mousePressed(mouseOperation, pointerPosition);
 
-    emit mouseCursorChanged(mouseOperation->cursorShape());
+    emit updateMouseCursor(mouseOperation->cursorShape());
     emit visualizationAvailable(surface->minValue(), surface->maxValue());
 }
 
@@ -120,7 +120,7 @@ void MainVm::cancelOperation()
 {
     mouseOperation->cancelOperation(mouseOperation);
 
-    emit mouseCursorChanged(mouseOperation->cursorShape());
+    emit updateMouseCursor(mouseOperation->cursorShape());
     emit visualizationAvailable(surface->minValue(), surface->maxValue());
 }
 
@@ -151,8 +151,7 @@ void MainVm::mouseMovedOnPixmap(const QPoint& mousePos, const QSize& labelSize)
     QPoint translated = Geometry::translatePoint(mousePos, labelSize, surface->size(), true);
 
     mouseOperation->mouseMoved(mouseOperation, translated);
-
-    emit mouseCursorChanged(mouseOperation->cursorShape());
+    emit updateMouseCursor(mouseOperation->cursorShape());
 
     if (translated.x() < 0 || translated.x() >= surface->width() || translated.y() < 0 || translated.y() >= surface->height())
     {
@@ -169,6 +168,7 @@ void MainVm::mouseReleasedFromPixmap(const QPoint& mousePos, Qt::MouseButtons bu
 {
     QPoint translated = Geometry::translatePoint(mousePos, labelSize, surface->size(), true);
     mouseOperation->mouseReleased(mouseOperation, translated, buttons);
+    emit updateMouseCursor(mouseOperation->cursorShape());
 }
 
 void MainVm::mouseDoubleClickedOnPixmap(const QPoint& mousePos, Qt::MouseButtons, const QSize& labelSize)
@@ -202,7 +202,7 @@ void MainVm::mouseDoubleClickedOnPixmap(const QPoint& mousePos, Qt::MouseButtons
     }
 }
 
-void MainVm::eewSimulation()
+void MainVm::newSimulation()
 {
     PointInputDialog d("Node coordinates", QPoint(256, 256), QPoint(1, 1), QPoint(1024, 1024), parentWidget);
     if (d.exec() != QDialog::Accepted)
@@ -340,9 +340,9 @@ void MainVm::newNodeElement(const QPoint& mousePos, const QSize& labelSize)
     mouseOperation = std::move(std::make_unique<NewNodeMouseOperation>(std::move(mouseOperation), project->sharedScene()));
 
     /* Call it's activate method */
-    mouseOperation->activateOperation(mouseOperation, translated);
+    mouseOperation->mousePressed(mouseOperation, translated);
 
-    emit mouseCursorChanged(mouseOperation->cursorShape());
+    emit updateMouseCursor(mouseOperation->cursorShape());
 }
 
 void MainVm::newLineElement(const QPoint& mousePos, const QSize& labelSize)
@@ -359,9 +359,9 @@ void MainVm::newLineElement(const QPoint& mousePos, const QSize& labelSize)
     mouseOperation = std::move(std::make_unique<NewLineMouseOperation>(std::move(mouseOperation), project->sharedScene()));
 
     /* Call it's activate method */
-    mouseOperation->activateOperation(mouseOperation, translated);
+    mouseOperation->mousePressed(mouseOperation, translated);
 
-    emit mouseCursorChanged(mouseOperation->cursorShape());
+    emit updateMouseCursor(mouseOperation->cursorShape());
 }
 
 void MainVm::startSimulation()

@@ -10,42 +10,14 @@ public:
         : MouseOperation(std::move(parent), scene)
     { }
 
-    Qt::CursorShape cursorShape() const { return Qt::CrossCursor; }
+    Qt::CursorShape cursorShape() const override { return Qt::CrossCursor; }
 
-    void activateOperation(std::unique_ptr<MouseOperation>&, const QPoint& pointerPosition)
-    {
-        placeNewNodeElement(pointerPosition);
-    }
-
-    void cancelOperation(std::unique_ptr<MouseOperation>& current)
-    {
-        auto highLighted = scene->findHighLighted();
-
-        scene->highlight(scene->end());
-        if (highLighted != scene->end())
-            scene->remove(highLighted);
-
-        current = std::move(parent);
-    }
-
-    void mouseMoved(std::unique_ptr<MouseOperation>&, const QPoint& pointerPosition)
-    {
-        auto highLighted = scene->findHighLighted();
-        Q_ASSERT(highLighted != scene->end());
-        Q_ASSERT(highLighted->elementType() == drawingElementType::Node);
-        NodeElement<float>& node = static_cast<NodeElement<float>&>(*highLighted);
-        node.node().setPoint(pointerPosition);
-    }
+    void mousePressed(std::unique_ptr<MouseOperation>& current, const QPoint& pointerPosition) override;
+    void cancelOperation(std::unique_ptr<MouseOperation>& current) override;
+    void mouseMoved(std::unique_ptr<MouseOperation>& current, const QPoint& pointerPosition) override;
 
 private:
-    void placeNewNodeElement(const QPoint& pointerPosition)
-    {
-        scene->highlight(scene->end());
-
-        std::unique_ptr<DrawingElement<float>> newNode = NodeElement<float>::uniqueElement(SharedNode(pointerPosition));
-        newNode->setHighlighted(true);
-        scene->add(std::move(newNode));
-    }
+    void placeNewNodeElement(const QPoint& pointerPosition);
 
     QPoint nodeSavedPos;
 };
