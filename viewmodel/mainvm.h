@@ -64,6 +64,7 @@ private:
     void editNode(NodeElement<float>& node);
     void editLine(LineElement<float>& line);
     template<typename T> void activateNewMouseOperation(const QPoint& pointerPosition);
+    void postMouseOperation();
     void updateStatusBarValue(const QPoint& pointerPosition);
     void initNewProject(std::unique_ptr<Project>&& newProject);
 

@@ -118,8 +118,7 @@ void MainVm::updateStatusBarValue(const QPoint& pointerPosition)
 void MainVm::cancelOperation()
 {
     mouseOperation->cancelOperation(mouseOperation);
-    emit updateMouseCursor(mouseOperation->cursorShape());
-    emit visualizationAvailable(surface->minValue(), surface->maxValue());
+    postMouseOperation();
 }
 
 void MainVm::mousePressedOnPixmap(const QPoint& mousePos, Qt::MouseButtons buttons, const QSize& labelSize)
@@ -131,8 +130,7 @@ void MainVm::mousePressedOnPixmap(const QPoint& mousePos, Qt::MouseButtons butto
     {
         QPoint translated = Geometry::translatePoint(mousePos, labelSize, surface->size(), true);
         mouseOperation->mousePressed(mouseOperation, translated);
-        emit updateMouseCursor(mouseOperation->cursorShape());
-        emit visualizationAvailable(surface->minValue(), surface->maxValue());
+        postMouseOperation();
     }
     else if (buttons & Qt::RightButton)
     {
@@ -148,8 +146,7 @@ void MainVm::mouseMovedOnPixmap(const QPoint& mousePos, const QSize& labelSize)
 
     QPoint translated = Geometry::translatePoint(mousePos, labelSize, surface->size(), true);
     mouseOperation->mouseMoved(mouseOperation, translated);
-    emit updateMouseCursor(mouseOperation->cursorShape());
-    emit visualizationAvailable(surface->minValue(), surface->maxValue());
+    postMouseOperation();
 
     updateStatusBarValue(translated);
 }
@@ -158,7 +155,7 @@ void MainVm::mouseReleasedFromPixmap(const QPoint& mousePos, Qt::MouseButtons bu
 {
     QPoint translated = Geometry::translatePoint(mousePos, labelSize, surface->size(), true);
     mouseOperation->mouseReleased(mouseOperation, translated, buttons);
-    emit updateMouseCursor(mouseOperation->cursorShape());
+    postMouseOperation();
 }
 
 void MainVm::mouseDoubleClickedOnPixmap(const QPoint& mousePos, Qt::MouseButtons buttons, const QSize& labelSize)
@@ -168,7 +165,7 @@ void MainVm::mouseDoubleClickedOnPixmap(const QPoint& mousePos, Qt::MouseButtons
 
     QPoint translated = Geometry::translatePoint(mousePos, labelSize, surface->size(), true);
     mouseOperation->mouseDoubleClicked(mouseOperation, translated, buttons);
-    emit updateMouseCursor(mouseOperation->cursorShape());
+    postMouseOperation();
 }
 
 void MainVm::newSimulation()
@@ -308,25 +305,28 @@ void MainVm::activateNewMouseOperation(const QPoint& pointerPosition)
     /* Call it's activate method */
     mouseOperation->activate(mouseOperation, pointerPosition);
 
+    postMouseOperation();
+}
+
+void MainVm::postMouseOperation()
+{
     emit updateMouseCursor(mouseOperation->cursorShape());
+    if (mouseOperation->PopUpdate())
+        emit visualizationAvailable(surface->minValue(), surface->maxValue());
 }
 
 void MainVm::newNodeElement(const QPoint& mousePos, const QSize& labelSize)
 {
-    if (!surface)
-        return;
-
-    QPoint translated = Geometry::translatePoint(mousePos, labelSize, surface->size(), true);
-    activateNewMouseOperation<NewNodeMouseOperation>(translated);
+    if (surface)
+        activateNewMouseOperation<NewNodeMouseOperation>(
+                    Geometry::translatePoint(mousePos, labelSize, surface->size(), true));
 }
 
 void MainVm::newLineElement(const QPoint& mousePos, const QSize& labelSize)
 {
-    if (!surface)
-        return;
-
-    QPoint translated = Geometry::translatePoint(mousePos, labelSize, surface->size(), true);
-    activateNewMouseOperation<NewLineMouseOperation>(translated);
+    if (surface)
+        activateNewMouseOperation<NewLineMouseOperation>(
+                    Geometry::translatePoint(mousePos, labelSize, surface->size(), true));
 }
 
 void MainVm::startSimulation()
