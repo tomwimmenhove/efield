@@ -16,7 +16,7 @@ public:
 
     virtual Qt::CursorShape cursorShape() const { return Qt::ArrowCursor; }
 
-    virtual void activated(std::unique_ptr<MouseOperation>& current, const QPoint& pointerPosition);
+    virtual void activate(std::unique_ptr<MouseOperation>& current, const QPoint& pointerPosition);
     virtual void cancelOperation(std::unique_ptr<MouseOperation>& current);
     virtual void mousePressed(std::unique_ptr<MouseOperation>& current, const QPoint& pointerPosition);
     virtual void mouseMoved(std::unique_ptr<MouseOperation>& current, const QPoint& pointerPosition);

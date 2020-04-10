@@ -63,7 +63,7 @@ private:
     void createBorder(float voltage);
     void editNode(NodeElement<float>& node);
     void editLine(LineElement<float>& line);
-    void activateOperation(const QPoint& pointerPosition);
+    template<typename T> void activateNewMouseOperation(const QPoint& pointerPosition);
     void updateStatusBarValue(const QPoint& pointerPosition);
     void initNewProject(std::unique_ptr<Project>&& newProject);
 

@@ -1,6 +1,11 @@
 #include "newnodemouseoperation.h"
 #include "graphics/nodeelement.h"
 
+void NewNodeMouseOperation::activate(std::unique_ptr<MouseOperation>&, const QPoint& pointerPosition)
+{
+    placeNewNodeElement(pointerPosition);
+}
+
 void NewNodeMouseOperation::mousePressed(std::unique_ptr<MouseOperation>&, const QPoint& pointerPosition)
 {
     placeNewNodeElement(pointerPosition);

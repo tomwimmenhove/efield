@@ -1,6 +1,6 @@
 #include "mouseoperation.h"
 
-void MouseOperation::activated(std::unique_ptr<MouseOperation>&, const QPoint&)
+void MouseOperation::activate(std::unique_ptr<MouseOperation>&, const QPoint&)
 { }
 
 void MouseOperation::cancelOperation(std::unique_ptr<MouseOperation>&)

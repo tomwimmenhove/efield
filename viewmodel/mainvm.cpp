@@ -86,6 +86,13 @@ void MainVm::requestVisualization(const SimpleValueStepper& stepper, const QSize
 
 void MainVm::updateStatusBarValue(const QPoint& pointerPosition)
 {
+    if (pointerPosition.x() < 0 || pointerPosition.x() >= surface->width() ||
+        pointerPosition.y() < 0 || pointerPosition.y() >= surface->height())
+    {
+        emit newStatusMessage(QString(tr("[%1, %2]")).arg(pointerPosition.x()).arg(pointerPosition.y()));
+        return;
+    }
+
     if (gradient)
     {
         QVector2D v = gradient->value(pointerPosition.x(), pointerPosition.y());
@@ -108,39 +115,30 @@ void MainVm::updateStatusBarValue(const QPoint& pointerPosition)
     }
 }
 
-void MainVm::activateOperation(const QPoint& pointerPosition)
-{
-    mouseOperation->mousePressed(mouseOperation, pointerPosition);
-
-    emit updateMouseCursor(mouseOperation->cursorShape());
-    emit visualizationAvailable(surface->minValue(), surface->maxValue());
-}
-
 void MainVm::cancelOperation()
 {
     mouseOperation->cancelOperation(mouseOperation);
-
     emit updateMouseCursor(mouseOperation->cursorShape());
     emit visualizationAvailable(surface->minValue(), surface->maxValue());
 }
-
 
 void MainVm::mousePressedOnPixmap(const QPoint& mousePos, Qt::MouseButtons buttons, const QSize& labelSize)
 {
     if (!surface)
         return;
 
-    QPoint translated = Geometry::translatePoint(mousePos, labelSize, surface->size(), true);
-    if (translated.x() < 0 || translated.x() >= surface->width() || translated.y() < 0 || translated.y() >= surface->height())
+    if (buttons == Qt::LeftButton)
     {
-        emit newStatusMessage(QString(tr("[%1, %2]")).arg(translated.x()).arg(translated.y()));
+        QPoint translated = Geometry::translatePoint(mousePos, labelSize, surface->size(), true);
+        mouseOperation->mousePressed(mouseOperation, translated);
+        emit updateMouseCursor(mouseOperation->cursorShape());
+        emit visualizationAvailable(surface->minValue(), surface->maxValue());
+    }
+    else if (buttons & Qt::RightButton)
+    {
+        cancelOperation();
         return;
     }
-
-    if (buttons == Qt::LeftButton)
-        activateOperation(translated);
-    else if (buttons & Qt::RightButton)
-        cancelOperation();
 }
 
 void MainVm::mouseMovedOnPixmap(const QPoint& mousePos, const QSize& labelSize)
@@ -149,19 +147,11 @@ void MainVm::mouseMovedOnPixmap(const QPoint& mousePos, const QSize& labelSize)
         return;
 
     QPoint translated = Geometry::translatePoint(mousePos, labelSize, surface->size(), true);
-
     mouseOperation->mouseMoved(mouseOperation, translated);
     emit updateMouseCursor(mouseOperation->cursorShape());
-
-    if (translated.x() < 0 || translated.x() >= surface->width() || translated.y() < 0 || translated.y() >= surface->height())
-    {
-        emit newStatusMessage(QString(tr("[%1, %2]")).arg(translated.x()).arg(translated.y()));
-        return;
-    }
+    emit visualizationAvailable(surface->minValue(), surface->maxValue());
 
     updateStatusBarValue(translated);
-
-    emit visualizationAvailable(surface->minValue(), surface->maxValue());
 }
 
 void MainVm::mouseReleasedFromPixmap(const QPoint& mousePos, Qt::MouseButtons buttons, const QSize& labelSize)
@@ -171,35 +161,14 @@ void MainVm::mouseReleasedFromPixmap(const QPoint& mousePos, Qt::MouseButtons bu
     emit updateMouseCursor(mouseOperation->cursorShape());
 }
 
-void MainVm::mouseDoubleClickedOnPixmap(const QPoint& mousePos, Qt::MouseButtons, const QSize& labelSize)
+void MainVm::mouseDoubleClickedOnPixmap(const QPoint& mousePos, Qt::MouseButtons buttons, const QSize& labelSize)
 {
     if (!surface)
         return;
 
     QPoint translated = Geometry::translatePoint(mousePos, labelSize, surface->size(), true);
-    if (translated.x() < 0 || translated.x() >= surface->width() || translated.y() < 0 || translated.y() >= surface->height())
-    {
-        emit newStatusMessage(QString(tr("[%1, %2]")).arg(translated.x()).arg(translated.y()));
-        return;
-    }
-
-    QSharedPointer<SceneElement<float>> scene = project->sharedScene();
-    auto closest = scene->closestElement(translated);
-    if (closest == scene->end())
-        return;
-
-    switch (closest->elementType())
-    {
-        case drawingElementType::None:
-        case drawingElementType::Scene:
-            break;
-        case drawingElementType::Node:
-            editNode(static_cast<NodeElement<float>&>(*closest));
-            break;
-        case drawingElementType::Line:
-            editLine(static_cast<LineElement<float>&>(*closest));
-            break;
-    }
+    mouseOperation->mouseDoubleClicked(mouseOperation, translated, buttons);
+    emit updateMouseCursor(mouseOperation->cursorShape());
 }
 
 void MainVm::newSimulation()
@@ -326,23 +295,29 @@ void MainVm::editSelectedElement()
     }
 }
 
+template<typename T>
+void MainVm::activateNewMouseOperation(const QPoint& pointerPosition)
+{
+    /* Cancel any currently active operations */
+    mouseOperation->cancelOperation(mouseOperation);
+
+    /* Instantiate a new NewNodeMouseOperation with the current mouseOperation as
+     * parent, and move it to the current one. */
+    mouseOperation = std::move(std::make_unique<T>(std::move(mouseOperation), project->sharedScene()));
+
+    /* Call it's activate method */
+    mouseOperation->activate(mouseOperation, pointerPosition);
+
+    emit updateMouseCursor(mouseOperation->cursorShape());
+}
+
 void MainVm::newNodeElement(const QPoint& mousePos, const QSize& labelSize)
 {
     if (!surface)
         return;
 
-    cancelOperation();
-
     QPoint translated = Geometry::translatePoint(mousePos, labelSize, surface->size(), true);
-
-    /* Instantiate a new NewNodeMouseOperation with the current mouseOperation as
-     * parent, and move it to the current one. */
-    mouseOperation = std::move(std::make_unique<NewNodeMouseOperation>(std::move(mouseOperation), project->sharedScene()));
-
-    /* Call it's activate method */
-    mouseOperation->mousePressed(mouseOperation, translated);
-
-    emit updateMouseCursor(mouseOperation->cursorShape());
+    activateNewMouseOperation<NewNodeMouseOperation>(translated);
 }
 
 void MainVm::newLineElement(const QPoint& mousePos, const QSize& labelSize)
@@ -350,18 +325,8 @@ void MainVm::newLineElement(const QPoint& mousePos, const QSize& labelSize)
     if (!surface)
         return;
 
-    cancelOperation();
-
     QPoint translated = Geometry::translatePoint(mousePos, labelSize, surface->size(), true);
-
-    /* Instantiate a new NewNodeMouseOperation with the current mouseOperation as
-     * parent, and move it to the current one. */
-    mouseOperation = std::move(std::make_unique<NewLineMouseOperation>(std::move(mouseOperation), project->sharedScene()));
-
-    /* Call it's activate method */
-    mouseOperation->mousePressed(mouseOperation, translated);
-
-    emit updateMouseCursor(mouseOperation->cursorShape());
+    activateNewMouseOperation<NewLineMouseOperation>(translated);
 }
 
 void MainVm::startSimulation()
@@ -406,6 +371,8 @@ void MainVm::initNewProject(std::unique_ptr<Project>&& newProject)
     project = std::move(newProject);
 
     mouseOperation = std::make_unique<NormalMouseOperation>(project->sharedScene());
+    connect(static_cast<NormalMouseOperation*>(mouseOperation.get()), &NormalMouseOperation::editLine, this, &MainVm::editLine);
+    connect(static_cast<NormalMouseOperation*>(mouseOperation.get()), &NormalMouseOperation::editNode, this, &MainVm::editNode);
 }
 
 #ifdef QT_DEBUG

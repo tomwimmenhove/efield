@@ -1,6 +1,6 @@
 #include "dragnodemouseoperation.h"
 
-void DragNodeMouseOperation::activated(std::unique_ptr<MouseOperation>&, const QPoint& pointerPosition)
+void DragNodeMouseOperation::activate(std::unique_ptr<MouseOperation>&, const QPoint& pointerPosition)
 {
     auto closest = scene->closestElement(pointerPosition);
     Q_ASSERT(closest->elementType() == drawingElementType::Node);
