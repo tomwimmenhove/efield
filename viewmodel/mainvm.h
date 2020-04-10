@@ -15,7 +15,7 @@
 #include "graphics/sceneelement.h"
 #include "graphics/nodeelement.h"
 #include "graphics/lineelement.h"
-#include "mouseoperation.h"
+#include "mouseoperations/mouseoperation.h"
 
 class MainVm : public QObject
 {
@@ -48,10 +48,8 @@ signals:
     void visualizationAvailable(float minValue, float maxValue);
     void newVisualization(const QPixmap& pixmap);
     void newStatusMessage(const QString& message);
-
     void runSimulatorWorker();
     void cancelSimulatorWorker();
-
     void mouseCursorChanged(Qt::CursorShape cursor);
 
 private:
@@ -65,26 +63,18 @@ private:
     void createBorder(float voltage);
     void editNode(NodeElement<float>& node);
     void editLine(LineElement<float>& line);
-
     void activateOperation(const QPoint& pointerPosition);
     void updateStatusBarValue(const QPoint& pointerPosition);
-
     void initNewProject(std::unique_ptr<Project>&& newProject);
 
-    std::unique_ptr<MouseOperation> mouseOperation;
-
     QWidget* parentWidget;
-
+    std::unique_ptr<MouseOperation> mouseOperation;
     std::unique_ptr<Project> project;
-
     QThread simulatorThread;
     SimulatorWorker* simulatorWorker = nullptr;
-
     bool started = false;
-
     QSharedPointer<FloatSurface> surface;
     QSharedPointer<GradientSurface> gradient;
-
     QElapsedTimer runTimer;
     int frames = 0;
 };

@@ -42,7 +42,11 @@ SOURCES += \
     util/geometry.cpp \
     pointinputdialog.cpp \
     model/project.cpp \
-    viewmodel/mouseoperation.cpp
+    viewmodel/mouseoperations/mouseoperation.cpp \
+    viewmodel/mouseoperations/dragnodemouseoperation.cpp \
+    viewmodel/mouseoperations/newnodemouseoperation.cpp \
+    viewmodel/mouseoperations/newlinemouseoperation.cpp \
+    viewmodel/mouseoperations/normalmouseoperation.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -74,7 +78,12 @@ HEADERS += \
     graphics/scenedeserializevisitor.h \
     model/project.h \
     util/derefiterator.h \
-    viewmodel/mouseoperation.h
+    viewmodel/mouseoperations/mouseoperation.h \
+    viewmodel/mouseoperations/dragnodemouseoperation.h \
+    viewmodel/mouseoperations/newnodemouseoperation.h \
+    viewmodel/mouseoperations/newlinemouseoperation.h \
+    viewmodel/mouseoperations/normalmouseoperation.h \
+    viewmodel/mouseoperations/mouseoperations.h
 
 FORMS += \
         mainwindow.ui \

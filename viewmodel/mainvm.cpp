@@ -12,6 +12,7 @@
 #include "visualizer/visualizer.h"
 #include "graphics/sceneserializevisitor.h"
 #include "graphics/scenedeserializevisitor.h"
+#include "mouseoperations/mouseoperations.h"
 
 MainVm::MainVm(QWidget* parent)
     : QObject(parent), parentWidget(parent)
