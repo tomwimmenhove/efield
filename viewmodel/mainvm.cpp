@@ -18,9 +18,9 @@ MainVm::MainVm(QWidget* parent)
     : QObject(parent), parentWidget(parent)
 {
 #ifdef QT_DEBUG
-    std::unique_ptr<Project> newProject = std::make_unique<Project>(QSize(601, 601));
+    auto newProject = std::make_unique<Project>(QSize(601, 601));
 #else
-    std::unique_ptr<Project> newProject = std::make_unique<Project>(QSize(256, 256));
+    auto newProject = std::make_unique<Project>(QSize(256, 256));
 #endif
 
     initNewProject(std::move(newProject));
@@ -228,7 +228,7 @@ void MainVm::deleteSelectedElement()
 
     if (highLighted->elementType() == drawingElementType::Node)
     {
-        NodeElement<float>& node = static_cast<NodeElement<float>&>(*highLighted);
+        auto& node = static_cast<NodeElement<float>&>(*highLighted);
 
         // Can't delete nodes that are used by other elements */
         if (node.node()->refCounter() > 0)

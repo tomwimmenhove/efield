@@ -12,7 +12,7 @@ void NewLineMouseOperation::mousePressed(std::unique_ptr<MouseOperation>&, const
             if (closest != scene->end() && highLighted != scene->end())
             {
                 Q_ASSERT(highLighted->elementType() == drawingElementType::Node);
-                NodeElement<float>& startNode = static_cast<NodeElement<float>&>(*highLighted);
+                auto& startNode = static_cast<NodeElement<float>&>(*highLighted);
                 SharedNode sharedStartNode = startNode.node();
                 SharedNode sharedEndNode = SharedNode(pointerPosition);
                 scene->add(std::move(LineElement<float>::uniqueElement(sharedStartNode, sharedEndNode, 0)));
@@ -27,9 +27,9 @@ void NewLineMouseOperation::mousePressed(std::unique_ptr<MouseOperation>&, const
             {
                 /* Set the definitive end point for the new line segment */
                 Q_ASSERT(highLighted->elementType() == drawingElementType::Node);
-                NodeElement<float>& endNode = static_cast<NodeElement<float>&>(*highLighted);
+                auto& endNode = static_cast<NodeElement<float>&>(*highLighted);
                 Q_ASSERT(scene->back().elementType() == drawingElementType::Line);
-                LineElement<float>& newLine = static_cast<LineElement<float>&>(scene->back());
+                auto& newLine = static_cast<LineElement<float>&>(scene->back());
 
                 if (endNode.node()->identifier() != newLine.point1()->identifier())
                 {
@@ -78,12 +78,17 @@ void NewLineMouseOperation::mouseMoved(std::unique_ptr<MouseOperation>&, const Q
         case State::p2:
         {
             Q_ASSERT(scene->back().elementType() == drawingElementType::Line);
-            LineElement<float>& newLine = static_cast<LineElement<float>&>(scene->back());
+            auto& newLine = static_cast<LineElement<float>&>(scene->back());
 
             if (closest == scene->end())
                 scene->highlight(scene->end());
-            else if (static_cast<NodeElement<float>&>(*closest).node()->identifier() != newLine.point1()->identifier())
-                scene->highlight(closest);
+            else
+            {
+                Q_ASSERT(closest->elementType() == drawingElementType::Node);
+                auto& closestNode = static_cast<NodeElement<float>&>(*closest);
+                if (closestNode.node()->identifier() != newLine.point1()->identifier())
+                    scene->highlight(closest);
+            }
 
             newLine.point2().setPoint(pointerPosition);
             break;
