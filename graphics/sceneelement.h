@@ -56,8 +56,7 @@ public:
             i->setHighlighted(i == iter);
     }
 
-    iterator closestElement(const QPoint& point, float maxDist = 15 /*std::numeric_limits<float>::max()*/,
-                                 drawingElementType type = drawingElementType::None) const
+    iterator closestElement(const QPoint& point, drawingElementType type = drawingElementType::None) const
     {
         iterator closest = end();
 
@@ -78,8 +77,7 @@ public:
         return closest;
     }
 
-    void highlightClosestElement(const QPoint& point,
-                          float maxDist = 15 /*std::numeric_limits<float>::max()*/)
+    void highlightClosestElement(const QPoint& point)
     {
         highlight(closestElement(point, maxDist));
     }
@@ -92,6 +90,7 @@ public:
     void accept(DrawingElementVisitor<T>& visitor) override { visitor.visit(*this); }
 
 private:
+    const float maxDist = 15;
     std::vector<std::unique_ptr<DrawingElement<T>>> elements;
 };
 

@@ -19,7 +19,7 @@ void NewNodeMouseOperation::cancelOperation(std::unique_ptr<MouseOperation>& cur
     if (highLighted != scene->end())
         scene->remove(highLighted);
 
-    update();
+    parent->update();
     current = std::move(parent);
 }
 

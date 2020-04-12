@@ -194,7 +194,6 @@ void MainVm::projectOpen()
             QMessageBox::critical(parentWidget, "Unable to load",
                                   QString("Unable to load %1: %2")
                                   .arg(fileName).arg(file.errorString()));
-
     }
 }
 
@@ -311,7 +310,7 @@ void MainVm::activateNewMouseOperation(const QPoint& pointerPosition)
 void MainVm::postMouseOperation()
 {
     emit updateMouseCursor(mouseOperation->cursorShape());
-    if (mouseOperation->PopUpdate())
+    if (mouseOperation->popUpdate())
         emit visualizationAvailable(surface->minValue(), surface->maxValue());
 }
 

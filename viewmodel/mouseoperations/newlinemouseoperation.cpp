@@ -47,40 +47,33 @@ void NewLineMouseOperation::mousePressed(std::unique_ptr<MouseOperation>&, const
 
 void NewLineMouseOperation::cancelOperation(std::unique_ptr<MouseOperation>& current)
 {
-    scene->highlight(scene->end());
-
     if (state == State::p2)
     {
+        scene->highlight(scene->end());
+
         Q_ASSERT(scene->back().elementType() == drawingElementType::Line);
         scene->pop();
+
+        state = State::p1;
+        update();
+
+        return;
     }
 
-    update();
+    parent->update();
     current = std::move(parent);
 }
 
 void NewLineMouseOperation::mouseMoved(std::unique_ptr<MouseOperation>&, const QPoint& pointerPosition)
 {
-    auto closest = scene->closestElement(pointerPosition);
+    auto closest = scene->closestElement(pointerPosition, drawingElementType::Node);
 
     switch (state)
     {
         case State::p1:
         {
-            /* Highlight close nodes */
-            if (closest == scene->end())
-            {
-                scene->highlight(scene->end());
-                break;
-            }
-
-            if (closest->elementType() == drawingElementType::Node)
-            {
-                scene->highlight(closest);
-                break;
-            }
-
-            return;
+            scene->highlight(closest);
+            break;
         }
         case State::p2:
         {
@@ -89,8 +82,7 @@ void NewLineMouseOperation::mouseMoved(std::unique_ptr<MouseOperation>&, const Q
 
             if (closest == scene->end())
                 scene->highlight(scene->end());
-            else if (closest->elementType() == drawingElementType::Node &&
-                     static_cast<NodeElement<float>&>(*closest).node()->identifier() != newLine.point1()->identifier())
+            else if (static_cast<NodeElement<float>&>(*closest).node()->identifier() != newLine.point1()->identifier())
                 scene->highlight(closest);
 
             newLine.point2().setPoint(pointerPosition);

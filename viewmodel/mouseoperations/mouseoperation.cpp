@@ -18,7 +18,7 @@ void MouseOperation::mouseReleased(std::unique_ptr<MouseOperation>&, const QPoin
 void MouseOperation::mouseDoubleClicked(std::unique_ptr<MouseOperation>&, const QPoint&, Qt::MouseButtons)
 { }
 
-bool MouseOperation::PopUpdate()
+bool MouseOperation::popUpdate()
 {
     if (needsUpdate)
     {

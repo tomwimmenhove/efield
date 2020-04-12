@@ -13,7 +13,7 @@ void NormalMouseOperation::mousePressed(std::unique_ptr<MouseOperation>& current
     {
         current = std::make_unique<DragNodeMouseOperation>(std::move(current), scene);
         current->activate(current, pointerPosition);
-//        return;
+        return;
     }
 
     scene->highlight(closest);

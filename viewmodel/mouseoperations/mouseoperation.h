@@ -14,7 +14,8 @@ public:
         : parent(std::move(parent)), scene(scene)
     { }
 
-    bool PopUpdate();
+    bool popUpdate();
+    inline void update() { needsUpdate = true; }
 
     virtual Qt::CursorShape cursorShape() const { return Qt::ArrowCursor; }
 
@@ -28,8 +29,6 @@ public:
     virtual ~MouseOperation() { }
 
 protected:
-    inline void update() { needsUpdate = true; }
-
     std::unique_ptr<MouseOperation> parent;
     QSharedPointer<SceneElement<float>> scene;
 
