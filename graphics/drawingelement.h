@@ -21,8 +21,8 @@ template<typename T>
 class DrawingElement
 {
 public:
-    DrawingElement(int id)
-        : id(id)
+    DrawingElement(int id, const QSize& bounds)
+        : id(id), clipBounds(bounds)
     { }
 
     virtual drawingElementType elementType() const = 0;
@@ -30,10 +30,13 @@ public:
     virtual void drawAnnotation(QPainter& painter, const QSize& surfaceSize) = 0;
     virtual float distanceTo(const QPoint& point) const = 0;
     virtual QPoint center() const = 0;
-    virtual void setCenter(const QPoint& point) = 0;
+    virtual bool setCenter(const QPoint& point) = 0;
     virtual bool canAnchor() const = 0;
     virtual SharedNode anchorNode() const { abort(); }
     virtual bool canDelete() const = 0;
+
+    inline QSize bounds() const { return clipBounds; }
+    inline void setBounds(const QSize& bounds) { clipBounds = bounds; }
 
     inline int identifier() const { return id; }
 
@@ -45,8 +48,12 @@ public:
     virtual ~DrawingElement() { }
 
 protected:
+    inline bool isInBounds(const QPoint& p) { return QRect(QPoint(0, 0), clipBounds).contains(p); }
     bool highlighted = false;
     int id;
+
+private:
+    QSize clipBounds;
 };
 
 #endif // DRAWINGELEMENT_H

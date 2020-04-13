@@ -37,7 +37,7 @@ void NewNodeMouseOperation::placeNewNodeElement(const QPoint& pointerPosition)
 {
     scene->highlight(scene->end());
 
-    auto newNode = NodeElement<float>::uniqueElement(SharedNode(scene->newId(), pointerPosition));
+    auto newNode = NodeElement<float>::uniqueElement(SharedNode(scene->newId(), pointerPosition), scene->bounds());
     newNode->setHighlighted(true);
     scene->add(std::move(newNode));
 

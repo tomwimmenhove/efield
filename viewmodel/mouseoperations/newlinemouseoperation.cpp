@@ -15,7 +15,7 @@ void NewLineMouseOperation::mousePressed(std::unique_ptr<MouseOperation>&, const
                 startId = highLighted->identifier();
                 SharedNode sharedStartNode = highLighted->anchorNode();
                 SharedNode sharedEndNode = SharedNode(-1, pointerPosition);
-                scene->add(std::move(LineElement<float>::uniqueElement(scene->newId(), sharedStartNode, sharedEndNode, 0)));
+                scene->add(std::move(LineElement<float>::uniqueElement(scene->newId(), scene->bounds(), sharedStartNode, sharedEndNode, 0)));
 
                 state = State::p2;
                 break;

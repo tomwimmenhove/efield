@@ -22,10 +22,10 @@ public:
 
     void visit(SceneElement<T>& element) override
     {
-        std::array<QPair<QString, std::function<DrawingElement<T>*(int id)>>, 2> nodeFactories
+        std::array<QPair<QString, std::function<DrawingElement<T>*(int id, const QSize& bounds)>>, 2> nodeFactories
         {{
-            { "Node", [](int id) { return new NodeElement<T>(id); } }, // First, because LineElements depends on it
-            { "Line", [](int id) { return new LineElement<T>(id); } },
+            { "Node", [](int id, const QSize& bounds) { return new NodeElement<T>(id, bounds); } }, // First, because LineElements depends on it
+            { "Line", [](int id, const QSize& bounds) { return new LineElement<T>(id, bounds); } },
         }};
 
         int maxId = 0;
@@ -33,7 +33,7 @@ public:
         QDomNamedNodeMap attributes = domElement.attributes();
         QSize size(attributes.namedItem("Width").nodeValue().toInt(),
                    attributes.namedItem("Height").nodeValue().toInt());
-        element.setSize(size);
+        element.setBounds(size);
 
         for(auto& nodeFactory: nodeFactories)
         {
@@ -47,7 +47,7 @@ public:
                 if (id > maxId)
                     maxId = id;
 
-                std::unique_ptr<DrawingElement<T>> nodeElement = std::unique_ptr<DrawingElement<T>>(nodeFactory.second(id));
+                std::unique_ptr<DrawingElement<T>> nodeElement = std::unique_ptr<DrawingElement<T>>(nodeFactory.second(id, size));
 
                 SceneDeserializeVisitor visitor(nodeXmlElement, nodeMap);
                 nodeElement->accept(visitor);

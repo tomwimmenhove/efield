@@ -12,12 +12,12 @@ template<typename T>
 class NodeElement : public DrawingElement<T>
 {
 public:
-    NodeElement(int id)
-        : DrawingElement<T>(id), n(id)
+    NodeElement(int id, const QSize& bounds)
+        : DrawingElement<T>(id, bounds), n(id)
     { }
 
-    NodeElement(const SharedNode& p)
-        : DrawingElement<T>(p.identifier()), n(p)
+    NodeElement(const SharedNode& p, const QSize& bounds)
+        : DrawingElement<T>(p.identifier(), bounds), n(p)
     { }
 
     template<typename... Args>
@@ -54,9 +54,14 @@ public:
     }
 
     QPoint center() const override { return n.point(); }
-    void setCenter(const QPoint& point) override
+    bool setCenter(const QPoint& point) override
     {
-        n.setPoint(n.point() + point - center());
+        QPoint newPoint = n.point() + point - center();
+        if (!this->isInBounds(newPoint))
+            return false;
+
+        n.setPoint(newPoint);
+        return true;
     }
 
     bool canAnchor() const override { return true; }

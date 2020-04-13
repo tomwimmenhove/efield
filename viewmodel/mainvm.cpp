@@ -344,13 +344,13 @@ void MainVm::createScene()
     SharedNode cathodeLeft(scene->newId(), 100, 100);
     SharedNode cathodeRight(scene->newId(), 500, 100);
 
-    scene->add(NodeElement<float>::uniqueElement(anodeRight));
-    scene->add(NodeElement<float>::uniqueElement(anodeLeft));
-    scene->add(NodeElement<float>::uniqueElement(cathodeLeft));
-    scene->add(NodeElement<float>::uniqueElement(cathodeRight));
+    scene->add(NodeElement<float>::uniqueElement(anodeRight, scene->bounds()));
+    scene->add(NodeElement<float>::uniqueElement(anodeLeft, scene->bounds()));
+    scene->add(NodeElement<float>::uniqueElement(cathodeLeft, scene->bounds()));
+    scene->add(NodeElement<float>::uniqueElement(cathodeRight, scene->bounds()));
 
-    scene->add(LineElement<float>::uniqueElement(scene->newId(), anodeLeft, anodeRight, 1));
-    scene->add(LineElement<float>::uniqueElement(scene->newId(), cathodeLeft, cathodeRight, -1));
+    scene->add(LineElement<float>::uniqueElement(scene->newId(), scene->bounds(), anodeLeft, anodeRight, 1));
+    scene->add(LineElement<float>::uniqueElement(scene->newId(), scene->bounds(), cathodeLeft, cathodeRight, -1));
 }
 #endif
 
@@ -364,14 +364,14 @@ void MainVm::createBorder(float voltage)
     SharedNode bottomLeft(scene->newId(), 0, 0);
     SharedNode bottomRight(scene->newId(), size.height(), 0);
 
-    scene->add(NodeElement<float>::uniqueElement(topLeft));
-    scene->add(NodeElement<float>::uniqueElement(topRight));
-    scene->add(NodeElement<float>::uniqueElement(bottomLeft));
-    scene->add(NodeElement<float>::uniqueElement(bottomRight));
+    scene->add(NodeElement<float>::uniqueElement(topLeft, scene->bounds()));
+    scene->add(NodeElement<float>::uniqueElement(topRight, scene->bounds()));
+    scene->add(NodeElement<float>::uniqueElement(bottomLeft, scene->bounds()));
+    scene->add(NodeElement<float>::uniqueElement(bottomRight, scene->bounds()));
 
-    scene->add(LineElement<float>::uniqueElement(scene->newId(), topLeft, topRight, voltage));
-    scene->add(LineElement<float>::uniqueElement(scene->newId(), bottomLeft, bottomRight, voltage));
-    scene->add(LineElement<float>::uniqueElement(scene->newId(), topLeft, bottomLeft, voltage));
-    scene->add(LineElement<float>::uniqueElement(scene->newId(), topRight, bottomRight, voltage));
+    scene->add(LineElement<float>::uniqueElement(scene->newId(), scene->bounds(), topLeft, topRight, voltage));
+    scene->add(LineElement<float>::uniqueElement(scene->newId(), scene->bounds(), bottomLeft, bottomRight, voltage));
+    scene->add(LineElement<float>::uniqueElement(scene->newId(), scene->bounds(), topLeft, bottomLeft, voltage));
+    scene->add(LineElement<float>::uniqueElement(scene->newId(), scene->bounds(), topRight, bottomRight, voltage));
 }
 

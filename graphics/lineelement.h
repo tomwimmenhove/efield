@@ -12,12 +12,12 @@ template<typename T>
 class LineElement : public DrawingElement<T>
 {
 public:
-    LineElement(int id)
-        : DrawingElement<T>(id)
+    LineElement(int id, const QSize& bounds)
+        : DrawingElement<T>(id, bounds)
     { }
 
-    LineElement(int id, SharedNode& p1, SharedNode& p2, const T& value)
-        : DrawingElement<T>(id), p1(p1), p2(p2), v(value)
+    LineElement(int id, const QSize& bounds, SharedNode& p1, SharedNode& p2, const T& value)
+        : DrawingElement<T>(id, bounds), p1(p1), p2(p2), v(value)
     {
         p1->use();
         p2->use();
@@ -89,11 +89,19 @@ public:
     }
 
     QPoint center() const override { return (p1.point() + p2.point()) / 2; }
-    void setCenter(const QPoint& point) override
+    bool setCenter(const QPoint& point) override
     {
         QPoint d = point - center();
-        p1.setPoint(p1.point() + d);
-        p2.setPoint(p2.point() + d);
+        QPoint newP1 = p1.point() + d;
+        QPoint newP2 = p2.point() + d;
+
+        if (!this->isInBounds(newP1) || !this->isInBounds(newP2))
+            return false;
+
+        p1.setPoint(newP1);
+        p2.setPoint(newP2);
+
+        return true;
     }
 
     bool canAnchor() const override { return false; }
