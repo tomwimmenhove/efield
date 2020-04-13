@@ -2,7 +2,7 @@
 #define NORMALMOUSEOPERATIONS_H
 
 #include "normalmouseoperation.h"
-#include "dragnodemouseoperation.h"
+#include "dragmouseoperation.h"
 #include "newlinemouseoperation.h"
 #include "newnodemouseoperation.h"
 

@@ -3,7 +3,7 @@
 #include "graphics/nodeelement.h"
 #include "graphics/lineelement.h"
 #include "normalmouseoperation.h"
-#include "dragnodemouseoperation.h"
+#include "dragmouseoperation.h"
 #include "pointinputdialog.h"
 
 void NormalMouseOperation::mousePressed(std::unique_ptr<MouseOperation>& current, const QPoint& pointerPosition)
@@ -11,7 +11,7 @@ void NormalMouseOperation::mousePressed(std::unique_ptr<MouseOperation>& current
     auto closest = scene->closestElement(pointerPosition);
     if (closest != scene->end())
     {
-        current = std::make_unique<DragNodeMouseOperation>(std::move(current), scene);
+        current = std::make_unique<DragMouseOperation>(std::move(current), scene);
         current->activate(current, pointerPosition);
         return;
     }

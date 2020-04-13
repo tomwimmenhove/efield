@@ -3,10 +3,10 @@
 
 #include "mouseoperation.h"
 
-class DragNodeMouseOperation : public MouseOperation
+class DragMouseOperation : public MouseOperation
 {
 public:
-    DragNodeMouseOperation(std::unique_ptr<MouseOperation>&& parent, QSharedPointer<SceneElement<float>> scene) noexcept
+    DragMouseOperation(std::unique_ptr<MouseOperation>&& parent, QSharedPointer<SceneElement<float>> scene) noexcept
         : MouseOperation(std::move(parent), scene)
     { }
 
@@ -19,6 +19,7 @@ public:
 
 private:
     QPoint savedPos;
+    QPoint dragStartPos;
 };
 
 #endif // DRAGNODEMOUSEOPERATION_H

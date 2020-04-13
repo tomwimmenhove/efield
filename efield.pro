@@ -43,11 +43,11 @@ SOURCES += \
     pointinputdialog.cpp \
     model/project.cpp \
     viewmodel/mouseoperations/mouseoperation.cpp \
-    viewmodel/mouseoperations/dragnodemouseoperation.cpp \
     viewmodel/mouseoperations/newnodemouseoperation.cpp \
     viewmodel/mouseoperations/newlinemouseoperation.cpp \
     viewmodel/mouseoperations/normalmouseoperation.cpp \
-    viewmodel/editdrawingelementvisitor.cpp
+    viewmodel/editdrawingelementvisitor.cpp \
+    viewmodel/mouseoperations/dragmouseoperation.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -80,12 +80,12 @@ HEADERS += \
     model/project.h \
     util/derefiterator.h \
     viewmodel/mouseoperations/mouseoperation.h \
-    viewmodel/mouseoperations/dragnodemouseoperation.h \
     viewmodel/mouseoperations/newnodemouseoperation.h \
     viewmodel/mouseoperations/newlinemouseoperation.h \
     viewmodel/mouseoperations/normalmouseoperation.h \
     viewmodel/mouseoperations/mouseoperations.h \
-    viewmodel/editdrawingelementvisitor.h
+    viewmodel/editdrawingelementvisitor.h \
+    viewmodel/mouseoperations/dragmouseoperation.h
 
 FORMS += \
         mainwindow.ui \
