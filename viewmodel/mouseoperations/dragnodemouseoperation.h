@@ -18,7 +18,7 @@ public:
     void mouseReleased(std::unique_ptr<MouseOperation>& current, const QPoint& pointerPosition, Qt::MouseButtons buttons) override;
 
 private:
-    QPoint nodeSavedPos;
+    QPoint savedPos;
 };
 
 #endif // DRAGNODEMOUSEOPERATION_H

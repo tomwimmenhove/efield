@@ -94,6 +94,7 @@ public:
     }
 
     QPoint center() const override { return QPoint(); }
+    void setCenter(const QPoint&) override { }
     bool canAnchor() const override { return false; }
     bool canDelete() const override { return false; }
 

@@ -30,6 +30,7 @@ public:
     virtual void drawAnnotation(QPainter& painter, const QSize& surfaceSize) = 0;
     virtual float distanceTo(const QPoint& point) const = 0;
     virtual QPoint center() const = 0;
+    virtual void setCenter(const QPoint& point) = 0;
     virtual bool canAnchor() const = 0;
     virtual SharedNode anchorNode() const { abort(); }
     virtual bool canDelete() const = 0;

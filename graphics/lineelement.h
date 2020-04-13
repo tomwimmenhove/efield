@@ -89,6 +89,13 @@ public:
     }
 
     QPoint center() const override { return (p1.point() + p2.point()) / 2; }
+    void setCenter(const QPoint& point) override
+    {
+        QPoint d = point - center();
+        p1.setPoint(p1.point() + d);
+        p2.setPoint(p2.point() + d);
+    }
+
     bool canAnchor() const override { return false; }
     bool canDelete() const override { return true; }
 

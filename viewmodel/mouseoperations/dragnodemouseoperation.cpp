@@ -4,8 +4,7 @@ void DragNodeMouseOperation::activate(std::unique_ptr<MouseOperation>&, const QP
 {
     auto closest = scene->closestElement(pointerPosition);
     Q_ASSERT(closest != scene->end());
-    Q_ASSERT(closest->elementType() == drawingElementType::Node);
-    nodeSavedPos = closest->anchorNode().point();
+    savedPos = closest->center();
     scene->highlight(closest);
 
     update();
@@ -15,8 +14,7 @@ void DragNodeMouseOperation::cancelOperation(std::unique_ptr<MouseOperation>& cu
 {
     auto highLighted = scene->findHighLighted();
     Q_ASSERT(highLighted != scene->end());
-    Q_ASSERT(highLighted->elementType() == drawingElementType::Node);
-    highLighted->anchorNode().setPoint(nodeSavedPos);
+    highLighted->setCenter(savedPos);
 
     parent->update();
     current = std::move(parent);
@@ -26,8 +24,7 @@ void DragNodeMouseOperation::mouseMoved(std::unique_ptr<MouseOperation>&, const 
 {
     auto highLighted = scene->findHighLighted();
     Q_ASSERT(highLighted != scene->end());
-    Q_ASSERT(highLighted->elementType() == drawingElementType::Node);
-    highLighted->anchorNode().setPoint(pointerPosition);
+    highLighted->setCenter(pointerPosition);
 
     update();
 }

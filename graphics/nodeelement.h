@@ -54,6 +54,11 @@ public:
     }
 
     QPoint center() const override { return n.point(); }
+    void setCenter(const QPoint& point) override
+    {
+        n.setPoint(n.point() + point - center());
+    }
+
     bool canAnchor() const override { return true; }
     bool canDelete() const override { return anchorNode()->refCounter() == 0; }
 
