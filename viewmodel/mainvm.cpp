@@ -225,6 +225,7 @@ void MainVm::deleteSelectedElement()
     if (highLighted == scene->end() || !highLighted->canDelete())
         return;
 
+    cancelOperation();
     scene->remove(highLighted);
 
     emit visualizationAvailable(surface->minValue(), surface->maxValue());
@@ -247,7 +248,6 @@ void MainVm::editSelectedElement()
         return;
 
     cancelOperation();
-
     editElement(*highLighted);
 }
 
