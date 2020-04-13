@@ -46,7 +46,8 @@ SOURCES += \
     viewmodel/mouseoperations/dragnodemouseoperation.cpp \
     viewmodel/mouseoperations/newnodemouseoperation.cpp \
     viewmodel/mouseoperations/newlinemouseoperation.cpp \
-    viewmodel/mouseoperations/normalmouseoperation.cpp
+    viewmodel/mouseoperations/normalmouseoperation.cpp \
+    viewmodel/editdrawingelementvisitor.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -83,7 +84,8 @@ HEADERS += \
     viewmodel/mouseoperations/newnodemouseoperation.h \
     viewmodel/mouseoperations/newlinemouseoperation.h \
     viewmodel/mouseoperations/normalmouseoperation.h \
-    viewmodel/mouseoperations/mouseoperations.h
+    viewmodel/mouseoperations/mouseoperations.h \
+    viewmodel/editdrawingelementvisitor.h
 
 FORMS += \
         mainwindow.ui \

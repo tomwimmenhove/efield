@@ -61,8 +61,7 @@ private:
     void createScene();
 #endif
     void createBorder(float voltage);
-    void editNode(NodeElement<float>& node);
-    void editLine(LineElement<float>& line);
+    void editElement(DrawingElement<float>& node);
     template<typename T> void activateNewMouseOperation(const QPoint& pointerPosition);
     void postMouseOperation();
     void updateStatusBarValue(const QPoint& pointerPosition);

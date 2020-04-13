@@ -20,8 +20,7 @@ public:
     void mouseDoubleClicked(std::unique_ptr<MouseOperation>& current, const QPoint& pointerPosition, Qt::MouseButtons buttons) override;
 
 signals:
-    void editNode(NodeElement<float>& node);
-    void editLine(LineElement<float>& line);
+    void editElement(DrawingElement<float>& node);
 
 private:
     QPoint nodeSavedPos;

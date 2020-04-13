@@ -7,12 +7,12 @@
 
 #include "mainvm.h"
 #include "pointinputdialog.h"
-
 #include "model/floatsurfacedrawer.h"
 #include "visualizer/visualizer.h"
 #include "graphics/sceneserializevisitor.h"
 #include "graphics/scenedeserializevisitor.h"
 #include "mouseoperations/mouseoperations.h"
+#include "editdrawingelementvisitor.h"
 
 MainVm::MainVm(QWidget* parent)
     : QObject(parent), parentWidget(parent)
@@ -240,28 +240,10 @@ void MainVm::deleteSelectedElement()
     emit visualizationAvailable(surface->minValue(), surface->maxValue());
 }
 
-void MainVm::editNode(NodeElement<float>& node)
+void MainVm::editElement(DrawingElement<float>& node)
 {
-    SharedNode sharedNode = node.node();
-
-    PointInputDialog d("Node coordinates", sharedNode, QPoint(0, 0), QPoint(surface->width() - 1, surface->height() - 1), parentWidget);
-    if (d.exec() != QDialog::Accepted)
-        return;
-
-    sharedNode.setPoint(d.point());
-
-    emit visualizationAvailable(surface->minValue(), surface->maxValue());
-}
-
-void MainVm::editLine(LineElement<float>& line)
-{
-    bool ok;
-    int def = line.value();
-
-    int volt = QInputDialog::getInt(parentWidget, tr("Edit line"),
-                                    tr("Voltage: "),  def, -2147483647, 2147483647, 1, &ok);
-    if (ok)
-        line.setValue(volt);
+    if (EditDrawingElementVisitor::edit(parentWidget, node, surface))
+        emit visualizationAvailable(surface->minValue(), surface->maxValue());
 }
 
 void MainVm::editSelectedElement()
@@ -269,26 +251,15 @@ void MainVm::editSelectedElement()
     if (!surface)
         return;
 
-    cancelOperation();
-
     QSharedPointer<SceneElement<float>> scene = project->sharedScene();
 
     auto highLighted = scene->findHighLighted();
     if (highLighted == scene->end())
         return;
 
-    switch (highLighted->elementType())
-    {
-        case drawingElementType::None:
-        case drawingElementType::Scene:
-            break;
-        case drawingElementType::Node:
-            editNode(static_cast<NodeElement<float>&>(*highLighted));
-            break;
-        case drawingElementType::Line:
-            editLine(static_cast<LineElement<float>&>(*highLighted));
-            break;
-    }
+    cancelOperation();
+
+    editElement(*highLighted);
 }
 
 template<typename T>
@@ -370,8 +341,7 @@ void MainVm::initNewProject(std::unique_ptr<Project>&& newProject)
     project = std::move(newProject);
 
     mouseOperation = std::make_unique<NormalMouseOperation>(project->sharedScene());
-    connect(static_cast<NormalMouseOperation*>(mouseOperation.get()), &NormalMouseOperation::editLine, this, &MainVm::editLine);
-    connect(static_cast<NormalMouseOperation*>(mouseOperation.get()), &NormalMouseOperation::editNode, this, &MainVm::editNode);
+    connect(static_cast<NormalMouseOperation*>(mouseOperation.get()), &NormalMouseOperation::editElement, this, &MainVm::editElement);
 }
 
 #ifdef QT_DEBUG
