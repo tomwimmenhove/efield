@@ -231,9 +231,9 @@ void MainVm::deleteSelectedElement()
     emit visualizationAvailable(surface->minValue(), surface->maxValue());
 }
 
-void MainVm::editElement(DrawingElement<float>& node)
+void MainVm::editElement(DrawingElement<float>& element)
 {
-    if (EditDrawingElementVisitor::edit(parentWidget, node, surface))
+    if (EditDrawingElementVisitor::edit(parentWidget, element, surface))
         emit visualizationAvailable(surface->minValue(), surface->maxValue());
 }
 

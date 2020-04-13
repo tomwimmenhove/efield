@@ -70,8 +70,6 @@ void NormalMouseOperation::mouseDoubleClicked(std::unique_ptr<MouseOperation>&, 
         return;
 
     auto closest = scene->closestElement(pointerPosition);
-    if (closest == scene->end())
-        return;
-
-    emit editElement(*closest);
+    if (closest != scene->end())
+        emit editElement(*closest);
 }
