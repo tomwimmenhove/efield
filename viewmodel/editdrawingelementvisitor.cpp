@@ -18,9 +18,9 @@ void EditDrawingElementVisitor::visit(SceneElement<float>&)
 
 void EditDrawingElementVisitor::visit(NodeElement<float>& node)
 {
-    qDebug() << "line id" << node.identifier() << ", sharedPoint id: " << node.node().identifier();
+    qDebug() << "line id" << node.identifier() << ", sharedPoint id: " << node.anchorNode().identifier();
 
-    SharedNode sharedNode = node.node();
+    SharedNode sharedNode = node.anchorNode();
 
     PointInputDialog d(QWidget::tr("Node coordinates"),
                        sharedNode, QPoint(0, 0), QPoint(surface->width() - 1, surface->height() - 1), parentWidget);

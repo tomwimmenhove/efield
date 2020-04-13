@@ -88,6 +88,10 @@ public:
         p2->use();
     }
 
+    QPoint center() const override { return (p1.point() + p2.point()) / 2; }
+    bool canAnchor() const override { return false; }
+    bool canDelete() const override { return true; }
+
     void accept(DrawingElementVisitor<T>& visitor) override { visitor.visit(*this); }
 
 private:

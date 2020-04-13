@@ -53,9 +53,11 @@ public:
         return dist > 0 ? dist : 0;
     }
 
-    bool canDelete() const override { return node()->refCounter() == 0; }
+    QPoint center() const override { return n.point(); }
+    bool canAnchor() const override { return true; }
+    bool canDelete() const override { return anchorNode()->refCounter() == 0; }
 
-    inline SharedNode node() const { return n; }
+    SharedNode anchorNode() const override { return n; }
     inline void setNode(SharedNode node)
     {
         Q_ASSERT(node.identifier() == this->identifier());

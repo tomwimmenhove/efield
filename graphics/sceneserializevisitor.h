@@ -27,8 +27,8 @@ public:
     void visit(NodeElement<T>& element) override
     {
         QDomElement node = domDocument.createElement("Node");
-        node.setAttribute("X", QString::number(element.node().point().x()));
-        node.setAttribute("Y", QString::number(element.node().point().y()));
+        node.setAttribute("X", QString::number(element.anchorNode().point().x()));
+        node.setAttribute("Y", QString::number(element.anchorNode().point().y()));
         node.setAttribute("ID", QString::number(element.identifier()));
         domElement.appendChild(node);
     }

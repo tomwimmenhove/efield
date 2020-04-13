@@ -5,13 +5,14 @@
 #include "graphics/idrawer.h"
 #include "util/geometry.h"
 #include "util/derefiterator.h"
+#include "nodeelement.h"
 
 #include <limits>
 #include <memory>
 #include <QVector>
 #include <QDomDocument>
 #include <QUuid>
-#include "nodeelement.h"
+#include <functional>
 
 template<typename T>
 class SceneElement : public DrawingElement<T>
@@ -59,14 +60,16 @@ public:
             i->setHighlighted(i == iter);
     }
 
-    iterator closestElement(const QPoint& point, drawingElementType type = drawingElementType::None) const
+    iterator closestElement(const QPoint& point,
+                            std::function<bool(const DrawingElement<T>&)> pred =
+            [](const DrawingElement<T>&) { return true; }) const
     {
         iterator closest = end();
 
         float min = std::numeric_limits<float>::max();
         for (auto i = begin(); i != end(); ++i)
         {
-            if (type != drawingElementType::None && type != i->elementType())
+            if (!pred(*i))
                 continue;
 
             float dist = i->distanceTo(point);
@@ -89,6 +92,10 @@ public:
     {
         return std::find_if(begin(), end(), [](const DrawingElement<T>& e) { return e.isHighlighted(); });
     }
+
+    QPoint center() const override { return QPoint(); }
+    bool canAnchor() const override { return false; }
+    bool canDelete() const override { return false; }
 
     void accept(DrawingElementVisitor<T>& visitor) override { visitor.visit(*this); }
 

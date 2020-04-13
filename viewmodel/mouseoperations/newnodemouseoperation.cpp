@@ -28,8 +28,7 @@ void NewNodeMouseOperation::mouseMoved(std::unique_ptr<MouseOperation>&, const Q
     auto highLighted = scene->findHighLighted();
     Q_ASSERT(highLighted != scene->end());
     Q_ASSERT(highLighted->elementType() == drawingElementType::Node);
-    NodeElement<float>& node = static_cast<NodeElement<float>&>(*highLighted);
-    node.node().setPoint(pointerPosition);
+    highLighted->anchorNode().setPoint(pointerPosition);
 
     update();
 }
