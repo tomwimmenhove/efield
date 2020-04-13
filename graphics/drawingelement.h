@@ -49,6 +49,7 @@ public:
 
 protected:
     inline bool isInBounds(const QPoint& p) { return QRect(QPoint(0, 0), clipBounds).contains(p); }
+
     bool highlighted = false;
     int id;
 

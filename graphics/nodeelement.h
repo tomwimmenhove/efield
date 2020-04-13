@@ -56,11 +56,7 @@ public:
     QPoint center() const override { return n.point(); }
     bool setCenter(const QPoint& point) override
     {
-        QPoint newPoint = n.point() + point - center();
-        if (!this->isInBounds(newPoint))
-            return false;
-
-        n.setPoint(newPoint);
+        n.setPoint(Geometry::clip(n.point() + point - center(), this->bounds()));
         return true;
     }
 

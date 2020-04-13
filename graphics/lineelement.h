@@ -92,14 +92,10 @@ public:
     bool setCenter(const QPoint& point) override
     {
         QPoint d = point - center();
-        QPoint newP1 = p1.point() + d;
-        QPoint newP2 = p2.point() + d;
+        QRect r = Geometry::clip(QRect(p1.point() + d, p2.point() + d), this->bounds());
 
-        if (!this->isInBounds(newP1) || !this->isInBounds(newP2))
-            return false;
-
-        p1.setPoint(newP1);
-        p2.setPoint(newP2);
+        p1.setPoint(r.topLeft());
+        p2.setPoint(r.bottomRight());
 
         return true;
     }

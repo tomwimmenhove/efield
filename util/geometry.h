@@ -4,6 +4,7 @@
 #include <QVector2D>
 #include <QPoint>
 #include <QSize>
+#include <QRect>
 
 class Geometry
 {
@@ -21,6 +22,10 @@ public:
                                  const QSize& toSurface,
                                  bool fipVertical,
                                  Qt::AspectRatioMode mode = Qt::KeepAspectRatio);
+
+    static QPoint clip(QPoint p, const QSize& size);
+    static QRect clip(QRect r, const QRect& bounds);
+    static QRect clip(QRect r, const QSize& size);
 };
 
 #endif // GEOMETRY_H
