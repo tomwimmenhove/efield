@@ -19,7 +19,10 @@ class SceneElement : public DrawingElement<T>
 public:
     using iterator = DerefIterator<typename std::vector<std::unique_ptr<DrawingElement<T>>>::const_iterator, DrawingElement<T>>;
 
-    SceneElement() { }
+    SceneElement(int id = 0) : DrawingElement<T>(id), idCounter(id) { }
+
+    inline int newId() { return ++idCounter; }
+    inline void setInitialId(int id) { idCounter = id; }
 
     virtual drawingElementType elementType() const override { return drawingElementType::Scene; }
 
@@ -92,6 +95,7 @@ public:
 private:
     const float maxDist = 15;
     std::vector<std::unique_ptr<DrawingElement<T>>> elements;
+    int idCounter;
 };
 
 #endif // SCENEELEMENT_H

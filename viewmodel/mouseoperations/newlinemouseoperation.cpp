@@ -13,9 +13,10 @@ void NewLineMouseOperation::mousePressed(std::unique_ptr<MouseOperation>&, const
             {
                 Q_ASSERT(highLighted->elementType() == drawingElementType::Node);
                 auto& startNode = static_cast<NodeElement<float>&>(*highLighted);
+                startId = startNode.identifier();
                 SharedNode sharedStartNode = startNode.node();
-                SharedNode sharedEndNode = SharedNode(pointerPosition);
-                scene->add(std::move(LineElement<float>::uniqueElement(sharedStartNode, sharedEndNode, 0)));
+                SharedNode sharedEndNode = SharedNode(-1, pointerPosition);
+                scene->add(std::move(LineElement<float>::uniqueElement(scene->newId(), sharedStartNode, sharedEndNode, 0)));
 
                 state = State::p2;
                 break;
@@ -31,7 +32,7 @@ void NewLineMouseOperation::mousePressed(std::unique_ptr<MouseOperation>&, const
                 Q_ASSERT(scene->back().elementType() == drawingElementType::Line);
                 auto& newLine = static_cast<LineElement<float>&>(scene->back());
 
-                if (endNode.node()->identifier() != newLine.point1()->identifier())
+                if (endNode.identifier() != startId)
                 {
                     newLine.setPoint2(endNode.node());
                     state = State::p1;
@@ -86,7 +87,7 @@ void NewLineMouseOperation::mouseMoved(std::unique_ptr<MouseOperation>&, const Q
             {
                 Q_ASSERT(closest->elementType() == drawingElementType::Node);
                 auto& closestNode = static_cast<NodeElement<float>&>(*closest);
-                if (closestNode.node()->identifier() != newLine.point1()->identifier())
+                if (closestNode.identifier() != startId)
                     scene->highlight(closest);
             }
 

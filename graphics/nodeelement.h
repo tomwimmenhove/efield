@@ -12,16 +12,18 @@ template<typename T>
 class NodeElement : public DrawingElement<T>
 {
 public:
-    NodeElement()
+    NodeElement(int id)
+        : DrawingElement<T>(id), n(id)
     { }
 
     NodeElement(const SharedNode& p)
-        : n(p)
+        : DrawingElement<T>(p.identifier()), n(p)
     { }
 
-    static std::unique_ptr<NodeElement<T>> uniqueElement(const SharedNode& p)
+    template<typename... Args>
+    static std::unique_ptr<NodeElement<T>> uniqueElement(Args&& ...arguments)
     {
-        return std::make_unique<NodeElement<T>>(p);
+        return std::make_unique<NodeElement<T>>(std::forward<Args>(arguments)...);
     }
 
     virtual drawingElementType elementType() const override { return drawingElementType::Node; }
@@ -51,8 +53,14 @@ public:
         return dist > 0 ? dist : 0;
     }
 
+    bool canDelete() const override { return node()->refCounter() == 0; }
+
     inline SharedNode node() const { return n; }
-    inline void setNode(SharedNode node) { n = node; }
+    inline void setNode(SharedNode node)
+    {
+        Q_ASSERT(node.identifier() == this->identifier());
+        n = node;
+    }
 
     void accept(DrawingElementVisitor<T>& visitor) override { visitor.visit(*this); }
 

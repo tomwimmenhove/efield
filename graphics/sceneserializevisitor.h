@@ -29,15 +29,16 @@ public:
         QDomElement node = domDocument.createElement("Node");
         node.setAttribute("X", QString::number(element.node().point().x()));
         node.setAttribute("Y", QString::number(element.node().point().y()));
-        node.setAttribute("ID", QString::number(element.node()->identifier()));
+        node.setAttribute("ID", QString::number(element.identifier()));
         domElement.appendChild(node);
     }
 
     void visit(LineElement<T>& element) override
     {
         QDomElement line = domDocument.createElement("Line");
-        line.setAttribute("Node1", QString::number(element.point1()->identifier()));
-        line.setAttribute("Node2", QString::number(element.point2()->identifier()));
+        line.setAttribute("Node1", QString::number(element.point1().identifier()));
+        line.setAttribute("Node2", QString::number(element.point2().identifier()));
+        line.setAttribute("ID", QString::number(element.identifier()));
         line.appendChild(domDocument.createTextNode(valueToString(element.value())));
         domElement.appendChild(line);
     }

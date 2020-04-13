@@ -13,9 +13,7 @@ public:
     template<typename... Args>
     Refcounted(Args && ...arguments)
         : value(std::forward<Args>(arguments)...)
-    {
-        id = idCounter++;
-    }
+    { }
 
     inline operator T() { return value; }
 
@@ -25,16 +23,6 @@ public:
         return *this;
     }
 
-//    QUuid getQUuid()
-//    {
-//        if (uuid.isNull())
-//            uuid = QUuid::createUuid();
-
-//        return uuid;
-//    }
-
-    inline uint64_t identifier() const { return id; }
-
     inline void use() { refCount++; }
     inline void release() { refCount--; }
     inline int refCounter() { return refCount; }
@@ -42,12 +30,6 @@ public:
 private:
     T value;
     int refCount = 0;
-    //QUuid uuid;
-
-    uint64_t id;
-    static QAtomicInteger<uint64_t> idCounter;
 };
-
-template<typename T> QAtomicInteger<uint64_t> Refcounted<T>::idCounter;
 
 #endif // REFCOUNTED_H

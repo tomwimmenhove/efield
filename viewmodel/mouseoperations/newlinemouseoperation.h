@@ -25,6 +25,8 @@ private:
         p2
     };
 
+    int startId;
+
     State state = State::p1;
 };
 

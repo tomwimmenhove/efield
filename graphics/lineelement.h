@@ -12,10 +12,12 @@ template<typename T>
 class LineElement : public DrawingElement<T>
 {
 public:
-    LineElement() { }
+    LineElement(int id)
+        : DrawingElement<T>(id)
+    { }
 
-    LineElement(SharedNode& p1, SharedNode& p2, const T& value)
-        : p1(p1), p2(p2), v(value)
+    LineElement(int id, SharedNode& p1, SharedNode& p2, const T& value)
+        : DrawingElement<T>(id), p1(p1), p2(p2), v(value)
     {
         p1->use();
         p2->use();
@@ -27,9 +29,10 @@ public:
         p2->release();
     }
 
-    static std::unique_ptr<LineElement<float>> uniqueElement(SharedNode& p1, SharedNode& p2, const T& value)
+    template<typename... Args>
+    static std::unique_ptr<LineElement<float>> uniqueElement(Args&& ...arguments)
     {
-        return std::make_unique<LineElement<float>>(p1, p2, value);
+        return std::make_unique<LineElement<float>>(std::forward<Args>(arguments)...);
     }
 
     virtual drawingElementType elementType() const override { return drawingElementType::Line; }

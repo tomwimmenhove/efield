@@ -22,33 +22,44 @@ public:
 
     void visit(SceneElement<T>& element) override
     {
-        std::array<QPair<QString, std::function<DrawingElement<T>*(void)>>, 2> nodeFactories
+        std::array<QPair<QString, std::function<DrawingElement<T>*(int id)>>, 2> nodeFactories
         {{
-            { "Node", []() { return new NodeElement<T>(); } }, // First, because LineElements depends on it
-            { "Line", []() { return new LineElement<T>(); } },
+            { "Node", [](int id) { return new NodeElement<T>(id); } }, // First, because LineElements depends on it
+            { "Line", [](int id) { return new LineElement<T>(id); } },
         }};
+
+        int maxId = 0;
 
         for(auto& nodeFactory: nodeFactories)
         {
             auto nodeXmlElements = domElement.elementsByTagName(nodeFactory.first);
             for(int i = 0; i < nodeXmlElements.count(); i++)
             {
-                std::unique_ptr<DrawingElement<T>> nodeElement = std::unique_ptr<DrawingElement<T>>(nodeFactory.second());
                 QDomElement nodeXmlElement = nodeXmlElements.item(i).toElement();
+                QDomNamedNodeMap attributes = nodeXmlElement.attributes();
+
+                int id = attributes.namedItem("ID").nodeValue().toInt();
+                if (id > maxId)
+                    maxId = id;
+
+                std::unique_ptr<DrawingElement<T>> nodeElement = std::unique_ptr<DrawingElement<T>>(nodeFactory.second(id));
+
                 SceneDeserializeVisitor visitor(nodeXmlElement, nodeMap);
                 nodeElement->accept(visitor);
                 element.add(std::move(nodeElement));
             }
         }
+
+        element.setInitialId(maxId);
     }
 
     void visit(NodeElement<T>& element) override
     {
         QDomNamedNodeMap attributes = domElement.attributes();
-        SharedNode sharedNode(attributes.namedItem("X").nodeValue().toInt(),
+        SharedNode sharedNode(element.identifier(),
+                              attributes.namedItem("X").nodeValue().toInt(),
                               attributes.namedItem("Y").nodeValue().toInt());
-        int id = attributes.namedItem("ID").nodeValue().toInt();
-        nodeMap[id] = sharedNode;
+        nodeMap[element.identifier()] = sharedNode;
         element.setNode(sharedNode);
     }
 
