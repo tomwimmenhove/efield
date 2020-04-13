@@ -20,7 +20,13 @@ class SceneElement : public DrawingElement<T>
 public:
     using iterator = DerefIterator<typename std::vector<std::unique_ptr<DrawingElement<T>>>::const_iterator, DrawingElement<T>>;
 
-    SceneElement(int id = 0) : DrawingElement<T>(id), idCounter(id) { }
+    SceneElement(int id = 0)
+        : DrawingElement<T>(id), idCounter(id)
+    { }
+
+    SceneElement(const QSize& size, int id = 0)
+        : DrawingElement<T>(id), sceneSize(size), idCounter(id)
+    { }
 
     inline int newId() { return ++idCounter; }
     inline void setInitialId(int id) { idCounter = id; }
@@ -36,6 +42,9 @@ public:
 
     iterator begin() const { return iterator(elements.begin()); }
     iterator end() const { return iterator(elements.end()); }
+
+    inline QSize size() const { return sceneSize; }
+    inline void setSize(const QSize& size) { sceneSize = size; }
 
     void draw(IDrawer<T>& drawer) override
     {
@@ -102,6 +111,7 @@ public:
 
 private:
     const float maxDist = 15;
+    QSize sceneSize;
     std::vector<std::unique_ptr<DrawingElement<T>>> elements;
     int idCounter;
 };

@@ -30,6 +30,11 @@ public:
 
         int maxId = 0;
 
+        QDomNamedNodeMap attributes = domElement.attributes();
+        QSize size(attributes.namedItem("Width").nodeValue().toInt(),
+                   attributes.namedItem("Height").nodeValue().toInt());
+        element.setSize(size);
+
         for(auto& nodeFactory: nodeFactories)
         {
             auto nodeXmlElements = domElement.elementsByTagName(nodeFactory.first);

@@ -27,7 +27,6 @@ public:
     QSharedPointer<Simulator> sharedSimulator() const { return simulator; }
 
 private:
-    void allocate(const QSize& size);
     void fromDoc(const QDomDocument& doc);
     QDomDocument toDoc();
 

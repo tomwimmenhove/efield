@@ -17,6 +17,9 @@ public:
 
     void visit(SceneElement<T>& element) override
     {
+        domElement.setAttribute("Width", QString::number(element.size().width()));
+        domElement.setAttribute("Height", QString::number(element.size().height()));
+
         for (auto& e: element)
         {
             SceneSerializeVisitor visitor(domElement, domDocument);
