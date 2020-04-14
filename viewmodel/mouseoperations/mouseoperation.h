@@ -6,12 +6,15 @@
 #include <QSharedPointer>
 
 #include "graphics/sceneelement.h"
+#include "util/undo/undostack.h"
 
 class MouseOperation
 {
 public:
-    MouseOperation(std::unique_ptr<MouseOperation>&& parent, QSharedPointer<SceneElement<float>> scene) noexcept
-        : parent(std::move(parent)), scene(scene)
+    MouseOperation(std::unique_ptr<MouseOperation>&& parent,
+                   const QSharedPointer<UndoStack>& undoStack,
+                   const QSharedPointer<SceneElement<float>>& scene) noexcept
+        : parent(std::move(parent)), undoStack(undoStack), scene(scene)
     { }
 
     bool popUpdate();
@@ -30,6 +33,7 @@ public:
 
 protected:
     std::unique_ptr<MouseOperation> parent;
+    QSharedPointer<UndoStack> undoStack;
     QSharedPointer<SceneElement<float>> scene;
 
 private:

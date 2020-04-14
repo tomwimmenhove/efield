@@ -94,10 +94,21 @@ public:
         highlight(closestElement(point, maxDist));
     }
 
+    iterator findIf(const std::function<bool(const DrawingElement<T>&)>& pred) const
+    {
+        return std::find_if(begin(), end(), pred);
+    }
+
     iterator findHighLighted() const
     {
-        return std::find_if(begin(), end(), [](const DrawingElement<T>& e) { return e.isHighlighted(); });
+        return findIf([](const DrawingElement<T>& e) { return e.isHighlighted(); });
     }
+
+    iterator findId(int id) const
+    {
+        return findIf([id](const DrawingElement<T>& e) { return e.identifier() == id; });
+    }
+
 
     QPoint center() const override { return QPoint(); }
     bool setCenter(const QPoint&) override { return false; }

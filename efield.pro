@@ -47,7 +47,9 @@ SOURCES += \
     viewmodel/mouseoperations/newlinemouseoperation.cpp \
     viewmodel/mouseoperations/normalmouseoperation.cpp \
     viewmodel/editdrawingelementvisitor.cpp \
-    viewmodel/mouseoperations/dragmouseoperation.cpp
+    viewmodel/mouseoperations/dragmouseoperation.cpp \
+    util/undo/undostack.cpp \
+    util/undo/moveundoitem.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -85,7 +87,9 @@ HEADERS += \
     viewmodel/mouseoperations/normalmouseoperation.h \
     viewmodel/mouseoperations/mouseoperations.h \
     viewmodel/editdrawingelementvisitor.h \
-    viewmodel/mouseoperations/dragmouseoperation.h
+    viewmodel/mouseoperations/dragmouseoperation.h \
+    util/undo/undostack.h \
+    util/undo/moveundoitem.h
 
 FORMS += \
         mainwindow.ui \

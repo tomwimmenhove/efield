@@ -109,7 +109,15 @@
     <addaction name="action_Open"/>
     <addaction name="action_Save_as"/>
    </widget>
+   <widget class="QMenu" name="menuEdit">
+    <property name="title">
+     <string>Edit</string>
+    </property>
+    <addaction name="action_Undo"/>
+    <addaction name="action_Redo"/>
+   </widget>
    <addaction name="menu_File"/>
+   <addaction name="menuEdit"/>
    <addaction name="menuSimulation"/>
    <addaction name="menuImage"/>
    <addaction name="menuPlot"/>
@@ -226,6 +234,22 @@
   <action name="action_Save_as">
    <property name="text">
     <string>&amp;Save as...</string>
+   </property>
+  </action>
+  <action name="action_Undo">
+   <property name="text">
+    <string>&amp;Undo</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Z</string>
+   </property>
+  </action>
+  <action name="action_Redo">
+   <property name="text">
+    <string>&amp;Redo</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Y</string>
    </property>
   </action>
  </widget>

@@ -3,20 +3,28 @@
 
 #include <QWidget>
 
-#include <graphics/drawingelement.h>
-#include <graphics/lineelement.h>
-#include <graphics/nodeelement.h>
-#include <graphics/sceneelement.h>
-#include <model/floatsurface.h>
+#include "graphics/drawingelement.h"
+#include "graphics/lineelement.h"
+#include "graphics/nodeelement.h"
+#include "graphics/sceneelement.h"
+#include "model/floatsurface.h"
+#include "util/undo/undostack.h"
 
 class EditDrawingElementVisitor : public DrawingElementVisitor<float>
 {
 public:
-    static bool edit(QWidget* parentWidget, DrawingElement<float>& element, QSharedPointer<FloatSurface> surface);
+    static bool edit(QWidget* parentWidget,
+                     const QSharedPointer<UndoStack>& undoStack,
+                     const QSharedPointer<SceneElement<float> >& scene,
+                     DrawingElement<float>& element,
+                     const QSharedPointer<FloatSurface> surface);
 
 private:
-    EditDrawingElementVisitor(QWidget* parentWidget, QSharedPointer<FloatSurface> surface)
-        : parentWidget(parentWidget), surface(surface)
+    EditDrawingElementVisitor(QWidget* parentWidget,
+                              const QSharedPointer<UndoStack>& undoStack,
+                              const QSharedPointer<SceneElement<float>>& scene,
+                              QSharedPointer<FloatSurface> surface)
+        : parentWidget(parentWidget), undoStack(undoStack), scene(scene), surface(surface)
     { }
 
     void visit(SceneElement<float>&);
@@ -25,6 +33,8 @@ private:
 
     bool update = false;
     QWidget* parentWidget;
+    QSharedPointer<UndoStack> undoStack;
+    QSharedPointer<SceneElement<float>> scene;
     QSharedPointer<FloatSurface> surface;
 };
 

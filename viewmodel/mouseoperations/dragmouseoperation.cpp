@@ -1,4 +1,5 @@
 #include "dragmouseoperation.h"
+#include "util/undo/moveundoitem.h"
 
 void DragMouseOperation::activate(std::unique_ptr<MouseOperation>&, const QPoint& pointerPosition)
 {
@@ -34,4 +35,9 @@ void DragMouseOperation::mouseReleased(std::unique_ptr<MouseOperation>& current,
 {
     if (buttons != Qt::LeftButton)
         current = std::move(parent);
+
+    auto highLighted = scene->findHighLighted();
+    Q_ASSERT(highLighted != scene->end());
+
+    undoStack->add(MoveUndoItem(scene, highLighted->identifier(), savedPos, highLighted->center(), "Move"));
 }

@@ -3,11 +3,14 @@
 #include <QDebug>
 
 #include "editdrawingelementvisitor.h"
-#include <pointinputdialog.h>
+#include "pointinputdialog.h"
+#include "util/undo/moveundoitem.h"
 
-bool EditDrawingElementVisitor::edit(QWidget* parentWidget, DrawingElement<float>& element, QSharedPointer<FloatSurface> surface)
+bool EditDrawingElementVisitor::edit(QWidget* parentWidget, const QSharedPointer<UndoStack>& undoStack,
+                                     const QSharedPointer<SceneElement<float>>& scene,
+                                     DrawingElement<float>& element, const QSharedPointer<FloatSurface> surface)
 {
-    EditDrawingElementVisitor v(parentWidget, surface);
+    EditDrawingElementVisitor v(parentWidget, undoStack, scene, surface);
     element.accept(v);
 
     return v.update;
@@ -18,7 +21,8 @@ void EditDrawingElementVisitor::visit(SceneElement<float>&)
 
 void EditDrawingElementVisitor::visit(NodeElement<float>& node)
 {
-    qDebug() << "line id" << node.identifier() << ", sharedPoint id: " << node.anchorNode().identifier();
+    int id = node.anchorNode().identifier();
+    qDebug() << "line id" << node.identifier() << ", sharedPoint id: " << id;
 
     SharedNode sharedNode = node.anchorNode();
 
@@ -27,7 +31,11 @@ void EditDrawingElementVisitor::visit(NodeElement<float>& node)
     if (d.exec() != QDialog::Accepted)
         return;
 
-    sharedNode.setPoint(d.point());
+    MoveUndoItem undoItem(scene, node.identifier(), node.center(), d.point(), "Move");
+    undoStack->add(undoItem);
+    undoItem.doFunction();
+
+    //sharedNode.setPoint(d.point());
 
     update = true;
 }

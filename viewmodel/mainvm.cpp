@@ -215,6 +215,24 @@ void MainVm::projectSaveAs()
     }
 }
 
+void MainVm::undo()
+{
+    if (undoStack->canUndo())
+    {
+        undoStack->undo();
+        emit visualizationAvailable(surface->minValue(), surface->maxValue());
+    }
+}
+
+void MainVm::redo()
+{
+    if (undoStack->canRedo())
+    {
+        undoStack->redo();
+        emit visualizationAvailable(surface->minValue(), surface->maxValue());
+    }
+}
+
 void MainVm::deleteSelectedElement()
 {
     if (!surface)
@@ -233,7 +251,7 @@ void MainVm::deleteSelectedElement()
 
 void MainVm::editElement(DrawingElement<float>& element)
 {
-    if (EditDrawingElementVisitor::edit(parentWidget, element, surface))
+    if (EditDrawingElementVisitor::edit(parentWidget, undoStack, project->sharedScene(), element, surface))
         emit visualizationAvailable(surface->minValue(), surface->maxValue());
 }
 
@@ -259,7 +277,7 @@ void MainVm::activateNewMouseOperation(const QPoint& pointerPosition)
 
     /* Instantiate a new NewNodeMouseOperation with the current mouseOperation as
      * parent, and move it to the current one. */
-    mouseOperation = std::move(std::make_unique<T>(std::move(mouseOperation), project->sharedScene()));
+    mouseOperation = std::move(std::make_unique<T>(std::move(mouseOperation), undoStack, project->sharedScene()));
 
     /* Call it's activate method */
     mouseOperation->activate(mouseOperation, pointerPosition);
@@ -321,6 +339,8 @@ void MainVm::initNewProject(std::unique_ptr<Project>&& newProject)
     simulatorWorker->setNumThreads(numThreads);
 #endif
 
+    undoStack = QSharedPointer<UndoStack>::create();
+
     connect(&simulatorThread, &QThread::finished, simulatorWorker, &SimulatorWorker::deleteLater);
     connect(this, &MainVm::runSimulatorWorker, simulatorWorker, &SimulatorWorker::run);
     connect(this, &MainVm::cancelSimulatorWorker, simulatorWorker, &SimulatorWorker::stop, Qt::DirectConnection);
@@ -329,7 +349,7 @@ void MainVm::initNewProject(std::unique_ptr<Project>&& newProject)
 
     project = std::move(newProject);
 
-    mouseOperation = std::make_unique<NormalMouseOperation>(project->sharedScene());
+    mouseOperation = std::make_unique<NormalMouseOperation>(undoStack, project->sharedScene());
     connect(static_cast<NormalMouseOperation*>(mouseOperation.get()), &NormalMouseOperation::editElement, this, &MainVm::editElement);
 }
 

@@ -12,8 +12,9 @@ class NormalMouseOperation : public QObject, public MouseOperation
     Q_OBJECT
 
 public:
-    NormalMouseOperation(QSharedPointer<SceneElement<float>> scene) noexcept
-        : MouseOperation(std::move(std::unique_ptr<MouseOperation>(nullptr)), scene)
+    NormalMouseOperation(const QSharedPointer<UndoStack>& undoStack,
+                         const QSharedPointer<SceneElement<float>>& scene) noexcept
+        : MouseOperation(std::move(std::unique_ptr<MouseOperation>(nullptr)), undoStack, scene)
     { }
 
     void mousePressed(std::unique_ptr<MouseOperation>& current, const QPoint& pointerPosition) override;

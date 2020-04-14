@@ -6,8 +6,10 @@
 class NewNodeMouseOperation : public MouseOperation
 {
 public:
-    NewNodeMouseOperation(std::unique_ptr<MouseOperation>&& parent, QSharedPointer<SceneElement<float>> scene) noexcept
-        : MouseOperation(std::move(parent), scene)
+    NewNodeMouseOperation(std::unique_ptr<MouseOperation>&& parent,
+                          const QSharedPointer<UndoStack>& undoStack,
+                          const QSharedPointer<SceneElement<float>>& scene) noexcept
+        : MouseOperation(std::move(parent), undoStack, scene)
     { }
 
     Qt::CursorShape cursorShape() const override { return Qt::CrossCursor; }

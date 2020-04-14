@@ -12,6 +12,7 @@
 #include "model/simulatorworker.h"
 #include "model/gradientsurface.h"
 #include "util/simplevaluestepper.h"
+#include "util/undo/undostack.h"
 #include "graphics/sceneelement.h"
 #include "graphics/nodeelement.h"
 #include "graphics/lineelement.h"
@@ -43,6 +44,8 @@ public slots:
     void newSimulation();
     void projectOpen();
     void projectSaveAs();
+    void undo();
+    void redo();
 
 signals:
     void visualizationAvailable(float minValue, float maxValue);
@@ -68,6 +71,7 @@ private:
     void initNewProject(std::unique_ptr<Project>&& newProject);
 
     QWidget* parentWidget;
+    QSharedPointer<UndoStack> undoStack;
     std::unique_ptr<MouseOperation> mouseOperation;
     std::unique_ptr<Project> project;
     QThread simulatorThread;

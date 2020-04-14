@@ -47,6 +47,10 @@ private slots:
     void on_action_Open_triggered();
     void on_action_Save_as_triggered();
 
+    void on_action_Undo_triggered();
+
+    void on_action_Redo_triggered();
+
 signals:
     void startSimulation();
     void stopSimulation();
@@ -64,6 +68,8 @@ signals:
     void cancelOperation();
     void projectOpen();
     void projectSaveAs();
+    void undo();
+    void redo();
 
 protected:
     void keyPressEvent(QKeyEvent *e);

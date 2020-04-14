@@ -11,7 +11,7 @@ void NormalMouseOperation::mousePressed(std::unique_ptr<MouseOperation>& current
     auto closest = scene->closestElement(pointerPosition);
     if (closest != scene->end())
     {
-        current = std::make_unique<DragMouseOperation>(std::move(current), scene);
+        current = std::make_unique<DragMouseOperation>(std::move(current), undoStack, scene);
         current->activate(current, pointerPosition);
         return;
     }
