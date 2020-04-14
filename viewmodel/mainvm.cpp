@@ -233,6 +233,9 @@ void MainVm::redo()
     }
 }
 
+#include "util/undo/deletenodeundoitem.h"
+#include "util/undo/deletelineundoitem.h"
+
 void MainVm::deleteSelectedElement()
 {
     if (!surface)
@@ -244,7 +247,21 @@ void MainVm::deleteSelectedElement()
         return;
 
     cancelOperation();
-    scene->remove(highLighted);
+
+    if (highLighted->elementType() == drawingElementType::Node)
+    {
+        DeleteNodeUndoItem undoItem(scene, highLighted->identifier(), "Delete node");
+        undoStack->add(undoItem);
+        undoItem.doFunction();
+    }
+    else if (highLighted->elementType() == drawingElementType::Line)
+    {
+        DeleteLineUndoItem undoItem(scene, highLighted->identifier(), "Delete line");
+        undoStack->add(undoItem);
+        undoItem.doFunction();
+    }
+    else
+        scene->remove(highLighted);
 
     emit visualizationAvailable(surface->minValue(), surface->maxValue());
 }

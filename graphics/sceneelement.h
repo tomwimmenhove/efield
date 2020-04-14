@@ -109,7 +109,6 @@ public:
         return findIf([id](const DrawingElement<T>& e) { return e.identifier() == id; });
     }
 
-
     QPoint center() const override { return QPoint(); }
     bool setCenter(const QPoint&) override { return false; }
     bool canAnchor() const override { return false; }

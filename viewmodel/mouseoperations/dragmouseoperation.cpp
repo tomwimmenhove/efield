@@ -39,5 +39,6 @@ void DragMouseOperation::mouseReleased(std::unique_ptr<MouseOperation>& current,
     auto highLighted = scene->findHighLighted();
     Q_ASSERT(highLighted != scene->end());
 
-    undoStack->add(MoveUndoItem(scene, highLighted->identifier(), savedPos, highLighted->center(), "Move"));
+    if (savedPos != highLighted->center())
+        undoStack->add(MoveUndoItem(scene, highLighted->identifier(), savedPos, highLighted->center(), "Move"));
 }

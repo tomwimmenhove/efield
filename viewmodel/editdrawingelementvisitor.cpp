@@ -5,6 +5,7 @@
 #include "editdrawingelementvisitor.h"
 #include "pointinputdialog.h"
 #include "util/undo/moveundoitem.h"
+#include "util/undo/linevalueundoitem.h"
 
 bool EditDrawingElementVisitor::edit(QWidget* parentWidget, const QSharedPointer<UndoStack>& undoStack,
                                      const QSharedPointer<SceneElement<float>>& scene,
@@ -32,8 +33,8 @@ void EditDrawingElementVisitor::visit(NodeElement<float>& node)
         return;
 
     MoveUndoItem undoItem(scene, node.identifier(), node.center(), d.point(), "Move");
-    undoStack->add(undoItem);
     undoItem.doFunction();
+    undoStack->add(undoItem);
 
     //sharedNode.setPoint(d.point());
 
@@ -51,6 +52,12 @@ void EditDrawingElementVisitor::visit(LineElement<float>& line)
 
     int volt = QInputDialog::getInt(parentWidget, QWidget::tr("Edit line"),
                                     QWidget::tr("Voltage: "),  def, -2147483647, 2147483647, 1, &ok);
-    if (ok)
-        line.setValue(volt);
+    if (!ok)
+        return;
+
+    LineValueUndoItem undoItem(scene, line.identifier(), def, volt, "Change voltage");
+    undoStack->add(undoItem);
+    undoItem.doFunction();
+
+    //line.setValue(volt);
 }

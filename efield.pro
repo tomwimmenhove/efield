@@ -49,7 +49,10 @@ SOURCES += \
     viewmodel/editdrawingelementvisitor.cpp \
     viewmodel/mouseoperations/dragmouseoperation.cpp \
     util/undo/undostack.cpp \
-    util/undo/moveundoitem.cpp
+    util/undo/moveundoitem.cpp \
+    util/undo/linevalueundoitem.cpp \
+    util/undo/deletenodeundoitem.cpp \
+    util/undo/deletelineundoitem.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -89,7 +92,10 @@ HEADERS += \
     viewmodel/editdrawingelementvisitor.h \
     viewmodel/mouseoperations/dragmouseoperation.h \
     util/undo/undostack.h \
-    util/undo/moveundoitem.h
+    util/undo/moveundoitem.h \
+    util/undo/linevalueundoitem.h \
+    util/undo/deletenodeundoitem.h \
+    util/undo/deletelineundoitem.h
 
 FORMS += \
         mainwindow.ui \

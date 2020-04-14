@@ -1,6 +1,5 @@
 #include "moveundoitem.h"
 
-
 MoveUndoItem::MoveUndoItem(const QSharedPointer<SceneElement<float>>& scene,
                            int id,
                            const QPoint& oldPoint,

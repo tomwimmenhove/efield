@@ -16,6 +16,8 @@ public:
         : DrawingElement<T>(id, bounds)
     { }
 
+    LineElement (const LineElement&) = delete;
+
     LineElement(int id, const QSize& bounds, SharedNode& p1, SharedNode& p2, const T& value)
         : DrawingElement<T>(id, bounds), p1(p1), p2(p2), v(value)
     {
