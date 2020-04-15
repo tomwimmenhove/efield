@@ -1,5 +1,6 @@
 #include "newlinemouseoperation.h"
 #include "graphics/lineelement.h"
+#include "util/undo/newlineundoitem.h"
 
 void NewLineMouseOperation::mousePressed(std::unique_ptr<MouseOperation>&, const QPoint& pointerPosition)
 {
@@ -31,7 +32,12 @@ void NewLineMouseOperation::mousePressed(std::unique_ptr<MouseOperation>&, const
 
                 if (highLighted->identifier() != startId)
                 {
-                    static_cast<LineElement<float>&>(scene->back()).setPoint2(highLighted->anchorNode());
+                    auto& line = static_cast<LineElement<float>&>(scene->back());
+                    line.setPoint2(highLighted->anchorNode());
+
+                    undoStack->add(NewLineUndoItem(scene, line.identifier(),
+                                                   line.point1().identifier(), line.point2().identifier(), line.value(), "Place line"));
+
                     state = State::p1;
                 }
             }
