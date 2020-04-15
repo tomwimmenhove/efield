@@ -13,7 +13,7 @@
 class EditDrawingElementVisitor : public DrawingElementVisitor<float>
 {
 public:
-    static bool edit(QWidget* parentWidget,
+    static bool editElement(QWidget* parentWidget,
                      const QSharedPointer<UndoStack>& undoStack,
                      const QSharedPointer<SceneElement<float> >& scene,
                      DrawingElement<float>& element,

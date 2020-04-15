@@ -52,7 +52,8 @@ SOURCES += \
     util/undo/moveundoitem.cpp \
     util/undo/linevalueundoitem.cpp \
     util/undo/deletenodeundoitem.cpp \
-    util/undo/deletelineundoitem.cpp
+    util/undo/deletelineundoitem.cpp \
+    viewmodel/deletedrawingelementvisitor.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -95,7 +96,8 @@ HEADERS += \
     util/undo/moveundoitem.h \
     util/undo/linevalueundoitem.h \
     util/undo/deletenodeundoitem.h \
-    util/undo/deletelineundoitem.h
+    util/undo/deletelineundoitem.h \
+    viewmodel/deletedrawingelementvisitor.h
 
 FORMS += \
         mainwindow.ui \

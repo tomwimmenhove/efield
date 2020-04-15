@@ -7,7 +7,7 @@
 #include "util/undo/moveundoitem.h"
 #include "util/undo/linevalueundoitem.h"
 
-bool EditDrawingElementVisitor::edit(QWidget* parentWidget, const QSharedPointer<UndoStack>& undoStack,
+bool EditDrawingElementVisitor::editElement(QWidget* parentWidget, const QSharedPointer<UndoStack>& undoStack,
                                      const QSharedPointer<SceneElement<float>>& scene,
                                      DrawingElement<float>& element, const QSharedPointer<FloatSurface> surface)
 {
@@ -36,8 +36,6 @@ void EditDrawingElementVisitor::visit(NodeElement<float>& node)
     undoItem.doFunction();
     undoStack->add(undoItem);
 
-    //sharedNode.setPoint(d.point());
-
     update = true;
 }
 
@@ -58,6 +56,4 @@ void EditDrawingElementVisitor::visit(LineElement<float>& line)
     LineValueUndoItem undoItem(scene, line.identifier(), def, volt, "Change voltage");
     undoStack->add(undoItem);
     undoItem.doFunction();
-
-    //line.setValue(volt);
 }

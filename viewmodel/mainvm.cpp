@@ -13,6 +13,7 @@
 #include "graphics/scenedeserializevisitor.h"
 #include "mouseoperations/mouseoperations.h"
 #include "editdrawingelementvisitor.h"
+#include "deletedrawingelementvisitor.h"
 
 MainVm::MainVm(QWidget* parent)
     : QObject(parent), parentWidget(parent)
@@ -233,9 +234,6 @@ void MainVm::redo()
     }
 }
 
-#include "util/undo/deletenodeundoitem.h"
-#include "util/undo/deletelineundoitem.h"
-
 void MainVm::deleteSelectedElement()
 {
     if (!surface)
@@ -248,27 +246,13 @@ void MainVm::deleteSelectedElement()
 
     cancelOperation();
 
-    if (highLighted->elementType() == drawingElementType::Node)
-    {
-        DeleteNodeUndoItem undoItem(scene, highLighted->identifier(), "Delete node");
-        undoStack->add(undoItem);
-        undoItem.doFunction();
-    }
-    else if (highLighted->elementType() == drawingElementType::Line)
-    {
-        DeleteLineUndoItem undoItem(scene, highLighted->identifier(), "Delete line");
-        undoStack->add(undoItem);
-        undoItem.doFunction();
-    }
-    else
-        scene->remove(highLighted);
-
-    emit visualizationAvailable(surface->minValue(), surface->maxValue());
+    if (DeleteDrawingElementVisitor::deleteElement(undoStack, scene, *highLighted))
+        emit visualizationAvailable(surface->minValue(), surface->maxValue());
 }
 
 void MainVm::editElement(DrawingElement<float>& element)
 {
-    if (EditDrawingElementVisitor::edit(parentWidget, undoStack, project->sharedScene(), element, surface))
+    if (EditDrawingElementVisitor::editElement(parentWidget, undoStack, project->sharedScene(), element, surface))
         emit visualizationAvailable(surface->minValue(), surface->maxValue());
 }
 
