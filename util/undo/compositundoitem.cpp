@@ -1,22 +1,15 @@
 #include "compositundoitem.h"
 
-CompositUndoItem::CompositUndoItem(const QSharedPointer<SceneElement<float>>& scene, const QString& title)
-    : UndoItem(scene, title)
+CompositUndoItem::CompositUndoItem(const QSharedPointer<SceneElement<float>>& scene, const QSharedPointer<UndoStack>& undoStack, const QString& title)
+    : UndoItem(scene, title), undoStack(undoStack)
 { }
-
-void CompositUndoItem::add(std::unique_ptr<UndoItem>&& item)
-{
-    undoList.push_back(std::move(item));
-}
 
 void CompositUndoItem::undoFunction()
 {
-    for (auto i = undoList.rbegin(); i != undoList.rend(); ++i)
-        (*i)->undoFunction();
+    undoStack->undoAll();
 }
 
 void CompositUndoItem::doFunction()
 {
-    for(auto& e: undoList)
-        e->doFunction();
+    undoStack->redoAll();
 }

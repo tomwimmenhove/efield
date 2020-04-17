@@ -10,15 +10,14 @@ class CompositUndoItem : public UndoItem
 {
 public:
     CompositUndoItem(const QSharedPointer<SceneElement<float>>& scene,
-                      const QString& title);
-
-    void add(std::unique_ptr<UndoItem>&& item);
+                     const QSharedPointer<UndoStack>& undoStack,
+                     const QString& title);
 
     void undoFunction() override;
     void doFunction() override;
 
 private:
-    std::vector<std::unique_ptr<UndoItem>> undoList;
+    QSharedPointer<UndoStack> undoStack;
 };
 
 #endif // COMPOSITUNDOITEM_H

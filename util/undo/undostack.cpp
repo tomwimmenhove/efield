@@ -26,6 +26,12 @@ QString UndoStack::undoName() const
     return stack[pos - 1]->title();
 }
 
+void UndoStack::undoAll()
+{
+    while (canUndo())
+        undo();
+}
+
 void UndoStack::redo()
 {
     Q_ASSERT(canRedo());
@@ -38,6 +44,12 @@ QString UndoStack::redoName() const
 {
     Q_ASSERT(canRedo());
     return stack[pos]->title();
+}
+
+void UndoStack::redoAll()
+{
+    while (canRedo())
+        redo();
 }
 
 void UndoStack::emitUpdate()

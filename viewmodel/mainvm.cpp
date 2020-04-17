@@ -14,6 +14,7 @@
 #include "mouseoperations/mouseoperations.h"
 #include "editdrawingelementvisitor.h"
 #include "deletedrawingelementvisitor.h"
+#include "util/undo/compositundoitem.h"
 
 MainVm::MainVm(QWidget* parent)
     : QObject(parent), parentWidget(parent)
@@ -243,11 +244,9 @@ void MainVm::deleteSelectedElement()
     if (scene->numHighlighted() == 0)
         return;
 
-//    auto highLighted = scene->findFirstHighLighted();
-//    if (highLighted == scene->end() || highLighted->isInUse())
-//        return;
-
     cancelOperation();
+
+    QSharedPointer<UndoStack> nestedUndoStack = QSharedPointer<UndoStack>::create();
 
     bool update = false;
     int n;
@@ -257,12 +256,14 @@ void MainVm::deleteSelectedElement()
         {
             if (it->isHighlighted() && !it->isInUse())
             {
-                update |= DeleteDrawingElementVisitor::deleteElement(undoStack, scene, *it);
+                update |= DeleteDrawingElementVisitor::deleteElement(nestedUndoStack, scene, *it);
                 n++;
                 break;
             }
         }
     } while (n != 0);
+
+    undoStack->add(std::make_unique<CompositUndoItem>(scene, nestedUndoStack, "Delete selected"));
 
     if (update)
         emit visualizationAvailable(surface->minValue(), surface->maxValue());

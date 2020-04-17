@@ -67,19 +67,15 @@ void DragMouseOperation::mouseReleased(std::unique_ptr<MouseOperation>& current,
 
     if (started && !savedPositions.empty())
     {
-        auto composit = std::make_unique<CompositUndoItem>(scene, "Move");
-
         QMapIterator<int, QPoint> i(savedPositions);
         while (i.hasNext())
         {
             i.next();
             auto it = scene->findId(i.key());
             Q_ASSERT(it != scene->end());
-            composit->add(std::make_unique<MoveUndoItem>(
+            undoStack->add(std::make_unique<MoveUndoItem>(
                               scene, it->identifier(), i.value(), it->center(), "Move"));
         }
-
-        undoStack->add(std::move(composit));
     }
 
     current = std::move(parent);

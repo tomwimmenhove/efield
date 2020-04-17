@@ -18,10 +18,12 @@ public:
     inline bool canUndo() const { return pos > 0; }
     void undo();
     QString undoName() const;
+    void undoAll();
 
     inline bool canRedo() const { return pos < stack.size(); }
     void redo();
     QString redoName() const;
+    void redoAll();
 
 signals:
     void stackUpdated(bool canUndo, const QString& undoName, bool canRedo, const QString& redoName);
