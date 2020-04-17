@@ -14,6 +14,8 @@ public:
     virtual void undoFunction() = 0;
     virtual void doFunction() = 0;
 
+    virtual ~UndoItem() { }
+
 protected:
     UndoItem(const QSharedPointer<SceneElement<float>>& scene, const QString& title)
         : scene(scene), titleString(title)
