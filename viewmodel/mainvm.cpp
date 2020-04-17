@@ -240,13 +240,31 @@ void MainVm::deleteSelectedElement()
         return;
 
     QSharedPointer<SceneElement<float>> scene = project->scene();
-    auto highLighted = scene->findFirstHighLighted();
-    if (highLighted == scene->end() || highLighted->isInUse())
+    if (scene->numHighlighted() == 0)
         return;
+
+//    auto highLighted = scene->findFirstHighLighted();
+//    if (highLighted == scene->end() || highLighted->isInUse())
+//        return;
 
     cancelOperation();
 
-    if (DeleteDrawingElementVisitor::deleteElement(undoStack, scene, *highLighted))
+    bool update = false;
+    int n;
+    do {
+        n = 0;
+        for (auto it = scene->begin(); it != scene->end(); ++it)
+        {
+            if (it->isHighlighted() && !it->isInUse())
+            {
+                update |= DeleteDrawingElementVisitor::deleteElement(undoStack, scene, *it);
+                n++;
+                break;
+            }
+        }
+    } while (n != 0);
+
+    if (update)
         emit visualizationAvailable(surface->minValue(), surface->maxValue());
 }
 
@@ -262,9 +280,11 @@ void MainVm::editSelectedElement()
         return;
 
     QSharedPointer<SceneElement<float>> scene = project->scene();
-    auto highLighted = scene->findFirstHighLighted();
-    if (highLighted == scene->end())
+    if (scene->numHighlighted() != 1)
         return;
+
+    auto highLighted = scene->findFirstHighLighted();
+    Q_ASSERT(highLighted != scene->end());
 
     cancelOperation();
     editElement(*highLighted);

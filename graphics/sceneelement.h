@@ -126,6 +126,16 @@ public:
         return findIf([](const DrawingElement<T>& e) { return e.isHighlighted(); });
     }
 
+    int numHighlighted() const
+    {
+        int n = 0;
+        for (auto i = begin(); i != end(); ++i)
+            if (i->isHighlighted())
+                n++;
+
+        return n;
+    }
+
     iterator findId(int id) const
     {
         return findIf([id](const DrawingElement<T>& e) { return e.identifier() == id; });
