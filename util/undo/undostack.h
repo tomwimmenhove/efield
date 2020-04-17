@@ -1,25 +1,19 @@
 #ifndef UNDOSTACK_H
 #define UNDOSTACK_H
 
-#include <QtGlobal>
 #include <QString>
+#include <QObject>
 #include <vector>
 #include <memory>
 
 #include "undoitem.h"
 
-class UndoStack
+class UndoStack : public QObject
 {
-public:
-    void add(std::unique_ptr<UndoItem>&& item)
-    {
-        Q_ASSERT(pos <= stack.size());
-        if (pos < stack.size())
-            stack.erase(stack.begin() + pos, stack.end());
-        stack.push_back(std::move(item));
+    Q_OBJECT
 
-        ++pos;
-    }
+public:
+    void add(std::unique_ptr<UndoItem>&& item);
 
     inline bool canUndo() const { return pos > 0; }
     void undo();
@@ -29,7 +23,12 @@ public:
     void redo();
     QString redoName() const;
 
+signals:
+    void stackUpdated(bool canUndo, const QString& undoName, bool canRedo, const QString& redoName);
+
 private:
+    void emitUpdate();
+
     size_t pos = 0;
     std::vector<std::unique_ptr<UndoItem>> stack;
 };

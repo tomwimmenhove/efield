@@ -54,6 +54,7 @@ signals:
     void runSimulatorWorker();
     void cancelSimulatorWorker();
     void updateMouseCursor(Qt::CursorShape cursor);
+    void undoStackUpdated(bool canUndo, const QString& undoName, bool canRedo, const QString& redoName);
 
 private:
 #ifdef _OPENMP

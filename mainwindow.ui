@@ -237,6 +237,9 @@
    </property>
   </action>
   <action name="action_Undo">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>&amp;Undo</string>
    </property>
@@ -245,6 +248,9 @@
    </property>
   </action>
   <action name="action_Redo">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>&amp;Redo</string>
    </property>

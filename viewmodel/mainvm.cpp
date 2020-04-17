@@ -341,6 +341,7 @@ void MainVm::initNewProject(std::unique_ptr<Project>&& newProject)
 #endif
 
     undoStack = QSharedPointer<UndoStack>::create();
+    connect(static_cast<UndoStack*>(undoStack.data()), &UndoStack::stackUpdated, this, &MainVm::undoStackUpdated);
 
     connect(&simulatorThread, &QThread::finished, simulatorWorker, &SimulatorWorker::deleteLater);
     connect(this, &MainVm::runSimulatorWorker, simulatorWorker, &SimulatorWorker::run);

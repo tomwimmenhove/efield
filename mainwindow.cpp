@@ -46,6 +46,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(mainVm, &MainVm::newVisualization, this, &MainWindow::mainVm_NewVisualization);
     connect(mainVm, &MainVm::newStatusMessage, this, &MainWindow::mainVm_NewStatusMessage);
     connect(mainVm, &MainVm::updateMouseCursor, this, &MainWindow::mainVm_UpdateMouseCursor);
+    connect(mainVm, &MainVm::undoStackUpdated, this, &MainWindow::mainVm_UndoStackUpdated);
 
 #ifdef USE_VM_THREAD
     mainVm->moveToThread(&vmThread);
@@ -120,6 +121,15 @@ void MainWindow::mainVm_NewStatusMessage(const QString& message)
 void MainWindow::mainVm_UpdateMouseCursor(Qt::CursorShape cursor)
 {
     ui->graphicsLabel->setCursor(cursor);
+}
+
+void MainWindow::mainVm_UndoStackUpdated(bool canUndo, const QString& undoName, bool canRedo, const QString& redoName)
+{
+    ui->action_Undo->setEnabled(canUndo);
+    ui->action_Undo->setText(tr("Undo %1").arg(undoName));
+
+    ui->action_Redo->setEnabled(canRedo);
+    ui->action_Redo->setText(tr("Redo %1").arg(redoName));
 }
 
 void MainWindow::on_actionStart_triggered()

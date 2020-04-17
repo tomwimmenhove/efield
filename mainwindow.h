@@ -32,6 +32,7 @@ private slots:
     void mainVm_NewVisualization(const QPixmap& pixmap);
     void mainVm_NewStatusMessage(const QString& message);
     void mainVm_UpdateMouseCursor(Qt::CursorShape cursor);
+    void mainVm_UndoStackUpdated(bool canUndo, const QString& undoName, bool canRedo, const QString& redoName);
 
     void on_actionStart_triggered();
     void on_actionS_top_triggered();
@@ -46,9 +47,7 @@ private slots:
     void on_action_New_triggered();
     void on_action_Open_triggered();
     void on_action_Save_as_triggered();
-
     void on_action_Undo_triggered();
-
     void on_action_Redo_triggered();
 
 signals:
