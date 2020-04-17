@@ -33,7 +33,11 @@ public:
 
     virtual drawingElementType elementType() const override { return drawingElementType::Scene; }
 
-    void add(std::unique_ptr<DrawingElement<T>>&& element) { elements.push_back(std::move(element)); }
+    void add(std::unique_ptr<DrawingElement<T>>&& element)
+    {
+        Q_ASSERT(findId(element->identifier()) == end());
+        elements.push_back(std::move(element));
+    }
     void remove(iterator iter) { elements.erase(iter.innerIterator()); }
     void pop() { elements.pop_back(); }
     void clear() { elements.clear(); }
