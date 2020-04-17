@@ -20,6 +20,12 @@ QPoint Geometry::scalePoint(const QPoint& point, const QSize& fromSize, const QS
                   point.y() * toSize.height() / fromSize.height());
 }
 
+QSize Geometry::scaleSize(const QSize& size, const QSize& fromSize, const QSize& toSize)
+{
+    return QSize(size.width() * toSize.width() / fromSize.width(),
+                  size.height() * toSize.height() / fromSize.height());
+}
+
 float Geometry::distToLine(const QVector2D& v, const QVector2D& w, const QVector2D& p)
 {
     // Return minimum distance between line segment vw and point p

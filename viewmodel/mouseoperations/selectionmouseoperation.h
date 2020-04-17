@@ -1,20 +1,16 @@
-#ifndef DRAGNODEMOUSEOPERATION_H
-#define DRAGNODEMOUSEOPERATION_H
-
-#include <QMap>
+#ifndef SELECTIONMOUSEOPERATION_H
+#define SELECTIONMOUSEOPERATION_H
 
 #include "mouseoperation.h"
 
-class DragMouseOperation : public MouseOperation
+class SelectionMouseOperation : public MouseOperation
 {
 public:
-    DragMouseOperation(std::unique_ptr<MouseOperation>&& parent,
+    SelectionMouseOperation(std::unique_ptr<MouseOperation>&& parent,
                        const QSharedPointer<UndoStack>& undoStack,
                        const QSharedPointer<SceneElement<float>>& scene) noexcept
         : MouseOperation(std::move(parent), undoStack, scene)
     { }
-
-    Qt::CursorShape cursorShape() const override { return Qt::CrossCursor; }
 
     void activate(std::unique_ptr<MouseOperation>& current, const QPoint& pointerPosition) override;
     void cancelOperation(std::unique_ptr<MouseOperation>& current) override;
@@ -22,9 +18,6 @@ public:
     void mouseReleased(std::unique_ptr<MouseOperation>& current, const QPoint& pointerPosition, Qt::MouseButtons buttons) override;
 
 private:
-    QMap<int, QPoint> savedPositions;
-    bool started = false;
     QPoint dragStartPos;
 };
-
-#endif // DRAGNODEMOUSEOPERATION_H
+#endif // SELECTIONMOUSEOPERATION_H

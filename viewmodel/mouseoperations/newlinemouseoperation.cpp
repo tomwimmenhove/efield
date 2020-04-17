@@ -4,7 +4,7 @@
 
 void NewLineMouseOperation::mousePressed(std::unique_ptr<MouseOperation>&, const QPoint& pointerPosition)
 {
-    auto highLighted = scene->findHighLighted();
+    auto highLighted = scene->findFirstHighLighted();
     auto closest = scene->closestElement(pointerPosition);
 
     switch (state)
@@ -16,7 +16,7 @@ void NewLineMouseOperation::mousePressed(std::unique_ptr<MouseOperation>&, const
                 startId = highLighted->identifier();
                 SharedNode sharedStartNode = highLighted->anchorNode();
                 SharedNode sharedEndNode = SharedNode(-1, pointerPosition);
-                scene->add(std::move(LineElement<float>::uniqueElement(scene->newId(), scene->bounds(), sharedStartNode, sharedEndNode, 0)));
+                scene->add(std::move(LineElement<float>::uniqueElement(scene->newId(), scene->sceneBounds(), sharedStartNode, sharedEndNode, 0)));
 
                 state = State::p2;
                 break;
@@ -41,7 +41,7 @@ void NewLineMouseOperation::mousePressed(std::unique_ptr<MouseOperation>&, const
                     state = State::p1;
                 }
             }
-            scene->highlight(scene->end());
+            scene->highlightUnique(scene->end());
             break;
         }
     }
@@ -53,7 +53,7 @@ void NewLineMouseOperation::cancelOperation(std::unique_ptr<MouseOperation>& cur
 {
     if (state == State::p2)
     {
-        scene->highlight(scene->end());
+        scene->highlightUnique(scene->end());
 
         Q_ASSERT(typeid(scene->back()).hash_code() == typeid(LineElement<float>&).hash_code());
         scene->pop();
@@ -76,16 +76,16 @@ void NewLineMouseOperation::mouseMoved(std::unique_ptr<MouseOperation>&, const Q
     {
         case State::p1:
         {
-            scene->highlight(closest);
+            scene->highlightUnique(closest);
             break;
         }
         case State::p2:
         {
             if (closest == scene->end())
-                scene->highlight(scene->end());
+                scene->highlightUnique(scene->end());
             else
                 if (closest->identifier() != startId)
-                    scene->highlight(closest);
+                    scene->highlightUnique(closest);
 
             Q_ASSERT(typeid(scene->back()).hash_code() == typeid(LineElement<float>&).hash_code());
             auto& line = static_cast<LineElement<float>&>(scene->back());

@@ -9,7 +9,7 @@ void NewNodeMouseOperation::activate(std::unique_ptr<MouseOperation>&, const QPo
 
 void NewNodeMouseOperation::mousePressed(std::unique_ptr<MouseOperation>&, const QPoint& pointerPosition)
 {
-    auto highLighted = scene->findHighLighted();
+    auto highLighted = scene->findFirstHighLighted();
     Q_ASSERT(highLighted != scene->end());
     Q_ASSERT(typeid(*highLighted).hash_code() == typeid(NodeElement<float>&).hash_code());
 
@@ -20,9 +20,9 @@ void NewNodeMouseOperation::mousePressed(std::unique_ptr<MouseOperation>&, const
 
 void NewNodeMouseOperation::cancelOperation(std::unique_ptr<MouseOperation>& current)
 {
-    auto highLighted = scene->findHighLighted();
+    auto highLighted = scene->findFirstHighLighted();
 
-    scene->highlight(scene->end());
+    scene->highlightUnique(scene->end());
     if (highLighted != scene->end())
         scene->remove(highLighted);
 
@@ -32,7 +32,7 @@ void NewNodeMouseOperation::cancelOperation(std::unique_ptr<MouseOperation>& cur
 
 void NewNodeMouseOperation::mouseMoved(std::unique_ptr<MouseOperation>&, const QPoint& pointerPosition)
 {
-    auto highLighted = scene->findHighLighted();
+    auto highLighted = scene->findFirstHighLighted();
     Q_ASSERT(highLighted != scene->end());
     Q_ASSERT(typeid(*highLighted).hash_code() == typeid(NodeElement<float>&).hash_code());
     highLighted->anchorNode().setPoint(pointerPosition);
@@ -42,9 +42,9 @@ void NewNodeMouseOperation::mouseMoved(std::unique_ptr<MouseOperation>&, const Q
 
 void NewNodeMouseOperation::placeNewNodeElement(const QPoint& pointerPosition)
 {
-    scene->highlight(scene->end());
+    scene->highlightUnique(scene->end());
 
-    auto newNode = NodeElement<float>::uniqueElement(SharedNode(scene->newId(), pointerPosition), scene->bounds());
+    auto newNode = NodeElement<float>::uniqueElement(SharedNode(scene->newId(), pointerPosition), scene->sceneBounds());
     newNode->setHighlighted(true);
     scene->add(std::move(newNode));
 

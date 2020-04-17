@@ -31,7 +31,7 @@ void Project::fromDoc(const QDomDocument& doc)
     sharedScene = QSharedPointer<SceneElement<float>>::create();
     visitor.visit(*sharedScene);
 
-    sharedSimulator = QSharedPointer<Simulator>::create(sharedScene->bounds(),
+    sharedSimulator = QSharedPointer<Simulator>::create(sharedScene->sceneBounds(),
         std::bind(&Project::setFixedValues, this, std::placeholders::_1));
 }
 

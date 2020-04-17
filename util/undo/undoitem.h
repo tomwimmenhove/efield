@@ -10,6 +10,10 @@
 class UndoItem
 {
 public:
+    UndoItem(const QSharedPointer<SceneElement<float>>& scene, const QString& title)
+        : scene(scene), titleString(title)
+    { }
+
     inline QString title() const { return titleString; }
     virtual void undoFunction() = 0;
     virtual void doFunction() = 0;
@@ -17,10 +21,6 @@ public:
     virtual ~UndoItem() { }
 
 protected:
-    UndoItem(const QSharedPointer<SceneElement<float>>& scene, const QString& title)
-        : scene(scene), titleString(title)
-    { }
-
     QSharedPointer<SceneElement<float>> scene;
     QString titleString;
 };

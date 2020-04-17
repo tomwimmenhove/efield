@@ -33,7 +33,7 @@ public:
         QDomNamedNodeMap attributes = domElement.attributes();
         QSize size(attributes.namedItem("Width").nodeValue().toInt(),
                    attributes.namedItem("Height").nodeValue().toInt());
-        element.setBounds(size);
+        element.setSceneBounds(size);
 
         for(auto& nodeFactory: nodeFactories)
         {

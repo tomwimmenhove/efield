@@ -46,8 +46,9 @@ public:
 
     void drawAnnotation(QPainter& painter, const QSize& surfaceSize) override
     {
-        QPoint sp1 = Geometry::scalePoint(p1, surfaceSize, QSize(painter.device()->width(), painter.device()->height()));
-        QPoint sp2 = Geometry::scalePoint(p2, surfaceSize, QSize(painter.device()->width(), painter.device()->height()));
+        QSize pSize = QSize(painter.device()->width(), painter.device()->height());
+        QPoint sp1 = Geometry::scalePoint(p1, surfaceSize, pSize);
+        QPoint sp2 = Geometry::scalePoint(p2, surfaceSize, pSize);
 
         int mh = painter.device()->height() - 1;
 
@@ -92,7 +93,7 @@ public:
     bool setCenter(const QPoint& point) override
     {
         QPoint d = point - center();
-        QRect r = Geometry::clip(QRect(p1.point() + d, p2.point() + d), this->bounds());
+        QRect r = Geometry::clip(QRect(p1.point() + d, p2.point() + d), this->sceneBounds());
 
         p1.setPoint(r.topLeft());
         p2.setPoint(r.bottomRight());
@@ -100,8 +101,10 @@ public:
         return true;
     }
 
+    QRect bounds() const override { return QRect(point1().point(), point2().point()); }
+
     bool canAnchor() const override { return false; }
-    bool canDelete() const override { return true; }
+    bool isInUse() const override { return false; }
 
     void accept(DrawingElementVisitor<T>& visitor) override { visitor.visit(*this); }
 

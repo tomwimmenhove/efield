@@ -11,7 +11,7 @@
 #include <memory>
 #include <QVector>
 #include <QDomDocument>
-#include <QUuid>
+#include <QRect>
 #include <functional>
 
 template<typename T>
@@ -55,6 +55,19 @@ public:
     {
         for (auto const& e: elements)
             e->drawAnnotation(painter, surfaceSize);
+
+        if (!selectionRect.isNull())
+        {
+            QSize pSize = QSize(painter.device()->width(), painter.device()->height());
+            QPoint sp1 = Geometry::scalePoint(selectionRect.topLeft(), surfaceSize, pSize);
+            QPoint sp2 = Geometry::scalePoint(selectionRect.bottomRight(), surfaceSize, pSize);
+
+            QRect flippedRect(QPoint(sp1.x(), painter.device()->height() - 1 - sp1.y()),
+                              QPoint(sp2.x(), painter.device()->height() - 1 - sp2.y()));
+            painter.setPen(Qt::magenta);
+            painter.drawRect(flippedRect);
+            painter.fillRect(flippedRect, QBrush(QColor(0xff, 0, 0, 0x20)));
+        }
     }
 
     float distanceTo(const QPoint&) const override
@@ -62,10 +75,17 @@ public:
         return 0.0f;
     }
 
-    void highlight(iterator iter)
+    void setSelectionRect(const QRect& rect) { selectionRect = rect; }
+
+    void highlightUnique(iterator iter)
     {
         for (auto i = begin(); i != end(); ++i)
             i->setHighlighted(i == iter);
+    }
+
+    void highlight(iterator iter)
+    {
+        iter->setHighlighted(true);
     }
 
     iterator closestElement(const QPoint& point,
@@ -93,7 +113,7 @@ public:
 
     void highlightClosestElement(const QPoint& point)
     {
-        highlight(closestElement(point, maxDist));
+        highlightUnique(closestElement(point, maxDist));
     }
 
     iterator findIf(const std::function<bool(const DrawingElement<T>&)>& pred) const
@@ -101,7 +121,7 @@ public:
         return std::find_if(begin(), end(), pred);
     }
 
-    iterator findHighLighted() const
+    iterator findFirstHighLighted() const
     {
         return findIf([](const DrawingElement<T>& e) { return e.isHighlighted(); });
     }
@@ -111,10 +131,22 @@ public:
         return findIf([id](const DrawingElement<T>& e) { return e.identifier() == id; });
     }
 
+    QRect unitedBounds()
+    {
+        QRect rect;
+
+        for (auto i = begin(); i != end(); ++i)
+            if (i->isHighlighted())
+                rect = rect.isNull() ? i->bounds() : rect.united(rect);
+
+        return rect;
+    }
+
     QPoint center() const override { return QPoint(); }
     bool setCenter(const QPoint&) override { return false; }
+    QRect bounds() const override { return QRect(QPoint(0, 0), this->sceneBounds()); }
     bool canAnchor() const override { return false; }
-    bool canDelete() const override { return false; }
+    bool isInUse() const override { return true; }
 
     void accept(DrawingElementVisitor<T>& visitor) override { visitor.visit(*this); }
 
@@ -122,6 +154,7 @@ private:
     const float maxDist = 15;
     std::vector<std::unique_ptr<DrawingElement<T>>> elements;
     int idCounter;
+    QRect selectionRect;
 };
 
 #endif // SCENEELEMENT_H

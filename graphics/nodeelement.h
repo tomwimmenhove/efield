@@ -54,12 +54,14 @@ public:
     QPoint center() const override { return n.point(); }
     bool setCenter(const QPoint& point) override
     {
-        n.setPoint(Geometry::clip(n.point() + point - center(), this->bounds()));
+        n.setPoint(Geometry::clip(n.point() + point - center(), this->sceneBounds()));
         return true;
     }
 
+    QRect bounds() const override { return QRect(center(), QSize(1, 1)); }
+
     bool canAnchor() const override { return true; }
-    bool canDelete() const override { return anchorNode()->refCounter() == 0; }
+    bool isInUse() const override { return anchorNode()->refCounter() != 0; }
 
     SharedNode anchorNode() const override { return n; }
     inline void setNode(SharedNode node)

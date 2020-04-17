@@ -4,6 +4,7 @@
 #include "graphics/lineelement.h"
 #include "normalmouseoperation.h"
 #include "dragmouseoperation.h"
+#include "selectionmouseoperation.h"
 #include "pointinputdialog.h"
 
 void NormalMouseOperation::mousePressed(std::unique_ptr<MouseOperation>& current, const QPoint& pointerPosition)
@@ -17,7 +18,9 @@ void NormalMouseOperation::mousePressed(std::unique_ptr<MouseOperation>& current
         return;
     }
 
-    scene->highlight(closest);
+    current = std::make_unique<SelectionMouseOperation>(std::move(current),
+                                                   undoStack, scene);
+    current->activate(current, pointerPosition);
 
     update();
 }

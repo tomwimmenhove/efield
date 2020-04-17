@@ -240,8 +240,8 @@ void MainVm::deleteSelectedElement()
         return;
 
     QSharedPointer<SceneElement<float>> scene = project->scene();
-    auto highLighted = scene->findHighLighted();
-    if (highLighted == scene->end() || !highLighted->canDelete())
+    auto highLighted = scene->findFirstHighLighted();
+    if (highLighted == scene->end() || highLighted->isInUse())
         return;
 
     cancelOperation();
@@ -262,7 +262,7 @@ void MainVm::editSelectedElement()
         return;
 
     QSharedPointer<SceneElement<float>> scene = project->scene();
-    auto highLighted = scene->findHighLighted();
+    auto highLighted = scene->findFirstHighLighted();
     if (highLighted == scene->end())
         return;
 
@@ -366,13 +366,13 @@ void MainVm::createScene()
     SharedNode cathodeLeft(scene->newId(), 100, 100);
     SharedNode cathodeRight(scene->newId(), 500, 100);
 
-    scene->add(NodeElement<float>::uniqueElement(anodeRight, scene->bounds()));
-    scene->add(NodeElement<float>::uniqueElement(anodeLeft, scene->bounds()));
-    scene->add(NodeElement<float>::uniqueElement(cathodeLeft, scene->bounds()));
-    scene->add(NodeElement<float>::uniqueElement(cathodeRight, scene->bounds()));
+    scene->add(NodeElement<float>::uniqueElement(anodeRight, scene->sceneBounds()));
+    scene->add(NodeElement<float>::uniqueElement(anodeLeft, scene->sceneBounds()));
+    scene->add(NodeElement<float>::uniqueElement(cathodeLeft, scene->sceneBounds()));
+    scene->add(NodeElement<float>::uniqueElement(cathodeRight, scene->sceneBounds()));
 
-    scene->add(LineElement<float>::uniqueElement(scene->newId(), scene->bounds(), anodeLeft, anodeRight, 1));
-    scene->add(LineElement<float>::uniqueElement(scene->newId(), scene->bounds(), cathodeLeft, cathodeRight, -1));
+    scene->add(LineElement<float>::uniqueElement(scene->newId(), scene->sceneBounds(), anodeLeft, anodeRight, 1));
+    scene->add(LineElement<float>::uniqueElement(scene->newId(), scene->sceneBounds(), cathodeLeft, cathodeRight, -1));
 }
 #endif
 
@@ -386,14 +386,14 @@ void MainVm::createBorder(float voltage)
     SharedNode bottomLeft(scene->newId(), 0, 0);
     SharedNode bottomRight(scene->newId(), size.height(), 0);
 
-    scene->add(NodeElement<float>::uniqueElement(topLeft, scene->bounds()));
-    scene->add(NodeElement<float>::uniqueElement(topRight, scene->bounds()));
-    scene->add(NodeElement<float>::uniqueElement(bottomLeft, scene->bounds()));
-    scene->add(NodeElement<float>::uniqueElement(bottomRight, scene->bounds()));
+    scene->add(NodeElement<float>::uniqueElement(topLeft, scene->sceneBounds()));
+    scene->add(NodeElement<float>::uniqueElement(topRight, scene->sceneBounds()));
+    scene->add(NodeElement<float>::uniqueElement(bottomLeft, scene->sceneBounds()));
+    scene->add(NodeElement<float>::uniqueElement(bottomRight, scene->sceneBounds()));
 
-    scene->add(LineElement<float>::uniqueElement(scene->newId(), scene->bounds(), topLeft, topRight, voltage));
-    scene->add(LineElement<float>::uniqueElement(scene->newId(), scene->bounds(), bottomLeft, bottomRight, voltage));
-    scene->add(LineElement<float>::uniqueElement(scene->newId(), scene->bounds(), topLeft, bottomLeft, voltage));
-    scene->add(LineElement<float>::uniqueElement(scene->newId(), scene->bounds(), topRight, bottomRight, voltage));
+    scene->add(LineElement<float>::uniqueElement(scene->newId(), scene->sceneBounds(), topLeft, topRight, voltage));
+    scene->add(LineElement<float>::uniqueElement(scene->newId(), scene->sceneBounds(), bottomLeft, bottomRight, voltage));
+    scene->add(LineElement<float>::uniqueElement(scene->newId(), scene->sceneBounds(), topLeft, bottomLeft, voltage));
+    scene->add(LineElement<float>::uniqueElement(scene->newId(), scene->sceneBounds(), topRight, bottomRight, voltage));
 }
 

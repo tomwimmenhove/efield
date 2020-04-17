@@ -15,5 +15,5 @@ void NewNodeUndoItem::undoFunction()
 
 void NewNodeUndoItem::doFunction()
 {
-    scene->add(std::move(NodeElement<float>::uniqueElement(SharedNode(id, point), scene->bounds())));
+    scene->add(std::move(NodeElement<float>::uniqueElement(SharedNode(id, point), scene->sceneBounds())));
 }

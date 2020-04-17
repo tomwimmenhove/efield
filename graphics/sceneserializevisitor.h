@@ -17,8 +17,8 @@ public:
 
     void visit(SceneElement<T>& element) override
     {
-        domElement.setAttribute("Width", QString::number(element.bounds().width()));
-        domElement.setAttribute("Height", QString::number(element.bounds().height()));
+        domElement.setAttribute("Width", QString::number(element.sceneBounds().width()));
+        domElement.setAttribute("Height", QString::number(element.sceneBounds().height()));
 
         for (auto& e: element)
         {
