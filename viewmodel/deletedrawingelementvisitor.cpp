@@ -18,18 +18,18 @@ void DeleteDrawingElementVisitor::visit(SceneElement<float>&)
 
 void DeleteDrawingElementVisitor::visit(NodeElement<float>& node)
 {
-    DeleteNodeUndoItem undoItem(scene, node.identifier(), "Delete line");
-    undoStack->add(undoItem);
-    undoItem.doFunction();
+    auto undoItem = std::make_unique<DeleteNodeUndoItem>(scene, node.identifier(), "Delete line");
+    undoItem->doFunction();
+    undoStack->add(std::move(undoItem));
 
     update = true;
 }
 
 void DeleteDrawingElementVisitor::visit(LineElement<float>& line)
 {
-    DeleteLineUndoItem undoItem(scene, line.identifier(), "Delete line");
-    undoStack->add(undoItem);
-    undoItem.doFunction();
+    auto undoItem = std::make_unique<DeleteLineUndoItem>(scene, line.identifier(), "Delete line");
+    undoItem->doFunction();
+    undoStack->add(std::move(undoItem));
 
     update = true;
 }

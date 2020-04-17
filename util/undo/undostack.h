@@ -4,41 +4,19 @@
 #include <QtGlobal>
 #include <QString>
 #include <vector>
-#include <functional>
+#include <memory>
 
-class UndoItem
-{
-public:
-    UndoItem(const QString& title, std::function<void()> undoFunc, std::function<void()> doFunc)
-        : titleString(title), undoFunc(undoFunc), doFunc(doFunc)
-    { }
-
-    inline QString title() const { return titleString; }
-    inline void undoFunction() { undoFunc(); }
-    inline void doFunction() { doFunc(); }
-
-protected:
-    UndoItem()
-    { }
-
-    UndoItem(const QString& title)
-        : titleString(title)
-    { }
-
-    QString titleString;
-    std::function<void()> undoFunc;
-    std::function<void()> doFunc;
-};
+#include "undoitem.h"
 
 class UndoStack
 {
 public:
-    void add(const UndoItem& item)
+    void add(std::unique_ptr<UndoItem>&& item)
     {
         Q_ASSERT(pos <= stack.size());
         if (pos < stack.size())
             stack.erase(stack.begin() + pos, stack.end());
-        stack.push_back(item);
+        stack.push_back(std::move(item));
 
         ++pos;
     }
@@ -53,7 +31,7 @@ public:
 
 private:
     size_t pos = 0;
-    std::vector<UndoItem> stack;
+    std::vector<std::unique_ptr<UndoItem>> stack;
 };
 
 #endif // UNDOSTACK_H
