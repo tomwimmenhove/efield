@@ -37,8 +37,6 @@ public:
         return std::make_unique<LineElement<float>>(std::forward<Args>(arguments)...);
     }
 
-    virtual drawingElementType elementType() const override { return drawingElementType::Line; }
-
     void draw(IDrawer<T>& drawer) override
     {
         Drawing<T> drawing(drawer);

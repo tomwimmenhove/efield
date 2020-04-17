@@ -11,7 +11,7 @@ void NewNodeMouseOperation::mousePressed(std::unique_ptr<MouseOperation>&, const
 {
     auto highLighted = scene->findHighLighted();
     Q_ASSERT(highLighted != scene->end());
-    Q_ASSERT(highLighted->elementType() == drawingElementType::Node);
+    Q_ASSERT(typeid(*highLighted).hash_code() == typeid(NodeElement<float>&).hash_code());
 
     undoStack->add(std::make_unique<NewNodeUndoItem>(scene, highLighted->identifier(), highLighted->center(), "Place node"));
 
@@ -34,7 +34,7 @@ void NewNodeMouseOperation::mouseMoved(std::unique_ptr<MouseOperation>&, const Q
 {
     auto highLighted = scene->findHighLighted();
     Q_ASSERT(highLighted != scene->end());
-    Q_ASSERT(highLighted->elementType() == drawingElementType::Node);
+    Q_ASSERT(typeid(*highLighted).hash_code() == typeid(NodeElement<float>&).hash_code());
     highLighted->anchorNode().setPoint(pointerPosition);
 
     update();

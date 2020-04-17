@@ -31,8 +31,6 @@ public:
     inline int newId() { return ++idCounter; }
     inline void setInitialId(int id) { idCounter = id; }
 
-    virtual drawingElementType elementType() const override { return drawingElementType::Scene; }
-
     void add(std::unique_ptr<DrawingElement<T>>&& element)
     {
         Q_ASSERT(findId(element->identifier()) == end());

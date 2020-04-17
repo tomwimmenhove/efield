@@ -25,7 +25,6 @@ public:
         : id(id), clipBounds(bounds)
     { }
 
-    virtual drawingElementType elementType() const = 0;
     virtual void draw(IDrawer<T>& drawer) = 0;
     virtual void drawAnnotation(QPainter& painter, const QSize& surfaceSize) = 0;
     virtual float distanceTo(const QPoint& point) const = 0;

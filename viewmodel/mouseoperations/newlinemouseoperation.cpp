@@ -28,7 +28,7 @@ void NewLineMouseOperation::mousePressed(std::unique_ptr<MouseOperation>&, const
             {
                 /* Set the definitive end point for the new line segment */
                 Q_ASSERT(highLighted->canAnchor());
-                Q_ASSERT(scene->back().elementType() == drawingElementType::Line);
+                Q_ASSERT(typeid(scene->back()).hash_code() == typeid(LineElement<float>&).hash_code());
 
                 if (highLighted->identifier() != startId)
                 {
@@ -55,7 +55,7 @@ void NewLineMouseOperation::cancelOperation(std::unique_ptr<MouseOperation>& cur
     {
         scene->highlight(scene->end());
 
-        Q_ASSERT(scene->back().elementType() == drawingElementType::Line);
+        Q_ASSERT(typeid(scene->back()).hash_code() == typeid(LineElement<float>&).hash_code());
         scene->pop();
 
         state = State::p1;
@@ -87,8 +87,10 @@ void NewLineMouseOperation::mouseMoved(std::unique_ptr<MouseOperation>&, const Q
                 if (closest->identifier() != startId)
                     scene->highlight(closest);
 
-            Q_ASSERT(scene->back().elementType() == drawingElementType::Line);
-            static_cast<LineElement<float>&>(scene->back()).point2().setPoint(pointerPosition);
+            Q_ASSERT(typeid(scene->back()).hash_code() == typeid(LineElement<float>&).hash_code());
+            auto& line = static_cast<LineElement<float>&>(scene->back());
+            line.point2().setPoint(pointerPosition);
+
             break;
         }
     }

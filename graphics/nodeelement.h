@@ -26,8 +26,6 @@ public:
         return std::make_unique<NodeElement<T>>(std::forward<Args>(arguments)...);
     }
 
-    virtual drawingElementType elementType() const override { return drawingElementType::Node; }
-
     void draw(IDrawer<T>&) override { } /* Annotation only */
 
     void drawAnnotation(QPainter& painter, const QSize& surfaceSize) override
