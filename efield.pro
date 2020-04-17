@@ -55,8 +55,7 @@ SOURCES += \
     util/undo/deletelineundoitem.cpp \
     viewmodel/deletedrawingelementvisitor.cpp \
     util/undo/newlineundoitem.cpp \
-    util/undo/newnodeundoitem.cpp \
-    util/undo/undoitem.cpp
+    util/undo/newnodeundoitem.cpp
 
 HEADERS += \
         mainwindow.h \

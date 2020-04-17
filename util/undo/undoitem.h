@@ -2,30 +2,25 @@
 #define UNDOITEM_H
 
 #include <QString>
+#include <QSharedPointer>
 #include <functional>
+
+#include "graphics/sceneelement.h"
 
 class UndoItem
 {
 public:
-    UndoItem(const QString& title, std::function<void()> undoFunc, std::function<void()> doFunc)
-        : titleString(title), undoFunc(undoFunc), doFunc(doFunc)
-    { }
-
     inline QString title() const { return titleString; }
-    inline void undoFunction() { undoFunc(); }
-    inline void doFunction() { doFunc(); }
+    virtual void undoFunction() = 0;
+    virtual void doFunction() = 0;
 
 protected:
-    UndoItem()
+    UndoItem(const QSharedPointer<SceneElement<float>>& scene, const QString& title)
+        : scene(scene), titleString(title)
     { }
 
-    UndoItem(const QString& title)
-        : titleString(title)
-    { }
-
+    QSharedPointer<SceneElement<float>> scene;
     QString titleString;
-    std::function<void()> undoFunc;
-    std::function<void()> doFunc;
 };
 
 #endif // UNDOITEM_H

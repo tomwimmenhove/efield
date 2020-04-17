@@ -1,25 +1,25 @@
 #include "deletenodeundoitem.h"
 
-DeleteNodeUndoItem::DeleteNodeUndoItem(const QSharedPointer<SceneElement<float> >& scene,
+DeleteNodeUndoItem::DeleteNodeUndoItem(const QSharedPointer<SceneElement<float>>& scene,
                                      int id,
                                      const QString& title)
-    : UndoItem(title)
+    : UndoItem(scene, title), id(id)
 {
     auto it = scene->findId(id);
     Q_ASSERT(it != scene->end());
     Q_ASSERT(it->elementType() == drawingElementType::Node);
-    QPoint oldPoint = it->center();
+    oldPoint = it->center();
+}
 
-    undoFunc = [scene, id, oldPoint]()
-    {
-        scene->add(NodeElement<float>::uniqueElement(SharedNode(id, oldPoint), scene->bounds()));
-    };
+void DeleteNodeUndoItem::undoFunction()
+{
+    scene->add(NodeElement<float>::uniqueElement(SharedNode(id, oldPoint), scene->bounds()));
+}
 
-    doFunc = [scene, id]()
-    {
-        auto it = scene->findId(id);
-        Q_ASSERT(it != scene->end());
-        Q_ASSERT(it->elementType() == drawingElementType::Node);
-        scene->remove(it);
-    };
+void DeleteNodeUndoItem::doFunction()
+{
+    auto it = scene->findId(id);
+    Q_ASSERT(it != scene->end());
+    Q_ASSERT(it->elementType() == drawingElementType::Node);
+    scene->remove(it);
 }

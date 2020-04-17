@@ -5,19 +5,19 @@ MoveUndoItem::MoveUndoItem(const QSharedPointer<SceneElement<float>>& scene,
                            const QPoint& oldPoint,
                            const QPoint& newPoint,
                            const QString& title)
-    : UndoItem(title)
-{
-    undoFunc = [scene, id, oldPoint]()
-    {
-        auto it = scene->findId(id);
-        Q_ASSERT(it != scene->end());
-        it->setCenter(oldPoint);
-    };
+    : UndoItem(scene, title), id(id), oldPoint(oldPoint), newPoint(newPoint)
+{ }
 
-    doFunc = [scene, id, newPoint]()
-    {
-        auto it = scene->findId(id);
-        Q_ASSERT(it != scene->end());
-        it->setCenter(newPoint);
-    };
+void MoveUndoItem::undoFunction()
+{
+    auto it = scene->findId(id);
+    Q_ASSERT(it != scene->end());
+    it->setCenter(oldPoint);
+}
+
+void MoveUndoItem::doFunction()
+{
+    auto it = scene->findId(id);
+    Q_ASSERT(it != scene->end());
+    it->setCenter(newPoint);
 }
