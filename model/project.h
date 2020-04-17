@@ -23,8 +23,8 @@ public:
     QString toXmlString() { return toDoc().toString(4); }
     QByteArray toXmlBytes() { return toDoc().toByteArray(4); }
 
-    QSharedPointer<SceneElement<float>> sharedScene() const { return scene; }
-    QSharedPointer<Simulator> sharedSimulator() const { return simulator; }
+    QSharedPointer<SceneElement<float>> scene() const { return sharedScene; }
+    QSharedPointer<Simulator> simulator() const { return sharedSimulator; }
 
 private:
     void fromDoc(const QDomDocument& doc);
@@ -33,11 +33,11 @@ private:
     void setFixedValues(FloatSurface& surface)
     {
         FloatSurfaceDrawer drawer(surface);
-        scene->draw(drawer);
+        sharedScene->draw(drawer);
     }
 
-    QSharedPointer<SceneElement<float>> scene;
-    QSharedPointer<Simulator> simulator;
+    QSharedPointer<SceneElement<float>> sharedScene;
+    QSharedPointer<Simulator> sharedSimulator;
 };
 
 #endif // PROJECT_H

@@ -43,7 +43,7 @@ MainVm::~MainVm()
 
 void MainVm::updateVisualization(bool useGradiant)
 {
-    QSharedPointer<FloatSurface> clonedSurface = project->sharedSimulator()->cloneSurface();
+    QSharedPointer<FloatSurface> clonedSurface = project->simulator()->cloneSurface();
     if (useGradiant)
     {
         gradient = QSharedPointer<GradientSurface>(new GradientSurface(*clonedSurface));
@@ -74,7 +74,7 @@ void MainVm::requestVisualization(const SimpleValueStepper& stepper, const QSize
     }
 
     painter.setRenderHint(QPainter::Antialiasing);
-    project->sharedScene()->drawAnnotation(painter, surface->size());
+    project->scene()->drawAnnotation(painter, surface->size());
 
     frames++;
     if (frames % 25 == 0)
@@ -239,7 +239,7 @@ void MainVm::deleteSelectedElement()
     if (!surface)
         return;
 
-    QSharedPointer<SceneElement<float>> scene = project->sharedScene();
+    QSharedPointer<SceneElement<float>> scene = project->scene();
     auto highLighted = scene->findHighLighted();
     if (highLighted == scene->end() || !highLighted->canDelete())
         return;
@@ -252,7 +252,7 @@ void MainVm::deleteSelectedElement()
 
 void MainVm::editElement(DrawingElement<float>& element)
 {
-    if (EditDrawingElementVisitor::editElement(parentWidget, undoStack, project->sharedScene(), element, surface))
+    if (EditDrawingElementVisitor::editElement(parentWidget, undoStack, project->scene(), element, surface))
         emit visualizationAvailable(surface->minValue(), surface->maxValue());
 }
 
@@ -261,7 +261,7 @@ void MainVm::editSelectedElement()
     if (!surface)
         return;
 
-    QSharedPointer<SceneElement<float>> scene = project->sharedScene();
+    QSharedPointer<SceneElement<float>> scene = project->scene();
     auto highLighted = scene->findHighLighted();
     if (highLighted == scene->end())
         return;
@@ -278,7 +278,7 @@ void MainVm::activateNewMouseOperation(const QPoint& pointerPosition)
 
     /* Instantiate a new NewNodeMouseOperation with the current mouseOperation as
      * parent, and move it to the current one. */
-    mouseOperation = std::move(std::make_unique<T>(std::move(mouseOperation), undoStack, project->sharedScene()));
+    mouseOperation = std::move(std::make_unique<T>(std::move(mouseOperation), undoStack, project->scene()));
 
     /* Call it's activate method */
     mouseOperation->activate(mouseOperation, pointerPosition);
@@ -334,7 +334,7 @@ void MainVm::initNewProject(std::unique_ptr<Project>&& newProject)
     if (simulatorWorker)
         simulatorWorker->deleteLater();
 
-    simulatorWorker = new SimulatorWorker(newProject->sharedSimulator());
+    simulatorWorker = new SimulatorWorker(newProject->simulator());
 
 #ifdef _OPENMP
     simulatorWorker->setNumThreads(numThreads);
@@ -351,14 +351,14 @@ void MainVm::initNewProject(std::unique_ptr<Project>&& newProject)
 
     project = std::move(newProject);
 
-    mouseOperation = std::make_unique<NormalMouseOperation>(undoStack, project->sharedScene());
+    mouseOperation = std::make_unique<NormalMouseOperation>(undoStack, project->scene());
     connect(static_cast<NormalMouseOperation*>(mouseOperation.get()), &NormalMouseOperation::editElement, this, &MainVm::editElement);
 }
 
 #ifdef QT_DEBUG
 void MainVm::createScene()
 {
-    QSharedPointer<SceneElement<float>> scene = project->sharedScene();
+    QSharedPointer<SceneElement<float>> scene = project->scene();
 
     SharedNode anodeLeft(scene->newId(), 100, 500);
     SharedNode anodeRight(scene->newId(), 500, 500);
@@ -378,8 +378,8 @@ void MainVm::createScene()
 
 void MainVm::createBorder(float voltage)
 {
-    QSharedPointer<SceneElement<float>> scene = project->sharedScene();
-    QSize size = project->sharedSimulator()->size();
+    QSharedPointer<SceneElement<float>> scene = project->scene();
+    QSize size = project->simulator()->size();
 
     SharedNode topLeft(scene->newId(), 0, size.width() - 1);
     SharedNode topRight(scene->newId(), size.height() - 1, size.width() - 1);
