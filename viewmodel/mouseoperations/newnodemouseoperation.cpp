@@ -1,5 +1,6 @@
 #include "newnodemouseoperation.h"
 #include "graphics/nodeelement.h"
+#include "util/undo/newnodeundoitem.h"
 
 void NewNodeMouseOperation::activate(std::unique_ptr<MouseOperation>&, const QPoint& pointerPosition)
 {
@@ -8,6 +9,12 @@ void NewNodeMouseOperation::activate(std::unique_ptr<MouseOperation>&, const QPo
 
 void NewNodeMouseOperation::mousePressed(std::unique_ptr<MouseOperation>&, const QPoint& pointerPosition)
 {
+    auto highLighted = scene->findHighLighted();
+    Q_ASSERT(highLighted != scene->end());
+    Q_ASSERT(highLighted->elementType() == drawingElementType::Node);
+
+    undoStack->add(NewNodeUndoItem(scene, highLighted->identifier(), highLighted->center(), "Place node"));
+
     placeNewNodeElement(pointerPosition);
 }
 
