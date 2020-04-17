@@ -24,6 +24,16 @@ void DragMouseOperation::cancelOperation(std::unique_ptr<MouseOperation>& curren
 
 void DragMouseOperation::mouseMoved(std::unique_ptr<MouseOperation>&, const QPoint& pointerPosition)
 {
+    if (!started)
+    {
+        QPoint p = pointerPosition - dragStartPos;
+        if (p.manhattanLength() > 5)
+            started = true;
+    }
+
+    if (!started)
+        return;
+
     auto highLighted = scene->findHighLighted();
     Q_ASSERT(highLighted != scene->end());
     highLighted->setCenter(savedPos + pointerPosition - dragStartPos);

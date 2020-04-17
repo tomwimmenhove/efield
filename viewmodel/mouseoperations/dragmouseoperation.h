@@ -20,6 +20,7 @@ public:
     void mouseReleased(std::unique_ptr<MouseOperation>& current, const QPoint& pointerPosition, Qt::MouseButtons buttons) override;
 
 private:
+    bool started = false;
     QPoint savedPos;
     QPoint dragStartPos;
 };
