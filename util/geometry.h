@@ -24,9 +24,9 @@ public:
                                  bool fipVertical,
                                  Qt::AspectRatioMode mode = Qt::KeepAspectRatio);
 
-    static QPoint clip(QPoint p, const QSize& size);
-    static QRect clip(QRect r, const QRect& bounds);
-    static QRect clip(QRect r, const QSize& size);
+    static QPoint clip(QPoint p, QSize size);
+    static QRect clip(QRect r, QRect bounds);
+    static QRect clip(const QRect& r, const QSize& size);
 };
 
 #endif // GEOMETRY_H

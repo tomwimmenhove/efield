@@ -142,13 +142,13 @@ public:
         return findIf([id](const DrawingElement<T>& e) { return e.identifier() == id; });
     }
 
-    QRect unitedBounds()
+    const QRect selectionBounds()
     {
         QRect rect;
 
         for (auto i = begin(); i != end(); ++i)
             if (i->isHighlighted())
-                rect = rect.isNull() ? i->bounds() : rect.united(rect);
+                rect = rect.isNull() ? i->bounds() : rect.united(i->bounds());
 
         return rect;
     }

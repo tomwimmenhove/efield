@@ -7,7 +7,6 @@ void DragMouseOperation::activate(std::unique_ptr<MouseOperation>&, const QPoint
 {
     auto closest = scene->closestElement(pointerPosition);
     Q_ASSERT(closest != scene->end());
-    dragStartPos = pointerPosition;
 
     int numHighlighted;
 
@@ -24,6 +23,9 @@ void DragMouseOperation::activate(std::unique_ptr<MouseOperation>&, const QPoint
     for(auto i = scene->begin(); i != scene->end(); ++i)
         if (i->isHighlighted() && (numHighlighted == 1 || !i->isInUse()))
             savedPositions[i->identifier()] = i->center();
+
+    dragStartPos = pointerPosition;
+    dragStartSelectionBounds = scene->selectionBounds();
 
     update();
 }
@@ -43,6 +45,8 @@ void DragMouseOperation::cancelOperation(std::unique_ptr<MouseOperation>& curren
     current = std::move(parent);
 }
 
+#include <QDebug>
+
 void DragMouseOperation::mouseMoved(std::unique_ptr<MouseOperation>&, const QPoint& pointerPosition)
 {
     if (!started)
@@ -55,13 +59,17 @@ void DragMouseOperation::mouseMoved(std::unique_ptr<MouseOperation>&, const QPoi
     if (!started)
         return;
 
+    QRect rect = dragStartSelectionBounds.translated(pointerPosition - dragStartPos);
+    QRect clipped = Geometry::clip(rect, scene->sceneBounds());
+    auto delta = clipped.topLeft() - dragStartSelectionBounds.topLeft();
+
     QMapIterator<int, QPoint> i(savedPositions);
     while (i.hasNext())
     {
         i.next();
         auto it = scene->findId(i.key());
         Q_ASSERT(it != scene->end());
-        it->setCenter(i.value() + pointerPosition - dragStartPos);
+        it->setCenter(i.value() + delta);
     }
 
     update();

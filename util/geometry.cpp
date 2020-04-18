@@ -54,7 +54,7 @@ QPoint Geometry::translatePoint(const QPoint& point, const QSize& fromSurface, c
     return translated;
 }
 
-QPoint Geometry::clip(QPoint p, const QSize& size)
+QPoint Geometry::clip(QPoint p, QSize size)
 {
     if (p.x() < 0) p.setX(0);
     if (p.y() < 0) p.setY(0);
@@ -64,7 +64,7 @@ QPoint Geometry::clip(QPoint p, const QSize& size)
     return p;
 }
 
-QRect Geometry::clip(QRect r, const QRect& bounds)
+QRect Geometry::clip(QRect r, QRect bounds)
 {
     if (r.left() < bounds.left()) r.translate(bounds.left() - r.left(), 0);
     if (r.right() < bounds.left()) r.translate(bounds.left() - r.right(), 0);
@@ -83,7 +83,7 @@ QRect Geometry::clip(QRect r, const QRect& bounds)
     return r;
 }
 
-QRect Geometry::clip(QRect r, const QSize& size)
+QRect Geometry::clip(const QRect& r, const QSize& size)
 {
     return clip(r, QRect(QPoint(0, 0), size));
 }
