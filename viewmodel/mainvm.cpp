@@ -246,26 +246,7 @@ void MainVm::deleteSelectedElement()
 
     cancelOperation();
 
-    QSharedPointer<UndoStack> nestedUndoStack = QSharedPointer<UndoStack>::create();
-
-    bool update = false;
-    int n;
-    do {
-        n = 0;
-        for (auto it = scene->begin(); it != scene->end(); ++it)
-        {
-            if (it->isHighlighted() && !it->isInUse())
-            {
-                update |= DeleteDrawingElementVisitor::deleteElement(nestedUndoStack, scene, *it);
-                n++;
-                break;
-            }
-        }
-    } while (n != 0);
-
-    undoStack->add(std::make_unique<CompositUndoItem>(scene, nestedUndoStack, "Delete selected"));
-
-    if (update)
+    if (DeleteDrawingElementVisitor::deleteSelected(undoStack, scene))
         emit visualizationAvailable(surface->minValue(), surface->maxValue());
 }
 

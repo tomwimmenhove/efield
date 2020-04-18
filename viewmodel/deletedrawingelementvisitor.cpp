@@ -2,6 +2,7 @@
 
 #include "util/undo/deletelineundoitem.h"
 #include "util/undo/deletenodeundoitem.h"
+#include "util/undo/compositundoitem.h"
 
 bool DeleteDrawingElementVisitor::deleteElement(const QSharedPointer<UndoStack>& undoStack,
                                      const QSharedPointer<SceneElement<float>>& scene,
@@ -11,6 +12,30 @@ bool DeleteDrawingElementVisitor::deleteElement(const QSharedPointer<UndoStack>&
     element.accept(v);
 
     return v.update;
+}
+
+bool DeleteDrawingElementVisitor::deleteSelected(const QSharedPointer<UndoStack>& undoStack, const QSharedPointer<SceneElement<float> >& scene)
+{
+    QSharedPointer<UndoStack> nestedUndoStack = QSharedPointer<UndoStack>::create();
+
+    bool update = false;
+    int n;
+    do {
+        n = 0;
+        for(auto& i: *scene)
+        {
+            if (i.isHighlighted() && !i.isInUse())
+            {
+                update |= DeleteDrawingElementVisitor::deleteElement(nestedUndoStack, scene, i);
+                n++;
+                break;
+            }
+        }
+    } while (n != 0);
+
+    undoStack->add(std::make_unique<CompositUndoItem>(scene, nestedUndoStack, "Delete selected"));
+
+    return update;
 }
 
 void DeleteDrawingElementVisitor::visit(SceneElement<float>&)

@@ -27,6 +27,9 @@ public:
     DerefIterator & operator++() { ++i; return *this; }
     DerefIterator & operator--() { --i; return *this; }
 
+    DerefIterator & operator+=(difference_type n) { i += n; return *this; }
+    DerefIterator & operator-=(difference_type n) { i -= n; return *this; }
+
 private:
     T i;
 };

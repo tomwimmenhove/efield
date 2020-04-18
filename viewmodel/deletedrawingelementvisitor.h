@@ -15,6 +15,9 @@ public:
                      const QSharedPointer<SceneElement<float> >& scene,
                      DrawingElement<float>& element);
 
+    static bool deleteSelected(const QSharedPointer<UndoStack>& undoStack,
+                     const QSharedPointer<SceneElement<float> >& scene);
+
 private:
     DeleteDrawingElementVisitor(const QSharedPointer<UndoStack>& undoStack,
                               const QSharedPointer<SceneElement<float>>& scene)

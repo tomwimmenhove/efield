@@ -36,7 +36,7 @@ public:
         Q_ASSERT(findId(element->identifier()) == end());
         elements.push_back(std::move(element));
     }
-    void remove(iterator iter) { elements.erase(iter.innerIterator()); }
+    iterator remove(iterator iter) { return iterator(elements.erase(iter.innerIterator())); }
     void pop() { elements.pop_back(); }
     void clear() { elements.clear(); }
     DrawingElement<T>& front() const { return *elements.front(); }
@@ -44,6 +44,7 @@ public:
 
     iterator begin() const { return iterator(elements.begin()); }
     iterator end() const { return iterator(elements.end()); }
+    size_t size() const { return elements.size(); }
 
     void draw(IDrawer<T>& drawer) override
     {
