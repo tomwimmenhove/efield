@@ -4,6 +4,7 @@
 #include <QFileDialog>
 #include <QFile>
 #include <QMessageBox>
+#include <QApplication>
 
 #include "mainvm.h"
 #include "pointinputdialog.h"
@@ -172,6 +173,9 @@ void MainVm::mouseDoubleClickedOnPixmap(const QPoint& mousePos, Qt::MouseButtons
 
 void MainVm::newSimulation()
 {
+    if (!saveIfAltered())
+        return;
+
     PointInputDialog d("Node coordinates", QPoint(256, 256), QPoint(1, 1), QPoint(1024, 1024), parentWidget);
     if (d.exec() != QDialog::Accepted)
         return;
@@ -183,6 +187,9 @@ void MainVm::newSimulation()
 
 void MainVm::projectOpen()
 {
+    if (!saveIfAltered())
+        return;
+
     QString fileName = QFileDialog::getOpenFileName(parentWidget, tr("Open Project"), "",
                                                     tr("E-Field Sim files (*.efs)"));
 
@@ -202,15 +209,15 @@ void MainVm::projectOpen()
     }
 }
 
-void MainVm::projectSave()
+bool MainVm::projectSave()
 {
-    if (!project->fileName().isEmpty())
-        projectSaveTo(project->fileName());
-    else
-        projectSaveAs();
+    if (project->fileName().isEmpty())
+        return projectSaveAs();
+
+    return projectSaveTo(project->fileName());
 }
 
-void MainVm::projectSaveTo(const QString& fileName)
+bool MainVm::projectSaveTo(const QString& fileName)
 {
     QFile file(fileName);
 
@@ -218,14 +225,44 @@ void MainVm::projectSaveTo(const QString& fileName)
     {
         file.write(project->toXmlBytes());
         project->setFileName(fileName);
+
+        return true;
     }
-    else
-        QMessageBox::critical(parentWidget, "Unable to save",
-                              QString("Unable to save %1: %2")
-                              .arg(fileName).arg(file.errorString()));
+    QMessageBox::critical(parentWidget, "Unable to save",
+                          QString("Unable to save %1: %2")
+                          .arg(fileName).arg(file.errorString()));
+
+    return false;
 }
 
-void MainVm::projectSaveAs()
+bool MainVm::saveIfAltered()
+{
+    if (!project->isAltered())
+    {
+        return true;
+    }
+
+    QMessageBox msgBox;
+    msgBox.setText("The current project has been modified.");
+    msgBox.setInformativeText("Do you want to save your changes?");
+    msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+    msgBox.setDefaultButton(QMessageBox::Save);
+
+    switch(msgBox.exec())
+    {
+        case QMessageBox::Discard:
+            return true;
+        case QMessageBox::Save:
+            return projectSave();
+        case QMessageBox::Cancel:
+        default:
+            return false;
+    }
+
+    return false;
+}
+
+bool MainVm::projectSaveAs()
 {
     QString fileName = QFileDialog::getSaveFileName(parentWidget, tr("Open Project"), "",
                                                     tr("E-Field Sim files (*.efs)"));
@@ -233,7 +270,10 @@ void MainVm::projectSaveAs()
     if (!fileName.isEmpty())
     {
         projectSaveTo(fileName);
+        return true;
     }
+
+    return false;
 }
 
 void MainVm::undo()
@@ -269,6 +309,20 @@ void MainVm::selectAll()
 
     if (update)
         emit visualizationAvailable(surface->minValue(), surface->maxValue());
+}
+
+void MainVm::closeRequested()
+{
+    if (!saveIfAltered())
+        return;
+
+    QApplication::quit();
+}
+
+void MainVm::on_undoStackUpdated(bool canUndo, const QString& undoName, bool canRedo, const QString& redoName)
+{
+    emit undoStackUpdated(canUndo, undoName, canRedo, redoName);
+    project->setAltered(true);
 }
 
 void MainVm::deleteSelectedElement()
@@ -379,7 +433,7 @@ void MainVm::initNewProject(std::unique_ptr<Project>&& newProject)
 #endif
 
     undoStack = QSharedPointer<UndoStack>::create();
-    connect(static_cast<UndoStack*>(undoStack.data()), &UndoStack::stackUpdated, this, &MainVm::undoStackUpdated);
+    connect(static_cast<UndoStack*>(undoStack.data()), &UndoStack::stackUpdated, this, &MainVm::on_undoStackUpdated);
 
     connect(&simulatorThread, &QThread::finished, simulatorWorker, &SimulatorWorker::deleteLater);
     connect(this, &MainVm::runSimulatorWorker, simulatorWorker, &SimulatorWorker::run);

@@ -43,6 +43,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, &MainWindow::undo, mainVm, &MainVm::undo);
     connect(this, &MainWindow::redo, mainVm, &MainVm::redo);
     connect(this, &MainWindow::selectAll, mainVm, &MainVm::selectAll);
+    connect(this, &MainWindow::closeRequested, mainVm, &MainVm::closeRequested);
 
     connect(mainVm, &MainVm::visualizationAvailable, this, &MainWindow::mainVm_VisualizationAvailable);
     connect(mainVm, &MainVm::newVisualization, this, &MainWindow::mainVm_NewVisualization);
@@ -188,6 +189,17 @@ void MainWindow::keyPressEvent(QKeyEvent* e)
     }
 
     QMainWindow::keyPressEvent(e);
+}
+
+void MainWindow::closeEvent(QCloseEvent* event)
+{
+    if (shouldClose)
+        event->accept();
+    else
+    {
+        event->ignore();
+        emit closeRequested();
+    }
 }
 
 void MainWindow::on_actionPlace_Node_triggered()

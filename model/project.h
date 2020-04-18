@@ -4,14 +4,17 @@
 #include <QSize>
 #include <QDomDocument>
 #include <QSharedPointer>
+#include <QObject>
 
 #include "simulator.h"
 #include "floatsurfacedrawer.h"
 #include "graphics/sceneserializevisitor.h"
 #include "graphics/scenedeserializevisitor.h"
 
-class Project
+class Project : QObject
 {
+    Q_OBJECT
+
 public:
     Project(const QSize& size);
 
@@ -29,6 +32,9 @@ public:
     QString fileName() const { return fName; }
     void setFileName(const QString& value) { fName = value; }
 
+    bool isAltered() const { return altered; }
+    void setAltered(bool value) { altered = value; }
+
 private:
     void fromDoc(const QDomDocument& doc);
     QDomDocument toDoc();
@@ -40,6 +46,7 @@ private:
     }
 
     QString fName;
+    bool altered;
     QSharedPointer<SceneElement<float>> sharedScene;
     QSharedPointer<Simulator> sharedSimulator;
 };

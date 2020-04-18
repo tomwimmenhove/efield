@@ -73,9 +73,11 @@ signals:
     void undo();
     void redo();
     void selectAll();
+    void closeRequested();
 
 protected:
     void keyPressEvent(QKeyEvent *e);
+    void closeEvent(QCloseEvent *event);
 
 private:
     void frameUpdate();
@@ -85,6 +87,7 @@ private:
     QThread vmThread;
 #endif
 
+    bool shouldClose = false;
     QPoint graphLabelMousePos;
     QTimer* frameTimer;
     Ui::MainWindow *ui;
