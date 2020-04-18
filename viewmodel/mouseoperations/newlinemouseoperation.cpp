@@ -36,7 +36,7 @@ void NewLineMouseOperation::mousePressed(std::unique_ptr<MouseOperation>&, const
                     line.setPoint2(highLighted->anchorNode());
 
                     undoStack->add(std::make_unique<NewLineUndoItem>(scene, line.identifier(),
-                                                   line.point1().identifier(), line.point2().identifier(), line.value(), "Place line"));
+                                                   line.point1().identifier(), line.point2().identifier(), line.value()));
 
                     state = State::p1;
                 }

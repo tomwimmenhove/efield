@@ -9,9 +9,9 @@
 class DeleteLineUndoItem : public UndoItem
 {
 public:
-    DeleteLineUndoItem(const QSharedPointer<SceneElement<float>>& scene,
-                      int id,
-                      const QString& title);
+    DeleteLineUndoItem(const QSharedPointer<SceneElement<float>>& scene, int id);
+
+    QString title() const override { return "Delete line"; }
 
     void undoFunction() override;
     void doFunction() override;

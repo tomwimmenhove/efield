@@ -1,9 +1,7 @@
 #include "deletenodeundoitem.h"
 
-DeleteNodeUndoItem::DeleteNodeUndoItem(const QSharedPointer<SceneElement<float>>& scene,
-                                     int id,
-                                     const QString& title)
-    : UndoItem(scene, title), id(id)
+DeleteNodeUndoItem::DeleteNodeUndoItem(const QSharedPointer<SceneElement<float>>& scene, int id)
+    : UndoItem(scene), id(id)
 {
     auto it = scene->findId(id);
     Q_ASSERT(it != scene->end());

@@ -32,7 +32,7 @@ void EditDrawingElementVisitor::visit(NodeElement<float>& node)
     if (d.exec() != QDialog::Accepted)
         return;
 
-    auto undoItem = std::make_unique<MoveUndoItem>(scene, node.identifier(), node.center(), d.point(), "Move");
+    auto undoItem = std::make_unique<MoveUndoItem>(scene, node.identifier(), node.center(), d.point());
     undoItem->doFunction();
     undoStack->add(std::move(undoItem));
 
@@ -53,7 +53,7 @@ void EditDrawingElementVisitor::visit(LineElement<float>& line)
     if (!ok)
         return;
 
-    auto undoItem = std::make_unique<LineValueUndoItem>(scene, line.identifier(), def, volt, "Change voltage");
+    auto undoItem = std::make_unique<LineValueUndoItem>(scene, line.identifier(), def, volt);
     undoItem->doFunction();
     undoStack->add(std::move(undoItem));
 }

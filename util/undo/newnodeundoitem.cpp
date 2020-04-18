@@ -1,8 +1,8 @@
 #include "newnodeundoitem.h"
 
 NewNodeUndoItem::NewNodeUndoItem(const QSharedPointer<SceneElement<float>>& scene,
-                                 int id, const QPoint& point, const QString& title)
-    : UndoItem(scene, title), id(id), point(point)
+                                 int id, const QPoint& point)
+    : UndoItem(scene), id(id), point(point)
 { }
 
 void NewNodeUndoItem::undoFunction()

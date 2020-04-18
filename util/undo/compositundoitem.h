@@ -13,11 +13,14 @@ public:
                      const QSharedPointer<UndoStack>& undoStack,
                      const QString& title);
 
+    QString title() const override { return titleString; }
+
     void undoFunction() override;
     void doFunction() override;
 
 private:
     QSharedPointer<UndoStack> undoStack;
+    QString titleString;
 };
 
 #endif // COMPOSITUNDOITEM_H

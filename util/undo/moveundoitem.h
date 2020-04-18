@@ -12,8 +12,9 @@ public:
     MoveUndoItem(const QSharedPointer<SceneElement<float>>& scene,
                  int id,
                  const QPoint& oldPoint,
-                 const QPoint& newPoint,
-                 const QString& title);
+                 const QPoint& newPoint);
+
+    QString title() const override { return "Move"; }
 
     void undoFunction() override;
     void doFunction() override;

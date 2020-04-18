@@ -10,8 +10,9 @@ class NewLineUndoItem : public UndoItem
 {
 public:
     NewLineUndoItem(const QSharedPointer<SceneElement<float>>& scene,
-                  int id, int nodeId1, int nodeId2, float value,
-                  const QString& title);
+                  int id, int nodeId1, int nodeId2, float value);
+
+    QString title() const override { return "Place line"; }
 
     void undoFunction() override;
     void doFunction() override;

@@ -1,8 +1,9 @@
 #include "newlineundoitem.h"
 #include "graphics/lineelement.h"
 
-NewLineUndoItem::NewLineUndoItem(const QSharedPointer<SceneElement<float>>& scene, int id, int nodeId1, int nodeId2, float value, const QString& title)
-    : UndoItem(scene, title), id(id), nodeId1(nodeId1), nodeId2(nodeId2), value(value)
+NewLineUndoItem::NewLineUndoItem(const QSharedPointer<SceneElement<float>>& scene,
+                                 int id, int nodeId1, int nodeId2, float value)
+    : UndoItem(scene), id(id), nodeId1(nodeId1), nodeId2(nodeId2), value(value)
 { }
 
 void NewLineUndoItem::undoFunction()

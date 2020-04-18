@@ -9,9 +9,9 @@
 class DeleteNodeUndoItem : public UndoItem
 {
 public:
-    DeleteNodeUndoItem(const QSharedPointer<SceneElement<float>>& scene,
-                      int id,
-                      const QString& title);
+    DeleteNodeUndoItem(const QSharedPointer<SceneElement<float>>& scene, int id);
+
+    QString title() const override { return "Delete node"; }
 
     void undoFunction() override;
     void doFunction() override;

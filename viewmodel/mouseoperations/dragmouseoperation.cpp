@@ -82,12 +82,12 @@ void DragMouseOperation::mouseReleased(std::unique_ptr<MouseOperation>& current,
             auto it = scene->findId(i.key());
             Q_ASSERT(it != scene->end());
 
-            auto undoItem = std::make_unique<MoveUndoItem>(scene, it->identifier(), i.value(), it->center(), "Move");
+            auto undoItem = std::make_unique<MoveUndoItem>(scene, it->identifier(), i.value(), it->center());
             undoItem->doFunction();
             nestedUndoStack->add(std::move(undoItem));
         }
 
-        undoStack->add(std::make_unique<CompositUndoItem>(scene, nestedUndoStack, "Move selected"));
+        undoStack->add(std::make_unique<CompositUndoItem>(scene, nestedUndoStack, "Move selection"));
     }
 
     current = std::move(parent);

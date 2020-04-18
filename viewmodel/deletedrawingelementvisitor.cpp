@@ -22,18 +22,18 @@ bool DeleteDrawingElementVisitor::deleteSelected(const QSharedPointer<UndoStack>
     int n;
     do {
         n = 0;
-        for(auto& i: *scene)
+        for(auto& element: *scene)
         {
-            if (i.isHighlighted() && !i.isInUse())
+            if (element.isHighlighted() && !element.isInUse())
             {
-                update |= DeleteDrawingElementVisitor::deleteElement(nestedUndoStack, scene, i);
+                update |= DeleteDrawingElementVisitor::deleteElement(nestedUndoStack, scene, element);
                 n++;
                 break;
             }
         }
     } while (n != 0);
 
-    undoStack->add(std::make_unique<CompositUndoItem>(scene, nestedUndoStack, "Delete selected"));
+    undoStack->add(std::make_unique<CompositUndoItem>(scene, nestedUndoStack, "Delete selection"));
 
     return update;
 }
@@ -43,7 +43,7 @@ void DeleteDrawingElementVisitor::visit(SceneElement<float>&)
 
 void DeleteDrawingElementVisitor::visit(NodeElement<float>& node)
 {
-    auto undoItem = std::make_unique<DeleteNodeUndoItem>(scene, node.identifier(), "Delete node");
+    auto undoItem = std::make_unique<DeleteNodeUndoItem>(scene, node.identifier());
     undoItem->doFunction();
     undoStack->add(std::move(undoItem));
 
@@ -52,7 +52,7 @@ void DeleteDrawingElementVisitor::visit(NodeElement<float>& node)
 
 void DeleteDrawingElementVisitor::visit(LineElement<float>& line)
 {
-    auto undoItem = std::make_unique<DeleteLineUndoItem>(scene, line.identifier(), "Delete line");
+    auto undoItem = std::make_unique<DeleteLineUndoItem>(scene, line.identifier());
     undoItem->doFunction();
     undoStack->add(std::move(undoItem));
 

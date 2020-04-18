@@ -10,8 +10,9 @@ class NewNodeUndoItem : public UndoItem
 {
 public:
     NewNodeUndoItem(const QSharedPointer<SceneElement<float>>& scene,
-                  int id, const QPoint& point,
-                  const QString& title);
+                  int id, const QPoint& point);
+
+    QString title() const override { return "Place node"; }
 
     void undoFunction() override;
     void doFunction() override;

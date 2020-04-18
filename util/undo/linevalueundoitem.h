@@ -12,8 +12,9 @@ public:
     LineValueUndoItem(const QSharedPointer<SceneElement<float>>& scene,
                       int id,
                       float oldValue,
-                      float newValue,
-                      const QString& title);
+                      float newValue);
+
+    QString title() const override { return "Change voltage"; }
 
     void undoFunction() override;
     void doFunction() override;

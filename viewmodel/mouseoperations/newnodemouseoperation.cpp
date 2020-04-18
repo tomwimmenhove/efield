@@ -13,7 +13,7 @@ void NewNodeMouseOperation::mousePressed(std::unique_ptr<MouseOperation>&, const
     Q_ASSERT(highLighted != scene->end());
     Q_ASSERT(typeid(*highLighted).hash_code() == typeid(NodeElement<float>&).hash_code());
 
-    undoStack->add(std::make_unique<NewNodeUndoItem>(scene, highLighted->identifier(), highLighted->center(), "Place node"));
+    undoStack->add(std::make_unique<NewNodeUndoItem>(scene, highLighted->identifier(), highLighted->center()));
 
     placeNewNodeElement(pointerPosition);
 }

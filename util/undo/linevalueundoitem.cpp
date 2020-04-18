@@ -4,9 +4,8 @@
 LineValueUndoItem::LineValueUndoItem(const QSharedPointer<SceneElement<float>>& scene,
                                      int id,
                                      float oldValue,
-                                     float newValue,
-                                     const QString& title)
-    : UndoItem(scene, title), id(id), oldValue(oldValue), newValue(newValue)
+                                     float newValue)
+    : UndoItem(scene), id(id), oldValue(oldValue), newValue(newValue)
 { }
 
 void LineValueUndoItem::undoFunction()
