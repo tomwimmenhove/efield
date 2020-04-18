@@ -18,10 +18,6 @@ void DragMouseOperation::activate(std::unique_ptr<MouseOperation>&, const QPoint
     else
         numHighlighted = scene->numHighlighted();
 
-//    /* If it's not a multi-selection, highlight the one we clicked */
-//    if (scene->findFirstHighLighted() == scene->end())
-//        scene->highlightExclusive(closest);
-
     /* Exclude elements that are marked as 'in use'. If we're moving any elements that are
      * using those elements, they will be moved by those elements, indirectly */
     for(auto i = scene->begin(); i != scene->end(); ++i)
@@ -77,15 +73,21 @@ void DragMouseOperation::mouseReleased(std::unique_ptr<MouseOperation>& current,
 
     if (started && !savedPositions.empty())
     {
+        QSharedPointer<UndoStack> nestedUndoStack = QSharedPointer<UndoStack>::create();
+
         QMapIterator<int, QPoint> i(savedPositions);
         while (i.hasNext())
         {
             i.next();
             auto it = scene->findId(i.key());
             Q_ASSERT(it != scene->end());
-            undoStack->add(std::make_unique<MoveUndoItem>(
-                              scene, it->identifier(), i.value(), it->center(), "Move"));
+
+            auto undoItem = std::make_unique<MoveUndoItem>(scene, it->identifier(), i.value(), it->center(), "Move");
+            undoItem->doFunction();
+            nestedUndoStack->add(std::move(undoItem));
         }
+
+        undoStack->add(std::make_unique<CompositUndoItem>(scene, nestedUndoStack, "Move selected"));
     }
 
     current = std::move(parent);
