@@ -1,3 +1,5 @@
+#include <QFileInfo>
+
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
@@ -51,7 +53,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(mainVm, &MainVm::newStatusMessage, this, &MainWindow::mainVm_NewStatusMessage);
     connect(mainVm, &MainVm::updateMouseCursor, this, &MainWindow::mainVm_UpdateMouseCursor);
     connect(mainVm, &MainVm::undoStackUpdated, this, &MainWindow::mainVm_UndoStackUpdated);
-    connect(mainVm, &MainVm::titleMessage, this, &MainWindow::mainVm_TitleMessage);
+    connect(mainVm, &MainVm::projectStatusUpdate, this, &MainWindow::mainVm_ProjectStatusUpdate);
 
 #ifdef USE_VM_THREAD
     mainVm->moveToThread(&vmThread);
@@ -137,10 +139,25 @@ void MainWindow::mainVm_UndoStackUpdated(bool canUndo, const QString& undoName, 
     ui->action_Redo->setText(tr("Redo %1").arg(redoName));
 }
 
-void MainWindow::mainVm_TitleMessage(const QString& message)
+void MainWindow::mainVm_ProjectStatusUpdate(const QString& filename, bool altered)
 {
-    setWindowTitle(message);
+    ui->action_Save->setEnabled(altered);
+    ui->action_Save_as->setEnabled(altered);
+
+    if (filename.isEmpty())
+    {
+        setWindowTitle(QString("%1%2")
+                          .arg(QCoreApplication::applicationName())
+                          .arg(altered ? " *" : ""));
+        return;
+    }
+
+    setWindowTitle(QString("[%1]- %2%3")
+                      .arg(QFileInfo(filename).fileName())
+                      .arg(QCoreApplication::applicationName())
+                      .arg(altered ? " *" : ""));
 }
+
 
 void MainWindow::on_actionStart_triggered()
 {

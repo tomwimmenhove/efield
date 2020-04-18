@@ -52,7 +52,6 @@ public slots:
 
 private slots:
     void on_undoStackUpdated(bool canUndo, const QString& undoName, bool canRedo, const QString& redoName, size_t level);
-    void projectStatusUpdate(const QString& filename, bool altered);
 
 signals:
     void visualizationAvailable(float minValue, float maxValue);
@@ -62,7 +61,7 @@ signals:
     void cancelSimulatorWorker();
     void updateMouseCursor(Qt::CursorShape cursor);
     void undoStackUpdated(bool canUndo, const QString& undoName, bool canRedo, const QString& redoName);
-    void titleMessage(const QString& message);
+    void projectStatusUpdate(const QString& filename, bool altered);
 
 private:
 #ifdef _OPENMP

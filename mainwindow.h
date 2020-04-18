@@ -33,7 +33,7 @@ private slots:
     void mainVm_NewStatusMessage(const QString& message);
     void mainVm_UpdateMouseCursor(Qt::CursorShape cursor);
     void mainVm_UndoStackUpdated(bool canUndo, const QString& undoName, bool canRedo, const QString& redoName);
-    void mainVm_TitleMessage(const QString& message);
+    void mainVm_ProjectStatusUpdate(const QString& filename, bool altered);
 
     void on_actionStart_triggered();
     void on_actionS_top_triggered();

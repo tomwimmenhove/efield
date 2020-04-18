@@ -327,22 +327,6 @@ void MainVm::on_undoStackUpdated(bool canUndo, const QString& undoName, bool can
     project->setAltered(level != project->savedAtUndoLevel());
 }
 
-void MainVm::projectStatusUpdate(const QString& filename, bool altered)
-{
-    if (filename.isEmpty())
-    {
-        emit titleMessage(QString("%1%2")
-                          .arg(QCoreApplication::applicationName())
-                          .arg(altered ? " *" : ""));
-        return;
-    }
-
-    emit titleMessage(QString("[%1]- %2%3")
-                      .arg(QFileInfo(filename).fileName())
-                      .arg(QCoreApplication::applicationName())
-                      .arg(altered ? " *" : ""));
-}
-
 void MainVm::deleteSelectedElement()
 {
     if (!surface)
