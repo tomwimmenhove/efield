@@ -22,7 +22,7 @@ void NewNodeMouseOperation::cancelOperation(std::unique_ptr<MouseOperation>& cur
 {
     auto highLighted = scene->findFirstHighLighted();
 
-    scene->highlightUnique(scene->end());
+    scene->highlightExclusive(scene->end());
     if (highLighted != scene->end())
         scene->remove(highLighted);
 
@@ -42,7 +42,7 @@ void NewNodeMouseOperation::mouseMoved(std::unique_ptr<MouseOperation>&, const Q
 
 void NewNodeMouseOperation::placeNewNodeElement(const QPoint& pointerPosition)
 {
-    scene->highlightUnique(scene->end());
+    scene->highlightExclusive(scene->end());
 
     auto newNode = NodeElement<float>::uniqueElement(SharedNode(scene->newId(), pointerPosition), scene->sceneBounds());
     newNode->setHighlighted(true);

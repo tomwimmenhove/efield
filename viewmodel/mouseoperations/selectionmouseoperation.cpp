@@ -2,7 +2,7 @@
 
 void SelectionMouseOperation::activate(std::unique_ptr<MouseOperation>&, const QPoint& pointerPosition)
 {
-    scene->highlightUnique(scene->end());
+    scene->highlightExclusive(scene->end());
 
     dragStartPos = pointerPosition;
     scene->setSelectionRect(QRect());

@@ -41,7 +41,7 @@ void NewLineMouseOperation::mousePressed(std::unique_ptr<MouseOperation>&, const
                     state = State::p1;
                 }
             }
-            scene->highlightUnique(scene->end());
+            scene->highlightExclusive(scene->end());
             break;
         }
     }
@@ -53,7 +53,7 @@ void NewLineMouseOperation::cancelOperation(std::unique_ptr<MouseOperation>& cur
 {
     if (state == State::p2)
     {
-        scene->highlightUnique(scene->end());
+        scene->highlightExclusive(scene->end());
 
         Q_ASSERT(typeid(scene->back()).hash_code() == typeid(LineElement<float>&).hash_code());
         scene->pop();
@@ -76,16 +76,16 @@ void NewLineMouseOperation::mouseMoved(std::unique_ptr<MouseOperation>&, const Q
     {
         case State::p1:
         {
-            scene->highlightUnique(closest);
+            scene->highlightExclusive(closest);
             break;
         }
         case State::p2:
         {
             if (closest == scene->end())
-                scene->highlightUnique(scene->end());
+                scene->highlightExclusive(scene->end());
             else
                 if (closest->identifier() != startId)
-                    scene->highlightUnique(closest);
+                    scene->highlightExclusive(closest);
 
             Q_ASSERT(typeid(scene->back()).hash_code() == typeid(LineElement<float>&).hash_code());
             auto& line = static_cast<LineElement<float>&>(scene->back());

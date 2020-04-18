@@ -78,7 +78,7 @@ public:
 
     void setSelectionRect(const QRect& rect) { selectionRect = rect; }
 
-    void highlightUnique(iterator iter)
+    void highlightExclusive(iterator iter)
     {
         for (auto i = begin(); i != end(); ++i)
             i->setHighlighted(i == iter);
@@ -114,7 +114,7 @@ public:
 
     void highlightClosestElement(const QPoint& point)
     {
-        highlightUnique(closestElement(point, maxDist));
+        highlightExclusive(closestElement(point, maxDist));
     }
 
     iterator findIf(const std::function<bool(const DrawingElement<T>&)>& pred) const
