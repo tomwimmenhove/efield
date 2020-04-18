@@ -158,6 +158,7 @@ public:
     QRect bounds() const override { return QRect(QPoint(0, 0), this->sceneBounds()); }
     bool canAnchor() const override { return false; }
     bool isInUse() const override { return true; }
+    QString name() const override { return "Scene"; }
 
     void accept(DrawingElementVisitor<T>& visitor) override { visitor.visit(*this); }
 

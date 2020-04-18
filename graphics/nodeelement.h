@@ -62,6 +62,7 @@ public:
 
     bool canAnchor() const override { return true; }
     bool isInUse() const override { return anchorNode()->refCounter() != 0; }
+    QString name() const override { return "Node"; }
 
     SharedNode anchorNode() const override { return n; }
     inline void setNode(SharedNode node)

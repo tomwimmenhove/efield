@@ -105,6 +105,7 @@ public:
 
     bool canAnchor() const override { return false; }
     bool isInUse() const override { return false; }
+    QString name() const override { return "Line"; }
 
     void accept(DrawingElementVisitor<T>& visitor) override { visitor.visit(*this); }
 

@@ -57,7 +57,8 @@ SOURCES += \
     util/undo/newlineundoitem.cpp \
     util/undo/newnodeundoitem.cpp \
     viewmodel/mouseoperations/selectionmouseoperation.cpp \
-    util/undo/compositundoitem.cpp
+    util/undo/compositundoitem.cpp \
+    util/undo/compositundonamegenerator.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -106,7 +107,8 @@ HEADERS += \
     util/undo/newnodeundoitem.h \
     util/undo/undoitem.h \
     viewmodel/mouseoperations/selectionmouseoperation.h \
-    util/undo/compositundoitem.h
+    util/undo/compositundoitem.h \
+    util/undo/compositundonamegenerator.h
 
 FORMS += \
         mainwindow.ui \

@@ -1,6 +1,7 @@
 #include "dragmouseoperation.h"
 #include "util/undo/moveundoitem.h"
 #include "util/undo/compositundoitem.h"
+#include "util/undo/compositundonamegenerator.h"
 
 void DragMouseOperation::activate(std::unique_ptr<MouseOperation>&, const QPoint& pointerPosition)
 {
@@ -75,6 +76,8 @@ void DragMouseOperation::mouseReleased(std::unique_ptr<MouseOperation>& current,
     {
         QSharedPointer<UndoStack> nestedUndoStack = QSharedPointer<UndoStack>::create();
 
+        CompositUndoNameGenerator nameGen("Move");
+
         QMapIterator<int, QPoint> i(savedPositions);
         while (i.hasNext())
         {
@@ -82,12 +85,14 @@ void DragMouseOperation::mouseReleased(std::unique_ptr<MouseOperation>& current,
             auto it = scene->findId(i.key());
             Q_ASSERT(it != scene->end());
 
+            nameGen.addElementName(it->name());
+
             auto undoItem = std::make_unique<MoveUndoItem>(scene, it->identifier(), i.value(), it->center());
             undoItem->doFunction();
             nestedUndoStack->add(std::move(undoItem));
         }
 
-        undoStack->add(std::make_unique<CompositUndoItem>(scene, nestedUndoStack, "Move selection"));
+        undoStack->add(std::make_unique<CompositUndoItem>(scene, nestedUndoStack, nameGen.generate()));
     }
 
     current = std::move(parent);

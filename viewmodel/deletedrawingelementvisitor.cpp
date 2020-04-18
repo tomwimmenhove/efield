@@ -1,8 +1,10 @@
-#include "deletedrawingelementvisitor.h"
+#include <QMap>
 
+#include "deletedrawingelementvisitor.h"
 #include "util/undo/deletelineundoitem.h"
 #include "util/undo/deletenodeundoitem.h"
 #include "util/undo/compositundoitem.h"
+#include "util/undo/compositundonamegenerator.h"
 
 bool DeleteDrawingElementVisitor::deleteElement(const QSharedPointer<UndoStack>& undoStack,
                                      const QSharedPointer<SceneElement<float>>& scene,
@@ -18,6 +20,8 @@ bool DeleteDrawingElementVisitor::deleteSelected(const QSharedPointer<UndoStack>
 {
     QSharedPointer<UndoStack> nestedUndoStack = QSharedPointer<UndoStack>::create();
 
+    CompositUndoNameGenerator nameGen("Delete");
+
     bool update = false;
     int n;
     do {
@@ -26,6 +30,7 @@ bool DeleteDrawingElementVisitor::deleteSelected(const QSharedPointer<UndoStack>
         {
             if (element.isHighlighted() && !element.isInUse())
             {
+                nameGen.addElementName(element.name());
                 update |= DeleteDrawingElementVisitor::deleteElement(nestedUndoStack, scene, element);
                 n++;
                 break;
@@ -33,7 +38,7 @@ bool DeleteDrawingElementVisitor::deleteSelected(const QSharedPointer<UndoStack>
         }
     } while (n != 0);
 
-    undoStack->add(std::make_unique<CompositUndoItem>(scene, nestedUndoStack, "Delete selection"));
+    undoStack->add(std::make_unique<CompositUndoItem>(scene, nestedUndoStack, nameGen.generate()));
 
     return update;
 }
