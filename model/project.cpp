@@ -21,6 +21,33 @@ Project::Project(const QByteArray& xml)
     fromDoc(doc);
 }
 
+QString Project::fileName() const
+{
+    return fName;
+}
+
+void Project::setFileName(const QString& value)
+{
+    fName = value;
+    sendStatusUpdate();
+}
+
+bool Project::isAltered() const
+{
+    return altered;
+}
+
+void Project::setAltered(bool value)
+{
+    altered = value;
+    sendStatusUpdate();
+}
+
+void Project::sendStatusUpdate()
+{
+    emit statusUpdate(fName, altered);
+}
+
 void Project::fromDoc(const QDomDocument& doc)
 {
     QDomElement root = doc.documentElement();

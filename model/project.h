@@ -11,7 +11,7 @@
 #include "graphics/sceneserializevisitor.h"
 #include "graphics/scenedeserializevisitor.h"
 
-class Project : QObject
+class Project : public QObject
 {
     Q_OBJECT
 
@@ -29,11 +29,16 @@ public:
     QSharedPointer<SceneElement<float>> scene() const { return sharedScene; }
     QSharedPointer<Simulator> simulator() const { return sharedSimulator; }
 
-    QString fileName() const { return fName; }
-    void setFileName(const QString& value) { fName = value; }
+    QString fileName() const;
+    void setFileName(const QString& value);
 
-    bool isAltered() const { return altered; }
-    void setAltered(bool value) { altered = value; }
+    bool isAltered() const;
+    void setAltered(bool value);
+
+    void sendStatusUpdate();
+
+signals:
+    void statusUpdate(const QString& filename, bool altered);
 
 private:
     void fromDoc(const QDomDocument& doc);
@@ -46,7 +51,7 @@ private:
     }
 
     QString fName;
-    bool altered;
+    bool altered = false;
     QSharedPointer<SceneElement<float>> sharedScene;
     QSharedPointer<Simulator> sharedSimulator;
 };

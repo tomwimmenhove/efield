@@ -225,6 +225,7 @@ bool MainVm::projectSaveTo(const QString& fileName)
     {
         file.write(project->toXmlBytes());
         project->setFileName(fileName);
+        project->setAltered(false);
 
         return true;
     }
@@ -323,6 +324,22 @@ void MainVm::on_undoStackUpdated(bool canUndo, const QString& undoName, bool can
 {
     emit undoStackUpdated(canUndo, undoName, canRedo, redoName);
     project->setAltered(true);
+}
+
+void MainVm::projectStatusUpdate(const QString& filename, bool altered)
+{
+    if (filename.isEmpty())
+    {
+        emit titleMessage(QString("%1%2")
+                          .arg(QCoreApplication::applicationName())
+                          .arg(altered ? " *" : ""));
+        return;
+    }
+
+    emit titleMessage(QString("[%1]- %2%3")
+                      .arg(QFileInfo(filename).fileName())
+                      .arg(QCoreApplication::applicationName())
+                      .arg(altered ? " *" : ""));
 }
 
 void MainVm::deleteSelectedElement()
@@ -442,6 +459,8 @@ void MainVm::initNewProject(std::unique_ptr<Project>&& newProject)
     simulatorWorker->moveToThread(&simulatorThread);
 
     project = std::move(newProject);
+    connect(static_cast<Project*>(project.get()), &Project::statusUpdate, this, &MainVm::projectStatusUpdate);
+    project->sendStatusUpdate();
 
     mouseOperation = std::make_unique<NormalMouseOperation>(undoStack, project->scene());
     connect(static_cast<NormalMouseOperation*>(mouseOperation.get()), &NormalMouseOperation::editElement, this, &MainVm::editElement);
