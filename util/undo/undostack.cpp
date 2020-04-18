@@ -57,5 +57,5 @@ void UndoStack::emitUpdate()
     bool cu = canUndo();
     bool cr = canRedo();
 
-    emit stackUpdated(cu, cu ? undoName() : "", cr, cr ? redoName() : "");
+    emit stackUpdated(cu, cu ? undoName() : "", cr, cr ? redoName() : "", pos);
 }

@@ -226,6 +226,7 @@ bool MainVm::projectSaveTo(const QString& fileName)
         file.write(project->toXmlBytes());
         project->setFileName(fileName);
         project->setAltered(false);
+        project->setSavedAtUndoLevel(undoStack->level());
 
         return true;
     }
@@ -320,10 +321,10 @@ void MainVm::closeRequested()
     QApplication::quit();
 }
 
-void MainVm::on_undoStackUpdated(bool canUndo, const QString& undoName, bool canRedo, const QString& redoName)
+void MainVm::on_undoStackUpdated(bool canUndo, const QString& undoName, bool canRedo, const QString& redoName, size_t level)
 {
     emit undoStackUpdated(canUndo, undoName, canRedo, redoName);
-    project->setAltered(true);
+    project->setAltered(level != project->savedAtUndoLevel());
 }
 
 void MainVm::projectStatusUpdate(const QString& filename, bool altered)

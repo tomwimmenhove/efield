@@ -35,6 +35,9 @@ public:
     bool isAltered() const;
     void setAltered(bool value);
 
+    size_t savedAtUndoLevel() const { return savedAtLevel; }
+    void setSavedAtUndoLevel(size_t level) { savedAtLevel = level; }
+
     void sendStatusUpdate();
 
 signals:
@@ -50,6 +53,7 @@ private:
         sharedScene->draw(drawer);
     }
 
+    size_t savedAtLevel = 0;
     QString fName;
     bool altered = false;
     QSharedPointer<SceneElement<float>> sharedScene;

@@ -25,8 +25,10 @@ public:
     QString redoName() const;
     void redoAll();
 
+    inline size_t level() const { return pos; }
+
 signals:
-    void stackUpdated(bool canUndo, const QString& undoName, bool canRedo, const QString& redoName);
+    void stackUpdated(bool canUndo, const QString& undoName, bool canRedo, const QString& redoName, size_t level);
 
 private:
     void emitUpdate();

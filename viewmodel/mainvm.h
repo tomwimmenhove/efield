@@ -51,7 +51,7 @@ public slots:
     void closeRequested();
 
 private slots:
-    void on_undoStackUpdated(bool canUndo, const QString& undoName, bool canRedo, const QString& redoName);
+    void on_undoStackUpdated(bool canUndo, const QString& undoName, bool canRedo, const QString& redoName, size_t level);
     void projectStatusUpdate(const QString& filename, bool altered);
 
 signals:
