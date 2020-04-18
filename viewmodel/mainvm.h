@@ -46,6 +46,7 @@ public slots:
     void projectSaveAs();
     void undo();
     void redo();
+    void selectAll();
 
 signals:
     void visualizationAvailable(float minValue, float maxValue);

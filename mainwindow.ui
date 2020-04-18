@@ -115,6 +115,7 @@
     </property>
     <addaction name="action_Undo"/>
     <addaction name="action_Redo"/>
+    <addaction name="actionSelect_all"/>
    </widget>
    <addaction name="menu_File"/>
    <addaction name="menuEdit"/>
@@ -256,6 +257,14 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Y</string>
+   </property>
+  </action>
+  <action name="actionSelect_all">
+   <property name="text">
+    <string>Select all</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+A</string>
    </property>
   </action>
  </widget>

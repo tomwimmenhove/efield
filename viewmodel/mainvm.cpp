@@ -235,6 +235,23 @@ void MainVm::redo()
     }
 }
 
+void MainVm::selectAll()
+{
+    bool update = false;
+
+    for(auto& element: *project->scene())
+    {
+        if (!element.isHighlighted())
+        {
+            element.setHighlighted(true);
+            update = true;
+        }
+    }
+
+    if (update)
+        emit visualizationAvailable(surface->minValue(), surface->maxValue());
+}
+
 void MainVm::deleteSelectedElement()
 {
     if (!surface)

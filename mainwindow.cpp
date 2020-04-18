@@ -41,6 +41,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, &MainWindow::projectSaveAs, mainVm, &MainVm::projectSaveAs);
     connect(this, &MainWindow::undo, mainVm, &MainVm::undo);
     connect(this, &MainWindow::redo, mainVm, &MainVm::redo);
+    connect(this, &MainWindow::selectAll, mainVm, &MainVm::selectAll);
 
     connect(mainVm, &MainVm::visualizationAvailable, this, &MainWindow::mainVm_VisualizationAvailable);
     connect(mainVm, &MainVm::newVisualization, this, &MainWindow::mainVm_NewVisualization);
@@ -233,4 +234,9 @@ void MainWindow::on_action_Undo_triggered()
 void MainWindow::on_action_Redo_triggered()
 {
     emit redo();
+}
+
+void MainWindow::on_actionSelect_all_triggered()
+{
+    emit selectAll();
 }
