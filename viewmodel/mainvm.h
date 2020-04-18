@@ -43,6 +43,7 @@ public slots:
     void cancelOperation();
     void newSimulation();
     void projectOpen();
+    void projectSave();
     void projectSaveAs();
     void undo();
     void redo();
@@ -71,6 +72,7 @@ private:
     void postMouseOperation();
     void updateStatusBarValue(const QPoint& pointerPosition);
     void initNewProject(std::unique_ptr<Project>&& newProject);
+    void projectSaveTo(const QString& fileName);
 
     QWidget* parentWidget;
     QSharedPointer<UndoStack> undoStack;

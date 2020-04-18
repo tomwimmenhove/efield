@@ -39,6 +39,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, &MainWindow::newSimulation, mainVm, &MainVm::newSimulation);
     connect(this, &MainWindow::projectOpen, mainVm, &MainVm::projectOpen);
     connect(this, &MainWindow::projectSaveAs, mainVm, &MainVm::projectSaveAs);
+    connect(this, &MainWindow::projectSave, mainVm, &MainVm::projectSave);
     connect(this, &MainWindow::undo, mainVm, &MainVm::undo);
     connect(this, &MainWindow::redo, mainVm, &MainVm::redo);
     connect(this, &MainWindow::selectAll, mainVm, &MainVm::selectAll);
@@ -219,6 +220,11 @@ void MainWindow::on_action_Open_triggered()
 {
     emit projectOpen();
     frameUpdate();
+}
+
+void MainWindow::on_action_Save_triggered()
+{
+    emit projectSave();
 }
 
 void MainWindow::on_action_Save_as_triggered()

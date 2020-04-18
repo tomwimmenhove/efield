@@ -46,6 +46,7 @@ private slots:
     void on_action_Edit_selected_element_triggered();
     void on_action_New_triggered();
     void on_action_Open_triggered();
+    void on_action_Save_triggered();
     void on_action_Save_as_triggered();
     void on_action_Undo_triggered();
     void on_action_Redo_triggered();
@@ -67,6 +68,7 @@ signals:
     void newLineElement(const QPoint& mousePos, const QSize& labelSize);
     void cancelOperation();
     void projectOpen();
+    void projectSave();
     void projectSaveAs();
     void undo();
     void redo();

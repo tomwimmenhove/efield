@@ -26,6 +26,9 @@ public:
     QSharedPointer<SceneElement<float>> scene() const { return sharedScene; }
     QSharedPointer<Simulator> simulator() const { return sharedSimulator; }
 
+    QString fileName() const { return fName; }
+    void setFileName(const QString& value) { fName = value; }
+
 private:
     void fromDoc(const QDomDocument& doc);
     QDomDocument toDoc();
@@ -36,6 +39,7 @@ private:
         sharedScene->draw(drawer);
     }
 
+    QString fName;
     QSharedPointer<SceneElement<float>> sharedScene;
     QSharedPointer<Simulator> sharedSimulator;
 };

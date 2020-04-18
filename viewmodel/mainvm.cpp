@@ -191,12 +191,38 @@ void MainVm::projectOpen()
         QFile file(fileName);
 
         if(file.open(QIODevice::ReadOnly | QIODevice::Text))
+        {
             initNewProject(std::make_unique<Project>(file.readAll()));
+            project->setFileName(fileName);
+        }
         else
             QMessageBox::critical(parentWidget, "Unable to load",
                                   QString("Unable to load %1: %2")
                                   .arg(fileName).arg(file.errorString()));
     }
+}
+
+void MainVm::projectSave()
+{
+    if (!project->fileName().isEmpty())
+        projectSaveTo(project->fileName());
+    else
+        projectSaveAs();
+}
+
+void MainVm::projectSaveTo(const QString& fileName)
+{
+    QFile file(fileName);
+
+    if(file.open(QIODevice::WriteOnly | QIODevice::Truncate | QIODevice::Text))
+    {
+        file.write(project->toXmlBytes());
+        project->setFileName(fileName);
+    }
+    else
+        QMessageBox::critical(parentWidget, "Unable to save",
+                              QString("Unable to save %1: %2")
+                              .arg(fileName).arg(file.errorString()));
 }
 
 void MainVm::projectSaveAs()
@@ -206,14 +232,7 @@ void MainVm::projectSaveAs()
 
     if (!fileName.isEmpty())
     {
-        QFile file(fileName);
-
-        if(file.open(QIODevice::WriteOnly | QIODevice::Truncate | QIODevice::Text))
-            file.write(project->toXmlBytes());
-        else
-            QMessageBox::critical(parentWidget, "Unable to save",
-                                  QString("Unable to save %1: %2")
-                                  .arg(fileName).arg(file.errorString()));
+        projectSaveTo(fileName);
     }
 }
 
