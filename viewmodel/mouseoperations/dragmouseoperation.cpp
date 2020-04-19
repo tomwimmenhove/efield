@@ -1,3 +1,5 @@
+#include <QGuiApplication>
+
 #include "dragmouseoperation.h"
 #include "util/undo/moveundoitem.h"
 #include "util/undo/compositundoitem.h"
@@ -8,20 +10,10 @@ void DragMouseOperation::activate(std::unique_ptr<MouseOperation>&, const QPoint
     auto closest = scene->closestElement(pointerPosition);
     Q_ASSERT(closest != scene->end());
 
-    int numHighlighted;
-
-    if (!closest->isHighlighted())
-    {
-        scene->highlightExclusive(closest);
-        numHighlighted = 1;
-    }
-    else
-        numHighlighted = scene->numHighlighted();
-
     /* Exclude elements that are marked as 'in use'. If we're moving any elements that are
      * using those elements, they will be moved by those elements, indirectly */
     for(auto i = scene->begin(); i != scene->end(); ++i)
-        if (i->isHighlighted() && (numHighlighted == 1 || !i->isInUse()))
+        if (i->isHighlighted() && (scene->numHighlighted() == 1 || !i->isInUse()))
             savedPositions[i->identifier()] = i->center();
 
     dragStartPos = pointerPosition;
