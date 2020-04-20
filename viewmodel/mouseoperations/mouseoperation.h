@@ -22,12 +22,12 @@ public:
 
     virtual Qt::CursorShape cursorShape() const { return Qt::ArrowCursor; }
 
-    virtual void activate(std::unique_ptr<MouseOperation>& current, const QPoint& pointerPosition);
-    virtual void cancelOperation(std::unique_ptr<MouseOperation>& current);
-    virtual void mousePressed(std::unique_ptr<MouseOperation>& current, const QPoint& pointerPosition);
-    virtual void mouseMoved(std::unique_ptr<MouseOperation>& current, const QPoint& pointerPosition, Qt::MouseButtons buttons);
-    virtual void mouseReleased(std::unique_ptr<MouseOperation>& current, const QPoint& pointerPosition, Qt::MouseButtons buttons);
-    virtual void mouseDoubleClicked(std::unique_ptr<MouseOperation>& current, const QPoint& pointerPosition, Qt::MouseButtons buttons);
+    virtual std::unique_ptr<MouseOperation> activate(std::unique_ptr<MouseOperation>&& current, const QPoint& pointerPosition);
+    virtual std::unique_ptr<MouseOperation> cancelOperation(std::unique_ptr<MouseOperation>&& current);
+    virtual std::unique_ptr<MouseOperation> mousePressed(std::unique_ptr<MouseOperation>&& current, const QPoint& pointerPosition);
+    virtual std::unique_ptr<MouseOperation> mouseMoved(std::unique_ptr<MouseOperation>&& current, const QPoint& pointerPosition, Qt::MouseButtons buttons);
+    virtual std::unique_ptr<MouseOperation> mouseReleased(std::unique_ptr<MouseOperation>&& current, const QPoint& pointerPosition, Qt::MouseButtons buttons);
+    virtual std::unique_ptr<MouseOperation> mouseDoubleClicked(std::unique_ptr<MouseOperation>&& current, const QPoint& pointerPosition, Qt::MouseButtons buttons);
 
     virtual ~MouseOperation() { }
 

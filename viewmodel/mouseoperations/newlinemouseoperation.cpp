@@ -2,7 +2,7 @@
 #include "graphics/lineelement.h"
 #include "util/undo/newlineundoitem.h"
 
-void NewLineMouseOperation::mousePressed(std::unique_ptr<MouseOperation>&, const QPoint& pointerPosition)
+std::unique_ptr<MouseOperation> NewLineMouseOperation::mousePressed(std::unique_ptr<MouseOperation>&& current, const QPoint& pointerPosition)
 {
     auto highLighted = scene->findFirstHighLighted();
     auto closest = scene->closestElement(pointerPosition);
@@ -21,7 +21,8 @@ void NewLineMouseOperation::mousePressed(std::unique_ptr<MouseOperation>&, const
                 state = State::p2;
                 break;
             }
-            return;
+
+            return std::move(current);
         case State::p2:
         {
             if (highLighted != scene->end())
@@ -47,9 +48,11 @@ void NewLineMouseOperation::mousePressed(std::unique_ptr<MouseOperation>&, const
     }
 
     update();
+
+    return std::move(current);
 }
 
-void NewLineMouseOperation::cancelOperation(std::unique_ptr<MouseOperation>& current)
+std::unique_ptr<MouseOperation> NewLineMouseOperation::cancelOperation(std::unique_ptr<MouseOperation>&& current)
 {
     if (state == State::p2)
     {
@@ -61,14 +64,15 @@ void NewLineMouseOperation::cancelOperation(std::unique_ptr<MouseOperation>& cur
         state = State::p1;
         update();
 
-        return;
+        return std::move(current);
     }
 
     parent->update();
-    current = std::move(parent);
+
+    return std::move(parent);
 }
 
-void NewLineMouseOperation::mouseMoved(std::unique_ptr<MouseOperation>&, const QPoint& pointerPosition, Qt::MouseButtons)
+std::unique_ptr<MouseOperation> NewLineMouseOperation::mouseMoved(std::unique_ptr<MouseOperation>&& current, const QPoint& pointerPosition, Qt::MouseButtons)
 {
     auto closest = scene->closestElement(pointerPosition, [](const DrawingElement<float>& e) { return e.canAnchor(); });
 
@@ -96,4 +100,6 @@ void NewLineMouseOperation::mouseMoved(std::unique_ptr<MouseOperation>&, const Q
     }
 
     update();
+
+    return std::move(current);
 }

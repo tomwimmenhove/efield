@@ -8,7 +8,7 @@
 #include "selectionmouseoperation.h"
 #include "pointinputdialog.h"
 
-void NormalMouseOperation::mousePressed(std::unique_ptr<MouseOperation>& current, const QPoint& pointerPosition)
+std::unique_ptr<MouseOperation> NormalMouseOperation::mousePressed(std::unique_ptr<MouseOperation>&& current, const QPoint& pointerPosition)
 {
     mousePressedAt = pointerPosition;
 
@@ -27,41 +27,48 @@ void NormalMouseOperation::mousePressed(std::unique_ptr<MouseOperation>& current
             update();
         }
 
-        return;
+        return std::move(current);
     }
 
     if (controlPressed)
-        return;
+        return std::move(current);
 
-    current = std::make_unique<SelectionMouseOperation>(std::move(current),
-                                                   undoStack, scene);
-    current->activate(current, pointerPosition);
+    std::unique_ptr<MouseOperation> newOperation = std::make_unique<SelectionMouseOperation>(std::move(current),
+                                                                                             undoStack, scene);
+    newOperation = std::move(newOperation->activate(std::move(newOperation), pointerPosition));
+    newOperation->update();
 
-    update();
+    return std::move(newOperation);
 }
 
-void NormalMouseOperation::mouseMoved(std::unique_ptr<MouseOperation>& current, const QPoint& pointerPosition, Qt::MouseButtons buttons)
+std::unique_ptr<MouseOperation> NormalMouseOperation::mouseMoved(std::unique_ptr<MouseOperation>&& current, const QPoint& pointerPosition, Qt::MouseButtons buttons)
 {
-    if (!(buttons & Qt::LeftButton))
-        return;
+    if ((buttons & Qt::LeftButton) == 0)
+        return std::move(current);
 
     auto closest = scene->closestElement(mousePressedAt);
     if (closest != scene->end())
     {
-        current = std::make_unique<DragMouseOperation>(std::move(current),
-                                                       undoStack, scene);
-        current->activate(current, mousePressedAt);
-        current->mouseMoved(current, pointerPosition, buttons);
-        return;
+        std::unique_ptr<MouseOperation> newOperation = std::make_unique<DragMouseOperation>(std::move(current),
+                                                                 undoStack, scene);
+
+        newOperation = std::move(newOperation->activate(std::move(newOperation), mousePressedAt));
+        newOperation = std::move(newOperation->mouseMoved(std::move(newOperation), pointerPosition, buttons));
+
+        return std::move(newOperation);
     }
+
+    return std::move(current);
 }
 
-void NormalMouseOperation::mouseDoubleClicked(std::unique_ptr<MouseOperation>&, const QPoint& pointerPosition, Qt::MouseButtons buttons)
+std::unique_ptr<MouseOperation> NormalMouseOperation::mouseDoubleClicked(std::unique_ptr<MouseOperation>&& current, const QPoint& pointerPosition, Qt::MouseButtons buttons)
 {
     if (buttons != Qt::LeftButton)
-        return;
+        return std::move(current);
 
     auto closest = scene->closestElement(pointerPosition);
     if (closest != scene->end())
         emit editElement(*closest);
+
+    return std::move(current);
 }

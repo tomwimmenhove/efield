@@ -1,22 +1,34 @@
 #include "mouseoperation.h"
 
-void MouseOperation::activate(std::unique_ptr<MouseOperation>&, const QPoint&)
-{ }
+std::unique_ptr<MouseOperation> MouseOperation::activate(std::unique_ptr<MouseOperation>&& current, const QPoint&)
+{
+    return std::move(current);
+}
 
-void MouseOperation::cancelOperation(std::unique_ptr<MouseOperation>&)
-{ }
+std::unique_ptr<MouseOperation> MouseOperation::cancelOperation(std::unique_ptr<MouseOperation>&& current)
+{
+    return std::move(current);
+}
 
-void MouseOperation::mousePressed(std::unique_ptr<MouseOperation>&, const QPoint&)
-{ }
+std::unique_ptr<MouseOperation> MouseOperation::mousePressed(std::unique_ptr<MouseOperation>&& current, const QPoint&)
+{
+    return std::move(current);
+}
 
-void MouseOperation::mouseMoved(std::unique_ptr<MouseOperation>&, const QPoint&, Qt::MouseButtons)
-{ }
+std::unique_ptr<MouseOperation> MouseOperation::mouseMoved(std::unique_ptr<MouseOperation>&& current, const QPoint&, Qt::MouseButtons)
+{
+    return std::move(current);
+}
 
-void MouseOperation::mouseReleased(std::unique_ptr<MouseOperation>&, const QPoint&, Qt::MouseButtons)
-{ }
+std::unique_ptr<MouseOperation> MouseOperation::mouseReleased(std::unique_ptr<MouseOperation>&& current, const QPoint&, Qt::MouseButtons)
+{
+    return std::move(current);
+}
 
-void MouseOperation::mouseDoubleClicked(std::unique_ptr<MouseOperation>&, const QPoint&, Qt::MouseButtons)
-{ }
+std::unique_ptr<MouseOperation> MouseOperation::mouseDoubleClicked(std::unique_ptr<MouseOperation>&& current, const QPoint&, Qt::MouseButtons)
+{
+    return std::move(current);
+}
 
 bool MouseOperation::popUpdate()
 {

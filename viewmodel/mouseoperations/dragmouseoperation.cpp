@@ -5,7 +5,7 @@
 #include "util/undo/compositundoitem.h"
 #include "util/undo/compositundonamegenerator.h"
 
-void DragMouseOperation::activate(std::unique_ptr<MouseOperation>&, const QPoint& pointerPosition)
+std::unique_ptr<MouseOperation> DragMouseOperation::activate(std::unique_ptr<MouseOperation>&& current, const QPoint& pointerPosition)
 {
     auto closest = scene->closestElement(pointerPosition);
     Q_ASSERT(closest != scene->end());
@@ -20,9 +20,11 @@ void DragMouseOperation::activate(std::unique_ptr<MouseOperation>&, const QPoint
     dragStartSelectionBounds = scene->selectionBounds();
 
     update();
+
+    return std::move(current);
 }
 
-void DragMouseOperation::cancelOperation(std::unique_ptr<MouseOperation>& current)
+std::unique_ptr<MouseOperation> DragMouseOperation::cancelOperation(std::unique_ptr<MouseOperation>&&)
 {
     QMapIterator<int, QPoint> i(savedPositions);
     while (i.hasNext())
@@ -34,12 +36,11 @@ void DragMouseOperation::cancelOperation(std::unique_ptr<MouseOperation>& curren
     }
 
     parent->update();
-    current = std::move(parent);
+
+    return std::move(parent);
 }
 
-#include <QDebug>
-
-void DragMouseOperation::mouseMoved(std::unique_ptr<MouseOperation>&, const QPoint& pointerPosition, Qt::MouseButtons)
+std::unique_ptr<MouseOperation> DragMouseOperation::mouseMoved(std::unique_ptr<MouseOperation>&& current, const QPoint& pointerPosition, Qt::MouseButtons)
 {
     if (!started)
     {
@@ -49,7 +50,7 @@ void DragMouseOperation::mouseMoved(std::unique_ptr<MouseOperation>&, const QPoi
     }
 
     if (!started)
-        return;
+        return std::move(current);
 
     QRect rect = dragStartSelectionBounds.translated(pointerPosition - dragStartPos);
     QRect clipped = Geometry::clip(rect, scene->sceneBounds());
@@ -65,12 +66,14 @@ void DragMouseOperation::mouseMoved(std::unique_ptr<MouseOperation>&, const QPoi
     }
 
     update();
+
+    return std::move(current);
 }
 
-void DragMouseOperation::mouseReleased(std::unique_ptr<MouseOperation>& current, const QPoint&, Qt::MouseButtons buttons)
+std::unique_ptr<MouseOperation> DragMouseOperation::mouseReleased(std::unique_ptr<MouseOperation>&& current, const QPoint&, Qt::MouseButtons buttons)
 {
     if (buttons & Qt::LeftButton)
-        return;
+        return std::move(current);;
 
     if (started && !savedPositions.empty())
     {
@@ -95,5 +98,5 @@ void DragMouseOperation::mouseReleased(std::unique_ptr<MouseOperation>& current,
         undoStack->add(std::make_unique<CompositUndoItem>(scene, nestedUndoStack, nameGen.generate()));
     }
 
-    current = std::move(parent);
+    return std::move(parent);
 }

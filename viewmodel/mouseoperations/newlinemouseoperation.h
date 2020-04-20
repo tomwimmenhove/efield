@@ -14,9 +14,9 @@ public:
 
     Qt::CursorShape cursorShape() const override { return Qt::CrossCursor; }
 
-    void mousePressed(std::unique_ptr<MouseOperation>& current, const QPoint& pointerPosition) override;
-    void cancelOperation(std::unique_ptr<MouseOperation>& current) override;
-    void mouseMoved(std::unique_ptr<MouseOperation>& current, const QPoint& pointerPosition, Qt::MouseButtons buttons) override;
+    std::unique_ptr<MouseOperation> mousePressed(std::unique_ptr<MouseOperation>&& current, const QPoint& pointerPosition) override;
+    std::unique_ptr<MouseOperation> cancelOperation(std::unique_ptr<MouseOperation>&& current) override;
+    std::unique_ptr<MouseOperation> mouseMoved(std::unique_ptr<MouseOperation>&& current, const QPoint& pointerPosition, Qt::MouseButtons buttons) override;
 
 private:
     QPoint nodeSavedPos;

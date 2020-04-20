@@ -17,9 +17,9 @@ public:
         : MouseOperation(std::move(std::unique_ptr<MouseOperation>(nullptr)), undoStack, scene)
     { }
 
-    void mousePressed(std::unique_ptr<MouseOperation>& current, const QPoint& pointerPosition) override;
-    void mouseMoved(std::unique_ptr<MouseOperation>& current, const QPoint& pointerPosition, Qt::MouseButtons buttons) override;
-    void mouseDoubleClicked(std::unique_ptr<MouseOperation>& current, const QPoint& pointerPosition, Qt::MouseButtons buttons) override;
+    std::unique_ptr<MouseOperation> mousePressed(std::unique_ptr<MouseOperation>&& current, const QPoint& pointerPosition) override;
+    std::unique_ptr<MouseOperation> mouseMoved(std::unique_ptr<MouseOperation>&& current, const QPoint& pointerPosition, Qt::MouseButtons buttons) override;
+    std::unique_ptr<MouseOperation> mouseDoubleClicked(std::unique_ptr<MouseOperation>&& current, const QPoint& pointerPosition, Qt::MouseButtons buttons) override;
 
 signals:
     void editElement(DrawingElement<float>& element);

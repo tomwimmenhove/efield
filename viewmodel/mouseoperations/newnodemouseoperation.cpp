@@ -2,12 +2,14 @@
 #include "graphics/nodeelement.h"
 #include "util/undo/newnodeundoitem.h"
 
-void NewNodeMouseOperation::activate(std::unique_ptr<MouseOperation>&, const QPoint& pointerPosition)
+std::unique_ptr<MouseOperation> NewNodeMouseOperation::activate(std::unique_ptr<MouseOperation>&& current, const QPoint& pointerPosition)
 {
     placeNewNodeElement(pointerPosition);
+
+    return std::move(current);
 }
 
-void NewNodeMouseOperation::mousePressed(std::unique_ptr<MouseOperation>&, const QPoint& pointerPosition)
+std::unique_ptr<MouseOperation> NewNodeMouseOperation::mousePressed(std::unique_ptr<MouseOperation>&& current, const QPoint& pointerPosition)
 {
     auto highLighted = scene->findFirstHighLighted();
     Q_ASSERT(highLighted != scene->end());
@@ -16,9 +18,11 @@ void NewNodeMouseOperation::mousePressed(std::unique_ptr<MouseOperation>&, const
     undoStack->add(std::make_unique<NewNodeUndoItem>(scene, highLighted->identifier(), highLighted->center()));
 
     placeNewNodeElement(pointerPosition);
+
+    return std::move(current);
 }
 
-void NewNodeMouseOperation::cancelOperation(std::unique_ptr<MouseOperation>& current)
+std::unique_ptr<MouseOperation> NewNodeMouseOperation::cancelOperation(std::unique_ptr<MouseOperation>&&)
 {
     auto highLighted = scene->findFirstHighLighted();
 
@@ -27,10 +31,11 @@ void NewNodeMouseOperation::cancelOperation(std::unique_ptr<MouseOperation>& cur
         scene->remove(highLighted);
 
     parent->update();
-    current = std::move(parent);
+
+    return std::move(parent);
 }
 
-void NewNodeMouseOperation::mouseMoved(std::unique_ptr<MouseOperation>&, const QPoint& pointerPosition, Qt::MouseButtons)
+std::unique_ptr<MouseOperation> NewNodeMouseOperation::mouseMoved(std::unique_ptr<MouseOperation>&& current, const QPoint& pointerPosition, Qt::MouseButtons)
 {
     auto highLighted = scene->findFirstHighLighted();
     Q_ASSERT(highLighted != scene->end());
@@ -38,6 +43,8 @@ void NewNodeMouseOperation::mouseMoved(std::unique_ptr<MouseOperation>&, const Q
     highLighted->anchorNode().setPoint(pointerPosition);
 
     update();
+
+    return std::move(current);
 }
 
 void NewNodeMouseOperation::placeNewNodeElement(const QPoint& pointerPosition)

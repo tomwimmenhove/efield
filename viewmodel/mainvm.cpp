@@ -120,7 +120,7 @@ void MainVm::updateStatusBarValue(const QPoint& pointerPosition)
 
 void MainVm::cancelOperation()
 {
-    mouseOperation->cancelOperation(mouseOperation);
+    mouseOperation = std::move(mouseOperation->cancelOperation(std::move(mouseOperation)));
     postMouseOperation();
 }
 
@@ -132,7 +132,7 @@ void MainVm::mousePressedOnPixmap(const QPoint& mousePos, Qt::MouseButtons butto
     if (buttons == Qt::LeftButton)
     {
         QPoint translated = Geometry::translatePoint(mousePos, labelSize, surface->size(), true);
-        mouseOperation->mousePressed(mouseOperation, translated);
+        mouseOperation = std::move(mouseOperation->mousePressed(std::move(mouseOperation), translated));
         postMouseOperation();
     }
     else if (buttons & Qt::RightButton)
@@ -148,7 +148,7 @@ void MainVm::mouseMovedOnPixmap(const QPoint& mousePos, Qt::MouseButtons buttons
         return;
 
     QPoint translated = Geometry::translatePoint(mousePos, labelSize, surface->size(), true);
-    mouseOperation->mouseMoved(mouseOperation, translated, buttons);
+    mouseOperation = std::move(mouseOperation->mouseMoved(std::move(mouseOperation), translated, buttons));
     postMouseOperation();
 
     updateStatusBarValue(translated);
@@ -157,7 +157,7 @@ void MainVm::mouseMovedOnPixmap(const QPoint& mousePos, Qt::MouseButtons buttons
 void MainVm::mouseReleasedFromPixmap(const QPoint& mousePos, Qt::MouseButtons buttons, const QSize& labelSize)
 {
     QPoint translated = Geometry::translatePoint(mousePos, labelSize, surface->size(), true);
-    mouseOperation->mouseReleased(mouseOperation, translated, buttons);
+    mouseOperation = std::move(mouseOperation->mouseReleased(std::move(mouseOperation), translated, buttons));
     postMouseOperation();
 }
 
@@ -167,7 +167,7 @@ void MainVm::mouseDoubleClickedOnPixmap(const QPoint& mousePos, Qt::MouseButtons
         return;
 
     QPoint translated = Geometry::translatePoint(mousePos, labelSize, surface->size(), true);
-    mouseOperation->mouseDoubleClicked(mouseOperation, translated, buttons);
+    mouseOperation = std::move(mouseOperation->mouseDoubleClicked(std::move(mouseOperation), translated, buttons));
     postMouseOperation();
 }
 
@@ -368,14 +368,14 @@ template<typename T>
 void MainVm::activateNewMouseOperation(const QPoint& pointerPosition)
 {
     /* Cancel any currently active operations */
-    mouseOperation->cancelOperation(mouseOperation);
+    mouseOperation = std::move(mouseOperation->cancelOperation(std::move(mouseOperation)));
 
     /* Instantiate a new NewNodeMouseOperation with the current mouseOperation as
      * parent, and move it to the current one. */
-    mouseOperation = std::move(std::make_unique<T>(std::move(mouseOperation), undoStack, project->scene()));
+    std::unique_ptr<MouseOperation> newOperation = std::make_unique<T>(std::move(mouseOperation), undoStack, project->scene());
 
     /* Call it's activate method */
-    mouseOperation->activate(mouseOperation, pointerPosition);
+    mouseOperation = std::move(newOperation->activate(std::move(newOperation), pointerPosition));
 
     postMouseOperation();
 }

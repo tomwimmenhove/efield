@@ -1,20 +1,24 @@
 #include "selectionmouseoperation.h"
 
-void SelectionMouseOperation::activate(std::unique_ptr<MouseOperation>&, const QPoint& pointerPosition)
+std::unique_ptr<MouseOperation> SelectionMouseOperation::activate(std::unique_ptr<MouseOperation>&& current, const QPoint& pointerPosition)
 {
     scene->highlightExclusive(scene->end());
 
     dragStartPos = pointerPosition;
     scene->setSelectionRect(QRect());
+
+    return std::move(current);
 }
 
-void SelectionMouseOperation::cancelOperation(std::unique_ptr<MouseOperation>& current)
+std::unique_ptr<MouseOperation> SelectionMouseOperation::cancelOperation(std::unique_ptr<MouseOperation>&&)
 {
-    current = std::move(parent);
     scene->setSelectionRect(QRect());
+
+    parent->update();
+    return std::move(parent);
 }
 
-void SelectionMouseOperation::mouseMoved(std::unique_ptr<MouseOperation>&, const QPoint& pointerPosition, Qt::MouseButtons)
+std::unique_ptr<MouseOperation> SelectionMouseOperation::mouseMoved(std::unique_ptr<MouseOperation>&& current, const QPoint& pointerPosition, Qt::MouseButtons)
 {
     QRect rect(dragStartPos, pointerPosition);
     scene->setSelectionRect(rect);
@@ -23,13 +27,19 @@ void SelectionMouseOperation::mouseMoved(std::unique_ptr<MouseOperation>&, const
         i->setHighlighted(rect.contains(i->center()));
 
     update();
+
+    return std::move(current);
 }
 
-void SelectionMouseOperation::mouseReleased(std::unique_ptr<MouseOperation>& current, const QPoint&, Qt::MouseButtons buttons)
+std::unique_ptr<MouseOperation> SelectionMouseOperation::mouseReleased(std::unique_ptr<MouseOperation>&& current, const QPoint&, Qt::MouseButtons buttons)
 {
     if (buttons != Qt::LeftButton)
     {
         scene->setSelectionRect(QRect());
-        current = std::move(parent);
+
+        parent->update();
+        return std::move(parent);
     }
+
+    return std::move(current);
 }
