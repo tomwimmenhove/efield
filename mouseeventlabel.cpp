@@ -6,7 +6,7 @@ MouseEventLabel::MouseEventLabel(QWidget* parent)
 
 void MouseEventLabel::mouseMoveEvent(QMouseEvent* ev)
 {
-    emit mouse_Moved(ev->pos());
+    emit mouse_Moved(ev->pos(), ev->buttons());
 }
 
 void MouseEventLabel::mousePressEvent(QMouseEvent* ev)

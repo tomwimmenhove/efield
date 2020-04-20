@@ -142,13 +142,13 @@ void MainVm::mousePressedOnPixmap(const QPoint& mousePos, Qt::MouseButtons butto
     }
 }
 
-void MainVm::mouseMovedOnPixmap(const QPoint& mousePos, const QSize& labelSize)
+void MainVm::mouseMovedOnPixmap(const QPoint& mousePos, Qt::MouseButtons buttons, const QSize& labelSize)
 {
     if (!surface)
         return;
 
     QPoint translated = Geometry::translatePoint(mousePos, labelSize, surface->size(), true);
-    mouseOperation->mouseMoved(mouseOperation, translated);
+    mouseOperation->mouseMoved(mouseOperation, translated, buttons);
     postMouseOperation();
 
     updateStatusBarValue(translated);

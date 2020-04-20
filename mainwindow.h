@@ -22,7 +22,7 @@ public:
     ~MainWindow();
 
 private slots:
-    void graphLabel_MouseMoved(const QPoint& point);
+    void graphLabel_MouseMoved(const QPoint& point, Qt::MouseButtons buttons);
     void graphLabel_MousePressed(const QPoint& point, Qt::MouseButtons buttons);
     void graphLabel_MouseReleased(const QPoint& point, Qt::MouseButtons buttons);
     void graphLabel_MouseDoubleClicked(const QPoint& point, Qt::MouseButtons buttons);
@@ -58,7 +58,7 @@ signals:
     void stopSimulation();
     void updateVisualization(bool useGradiant);
     void requestVisualization(const SimpleValueStepper& stepper, const QSize& size);
-    void mouseMovedOnPixmap(const QPoint& mousePos, const QSize& labelSize);
+    void mouseMovedOnPixmap(const QPoint& mousePos, Qt::MouseButtons buttons, const QSize& labelSize);
     void mousePressedOnPixmap(const QPoint& mousePos, Qt::MouseButtons buttons, const QSize& labelSize);
     void mouseReleasedFromPixmap(const QPoint& mousePos, Qt::MouseButtons buttons, const QSize& labelSize);
     void mouseDoubleClickedOnPixmap(const QPoint& mousePos, Qt::MouseButtons buttons, const QSize& labelSize);

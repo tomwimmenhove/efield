@@ -14,7 +14,7 @@ void SelectionMouseOperation::cancelOperation(std::unique_ptr<MouseOperation>& c
     scene->setSelectionRect(QRect());
 }
 
-void SelectionMouseOperation::mouseMoved(std::unique_ptr<MouseOperation>&, const QPoint& pointerPosition)
+void SelectionMouseOperation::mouseMoved(std::unique_ptr<MouseOperation>&, const QPoint& pointerPosition, Qt::MouseButtons)
 {
     QRect rect(dragStartPos, pointerPosition);
     scene->setSelectionRect(rect);

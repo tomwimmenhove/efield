@@ -25,7 +25,7 @@ public:
     virtual void activate(std::unique_ptr<MouseOperation>& current, const QPoint& pointerPosition);
     virtual void cancelOperation(std::unique_ptr<MouseOperation>& current);
     virtual void mousePressed(std::unique_ptr<MouseOperation>& current, const QPoint& pointerPosition);
-    virtual void mouseMoved(std::unique_ptr<MouseOperation>& current, const QPoint& pointerPosition);
+    virtual void mouseMoved(std::unique_ptr<MouseOperation>& current, const QPoint& pointerPosition, Qt::MouseButtons buttons);
     virtual void mouseReleased(std::unique_ptr<MouseOperation>& current, const QPoint& pointerPosition, Qt::MouseButtons buttons);
     virtual void mouseDoubleClicked(std::unique_ptr<MouseOperation>& current, const QPoint& pointerPosition, Qt::MouseButtons buttons);
 

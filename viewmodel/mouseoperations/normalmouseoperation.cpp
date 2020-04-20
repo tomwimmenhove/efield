@@ -11,7 +11,6 @@
 void NormalMouseOperation::mousePressed(std::unique_ptr<MouseOperation>& current, const QPoint& pointerPosition)
 {
     mousePressedAt = pointerPosition;
-    pressed = true;
 
     bool controlPressed = QGuiApplication::keyboardModifiers().testFlag(Qt::ControlModifier);
 
@@ -41,27 +40,20 @@ void NormalMouseOperation::mousePressed(std::unique_ptr<MouseOperation>& current
     update();
 }
 
-void NormalMouseOperation::mouseMoved(std::unique_ptr<MouseOperation>& current, const QPoint& pointerPosition)
+void NormalMouseOperation::mouseMoved(std::unique_ptr<MouseOperation>& current, const QPoint& pointerPosition, Qt::MouseButtons buttons)
 {
-    if (!pressed)
+    if (!(buttons & Qt::LeftButton))
         return;
 
     auto closest = scene->closestElement(mousePressedAt);
     if (closest != scene->end())
     {
-        pressed = false;
         current = std::make_unique<DragMouseOperation>(std::move(current),
                                                        undoStack, scene);
         current->activate(current, mousePressedAt);
-        current->mouseMoved(current, pointerPosition);
+        current->mouseMoved(current, pointerPosition, buttons);
         return;
     }
-}
-
-void NormalMouseOperation::mouseReleased(std::unique_ptr<MouseOperation>&, const QPoint&, Qt::MouseButtons buttons)
-{
-    if (buttons != Qt::LeftButton)
-        pressed = false;
 }
 
 void NormalMouseOperation::mouseDoubleClicked(std::unique_ptr<MouseOperation>&, const QPoint& pointerPosition, Qt::MouseButtons buttons)

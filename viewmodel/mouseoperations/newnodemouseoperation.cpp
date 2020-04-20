@@ -30,7 +30,7 @@ void NewNodeMouseOperation::cancelOperation(std::unique_ptr<MouseOperation>& cur
     current = std::move(parent);
 }
 
-void NewNodeMouseOperation::mouseMoved(std::unique_ptr<MouseOperation>&, const QPoint& pointerPosition)
+void NewNodeMouseOperation::mouseMoved(std::unique_ptr<MouseOperation>&, const QPoint& pointerPosition, Qt::MouseButtons)
 {
     auto highLighted = scene->findFirstHighLighted();
     Q_ASSERT(highLighted != scene->end());

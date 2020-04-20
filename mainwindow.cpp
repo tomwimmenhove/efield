@@ -75,9 +75,9 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::graphLabel_MouseMoved(const QPoint& point)
+void MainWindow::graphLabel_MouseMoved(const QPoint& point, Qt::MouseButtons buttons)
 {
-    emit mouseMovedOnPixmap(point, ui->graphicsLabel->size());
+    emit mouseMovedOnPixmap(point, buttons, ui->graphicsLabel->size());
 
     graphLabelMousePos = point;
 }

@@ -33,7 +33,7 @@ public slots:
     void updateVisualization(bool useGradiant);
     void requestVisualization(const SimpleValueStepper& stepper, const QSize& size);
     void mousePressedOnPixmap(const QPoint& mousePos, Qt::MouseButtons buttons, const QSize& labelSize);
-    void mouseMovedOnPixmap(const QPoint& mousePos, const QSize& labelSize);
+    void mouseMovedOnPixmap(const QPoint& mousePos, Qt::MouseButtons buttons, const QSize& labelSize);
     void mouseReleasedFromPixmap(const QPoint& mousePos, Qt::MouseButtons buttons, const QSize& labelSize);
     void mouseDoubleClickedOnPixmap(const QPoint& mousePos, Qt::MouseButtons buttons, const QSize& labelSize);
     void deleteSelectedElement();

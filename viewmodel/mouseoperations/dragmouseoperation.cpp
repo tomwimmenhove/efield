@@ -39,7 +39,7 @@ void DragMouseOperation::cancelOperation(std::unique_ptr<MouseOperation>& curren
 
 #include <QDebug>
 
-void DragMouseOperation::mouseMoved(std::unique_ptr<MouseOperation>&, const QPoint& pointerPosition)
+void DragMouseOperation::mouseMoved(std::unique_ptr<MouseOperation>&, const QPoint& pointerPosition, Qt::MouseButtons)
 {
     if (!started)
     {
