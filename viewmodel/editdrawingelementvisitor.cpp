@@ -3,7 +3,7 @@
 #include <QDebug>
 
 #include "editdrawingelementvisitor.h"
-#include "pointinputdialog.h"
+#include "view/pointinputdialog.h"
 #include "util/undo/moveundoitem.h"
 #include "util/undo/linevalueundoitem.h"
 

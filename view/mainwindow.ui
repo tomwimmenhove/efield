@@ -288,12 +288,12 @@
   <customwidget>
    <class>MouseEventLabel</class>
    <extends>QLabel</extends>
-   <header>mouseeventlabel.h</header>
+   <header>view/mouseeventlabel.h</header>
   </customwidget>
   <customwidget>
    <class>HeatLegendWidget</class>
    <extends>QWidget</extends>
-   <header>heatlegendwidget.h</header>
+   <header>view/heatlegendwidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

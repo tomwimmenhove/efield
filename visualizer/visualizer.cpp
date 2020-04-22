@@ -3,7 +3,7 @@
 #include "visualizer.h"
 
 #include "util/simplevaluestepper.h"
-#include "heatmap.h"
+#include "view/heatmap.h"
 
 QImage Visualizer::imageFromFloatSurface(const FloatSurface& surface, const IValueStepper& stepper)
 {

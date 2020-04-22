@@ -7,7 +7,7 @@
 #include <QApplication>
 
 #include "mainvm.h"
-#include "pointinputdialog.h"
+#include "view/pointinputdialog.h"
 #include "model/floatsurfacedrawer.h"
 #include "visualizer/visualizer.h"
 #include "graphics/sceneserializevisitor.h"

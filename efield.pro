@@ -29,18 +29,13 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
         main.cpp \
-        mainwindow.cpp \
     model/simulator.cpp \
-    heatmap.cpp \
     model/floatsurface.cpp \
     model/gradientsurface.cpp \
-    mouseeventlabel.cpp \
     visualizer/visualizer.cpp \
-    visualizer/heatlegendwidget.cpp \
     viewmodel/mainvm.cpp \
     model/simulatorworker.cpp \
     util/geometry.cpp \
-    pointinputdialog.cpp \
     model/project.cpp \
     viewmodel/mouseoperations/mouseoperation.cpp \
     viewmodel/mouseoperations/newnodemouseoperation.cpp \
@@ -58,21 +53,22 @@ SOURCES += \
     util/undo/newnodeundoitem.cpp \
     viewmodel/mouseoperations/selectionmouseoperation.cpp \
     util/undo/compositundoitem.cpp \
-    util/undo/compositundonamegenerator.cpp
+    util/undo/compositundonamegenerator.cpp \
+    view/mainwindow.cpp \
+    view/heatmap.cpp \
+    view/mouseeventlabel.cpp \
+    view/pointinputdialog.cpp \
+    view/heatlegendwidget.cpp
 
 HEADERS += \
-        mainwindow.h \
     model/simulator.h \
     model/surface.h \
     model/floatsurfacedrawer.h \
     model/floatsurface.h \
     model/gradientsurface.h \
-    mouseeventlabel.h \
-    heatlegendwidget.h \
     util/ivaluestepper.h \
     util/simplevaluestepper.h \
     visualizer/visualizer.h \
-    visualizer/heatmap.h \
     viewmodel/mainvm.h \
     model/simulatorworker.h \
     graphics/lineelement.h \
@@ -84,7 +80,6 @@ HEADERS += \
     graphics/nodeelement.h \
     util/geometry.h \
     util/refcounted.h \
-    pointinputdialog.h \
     graphics/sceneserializevisitor.h \
     graphics/drawingelementvisitor.h \
     graphics/scenedeserializevisitor.h \
@@ -108,8 +103,13 @@ HEADERS += \
     util/undo/undoitem.h \
     viewmodel/mouseoperations/selectionmouseoperation.h \
     util/undo/compositundoitem.h \
-    util/undo/compositundonamegenerator.h
+    util/undo/compositundonamegenerator.h \
+    view/mainwindow.h \
+    view/heatlegendwidget.h \
+    view/mouseeventlabel.h \
+    view/pointinputdialog.h \
+    view/heatmap.h
 
 FORMS += \
-        mainwindow.ui \
-    pointinputdialog.ui
+    view/mainwindow.ui \
+    view/pointinputdialog.ui

@@ -4,6 +4,7 @@
 #include <QMap>
 
 #include "mouseoperation.h"
+#include "util/undo/compositundonamegenerator.h"
 
 class DragMouseOperation : public MouseOperation
 {
@@ -26,6 +27,7 @@ private:
     bool started = false;
     QPoint dragStartPos;
     QRect dragStartSelectionBounds;
+    CompositUndoNameGenerator nameGen = CompositUndoNameGenerator("Move");
 };
 
 #endif // DRAGNODEMOUSEOPERATION_H

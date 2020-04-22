@@ -6,7 +6,7 @@
 #include "normalmouseoperation.h"
 #include "dragmouseoperation.h"
 #include "selectionmouseoperation.h"
-#include "pointinputdialog.h"
+#include "view/pointinputdialog.h"
 
 std::unique_ptr<MouseOperation> NormalMouseOperation::mousePressed(std::unique_ptr<MouseOperation>&& current, const QPoint& pointerPosition)
 {

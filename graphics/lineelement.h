@@ -105,6 +105,7 @@ public:
 
     bool canAnchor() const override { return false; }
     bool isInUse() const override { return false; }
+    std::vector<int> uses() const override { return std::vector<int> { p1.identifier(), p2.identifier() }; }
     QString name() const override { return "Line"; }
 
     void accept(DrawingElementVisitor<T>& visitor) override { visitor.visit(*this); }
