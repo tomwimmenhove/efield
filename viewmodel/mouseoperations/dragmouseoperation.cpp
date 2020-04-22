@@ -3,18 +3,31 @@
 #include "dragmouseoperation.h"
 #include "util/undo/moveundoitem.h"
 #include "util/undo/compositundoitem.h"
-#include "util/undo/compositundonamegenerator.h"
 
 std::unique_ptr<MouseOperation> DragMouseOperation::activate(std::unique_ptr<MouseOperation>&& current, const QPoint& pointerPosition)
 {
     auto closest = scene->closestElement(pointerPosition);
     Q_ASSERT(closest != scene->end());
 
-    /* Exclude elements that are marked as 'in use'. If we're moving any elements that are
-     * using those elements, they will be moved by those elements, indirectly */
     for(auto i = scene->begin(); i != scene->end(); ++i)
-        if (i->isHighlighted() && (scene->numHighlighted() == 1 || !i->isInUse()))
-            savedPositions[i->identifier()] = i->center();
+    {
+        if (i->isHighlighted())
+        {
+            nameGen.addElementName(i->name());
+
+            if (i->canAnchor())
+                savedPositions[i->identifier()] = i->center();
+            else
+            {
+                for(auto id: i->uses())
+                {
+                    auto it = scene->findId(id);
+                    Q_ASSERT(it != scene->end());
+                    savedPositions[id] = it->center();
+                }
+            }
+        }
+    }
 
     dragStartPos = pointerPosition;
     dragStartSelectionBounds = scene->selectionBounds();
@@ -79,16 +92,12 @@ std::unique_ptr<MouseOperation> DragMouseOperation::mouseReleased(std::unique_pt
     {
         QSharedPointer<UndoStack> nestedUndoStack = QSharedPointer<UndoStack>::create();
 
-        CompositUndoNameGenerator nameGen("Move");
-
         QMapIterator<int, QPoint> i(savedPositions);
         while (i.hasNext())
         {
             i.next();
             auto it = scene->findId(i.key());
             Q_ASSERT(it != scene->end());
-
-            nameGen.addElementName(it->name());
 
             auto undoItem = std::make_unique<MoveUndoItem>(scene, it->identifier(), i.value(), it->center());
             undoItem->doFunction();
