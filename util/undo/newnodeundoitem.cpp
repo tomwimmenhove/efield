@@ -1,8 +1,8 @@
 #include "newnodeundoitem.h"
 
 NewNodeUndoItem::NewNodeUndoItem(const QSharedPointer<SceneElement<float>>& scene,
-                                 int id, const QPoint& point)
-    : UndoItem(scene), id(id), point(point)
+                                 int id, const QPoint& point, bool highlight)
+    : UndoItem(scene), id(id), point(point), highlight(highlight)
 { }
 
 void NewNodeUndoItem::undoFunction()
@@ -15,5 +15,7 @@ void NewNodeUndoItem::undoFunction()
 
 void NewNodeUndoItem::doFunction()
 {
-    scene->add(std::move(NodeElement<float>::uniqueElement(SharedNode(id, point), scene->sceneBounds())));
+    auto element = NodeElement<float>::uniqueElement(SharedNode(id, point), scene->sceneBounds());
+    element->setHighlighted(highlight);
+    scene->add(std::move(element));
 }

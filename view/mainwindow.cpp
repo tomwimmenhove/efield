@@ -46,6 +46,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, &MainWindow::undo, mainVm, &MainVm::undo);
     connect(this, &MainWindow::redo, mainVm, &MainVm::redo);
     connect(this, &MainWindow::selectAll, mainVm, &MainVm::selectAll);
+    connect(this, &MainWindow::copy, mainVm, &MainVm::copy);
+    connect(this, &MainWindow::paste, mainVm, &MainVm::paste);
     connect(this, &MainWindow::closeRequested, mainVm, &MainVm::closeRequested);
 
     connect(mainVm, &MainVm::visualizationAvailable, this, &MainWindow::mainVm_VisualizationAvailable);
@@ -281,4 +283,15 @@ void MainWindow::on_action_Redo_triggered()
 void MainWindow::on_actionSelect_all_triggered()
 {
     emit selectAll();
+}
+
+void MainWindow::on_action_Copy_triggered()
+{
+    emit copy();
+}
+
+void MainWindow::on_action_Paste_triggered()
+{
+    emit paste(ui->graphicsLabel->mapFromGlobal(ui->graphicsLabel->cursor().pos()),
+               ui->graphicsLabel->size());
 }

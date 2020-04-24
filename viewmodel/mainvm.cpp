@@ -1,4 +1,5 @@
 #include <cmath>
+#include <limits>
 
 #include <QInputDialog>
 #include <QFileDialog>
@@ -16,6 +17,8 @@
 #include "editdrawingelementvisitor.h"
 #include "deletedrawingelementvisitor.h"
 #include "util/undo/compositundoitem.h"
+#include "copydrawingelementvisitor.h"
+#include "util/undo/compositundonamegenerator.h"
 
 MainVm::MainVm(QWidget* parent)
     : QObject(parent), parentWidget(parent)
@@ -25,6 +28,10 @@ MainVm::MainVm(QWidget* parent)
 #else
     auto newProject = std::make_unique<Project>(QSize(256, 256));
 #endif
+
+    clipBoard =
+            //QSharedPointer<SceneElement<float>>::create(scene->sceneBounds());
+            QSharedPointer<SceneElement<float>>::create(QSize(std::numeric_limits<int>::max(), std::numeric_limits<int>::max()));
 
     initNewProject(std::move(newProject));
     createBorder(0);
@@ -311,6 +318,42 @@ void MainVm::selectAll()
 
     if (update)
         emit visualizationAvailable(surface->minValue(), surface->maxValue());
+}
+
+void MainVm::copy()
+{
+    clipBoard->clear();
+
+    QSharedPointer<SceneElement<float>> scene = project->scene();
+
+    CopyDrawingElementVisitor copy(scene, clipBoard);
+    for(auto& element: *scene)
+        if (element.isHighlighted())
+            element.accept(copy);
+
+    scene->highlightExclusive(scene->end());
+
+    emit visualizationAvailable(surface->minValue(), surface->maxValue());
+}
+
+void MainVm::paste(const QPoint&, const QSize&)
+{
+    if (clipBoard->size() == 0)
+        return;
+
+    QSharedPointer<SceneElement<float>> scene = project->scene();
+
+    QSharedPointer<UndoStack> nestedUndoStack = QSharedPointer<UndoStack>::create();
+
+    scene->highlightExclusive(scene->end());
+
+    CopyDrawingElementVisitor paste(clipBoard, scene, nestedUndoStack);
+    for(auto& element: *clipBoard)
+            element.accept(paste);
+
+    undoStack->add(std::make_unique<CompositUndoItem>(scene, nestedUndoStack, "Paste"));
+
+    emit visualizationAvailable(surface->minValue(), surface->maxValue());
 }
 
 void MainVm::closeRequested()

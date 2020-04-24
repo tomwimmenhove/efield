@@ -52,6 +52,8 @@ private slots:
     void on_action_Undo_triggered();
     void on_action_Redo_triggered();
     void on_actionSelect_all_triggered();
+    void on_action_Copy_triggered();
+    void on_action_Paste_triggered();
 
 signals:
     void startSimulation();
@@ -74,6 +76,8 @@ signals:
     void undo();
     void redo();
     void selectAll();
+    void copy();
+    void paste(const QPoint& mousePos, const QSize& labelSize);
     void closeRequested();
 
 protected:

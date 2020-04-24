@@ -17,7 +17,14 @@ std::unique_ptr<MouseOperation> NormalMouseOperation::mousePressed(std::unique_p
     auto closest = scene->closestElement(pointerPosition);
     if (closest != scene->end())
     {
-        if(controlPressed || !closest->isHighlighted())
+        auto closestHighlighted = scene->closestElement(pointerPosition,
+            [] (const DrawingElement<float>& e) { return e.isHighlighted(); });
+
+        /* Prefer selected elements. This helps with moving pasted elements that are exactly on top of their parents */
+        bool closerToSelected = closestHighlighted != scene->end() &&
+                                 closestHighlighted->distanceTo(pointerPosition) <= closest->distanceTo(pointerPosition);
+
+        if(controlPressed || !closerToSelected)
         {
             if (controlPressed)
                 closest->setHighlighted(!closest->isHighlighted());
@@ -46,6 +53,11 @@ std::unique_ptr<MouseOperation> NormalMouseOperation::mouseMoved(std::unique_ptr
     if ((buttons & Qt::LeftButton) == 0)
         return std::move(current);
 
+    if (!checkStartedDragging(pointerPosition))
+        return std::move(current);
+
+    startedDragging = false;
+
     auto closest = scene->closestElement(mousePressedAt);
     if (closest != scene->end())
     {
@@ -71,4 +83,16 @@ std::unique_ptr<MouseOperation> NormalMouseOperation::mouseDoubleClicked(std::un
         emit editElement(*closest);
 
     return std::move(current);
+}
+
+bool NormalMouseOperation::checkStartedDragging(const QPoint& pointerPosition)
+{
+    if (!startedDragging)
+    {
+        QPoint p = pointerPosition - mousePressedAt;
+        if (p.manhattanLength() > 5)
+            startedDragging = true;
+    }
+
+    return startedDragging;
 }

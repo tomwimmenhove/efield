@@ -24,7 +24,6 @@ public:
 
 private:
     QMap<int, QPoint> savedPositions;
-    bool started = false;
     QPoint dragStartPos;
     QRect dragStartSelectionBounds;
     CompositUndoNameGenerator nameGen = CompositUndoNameGenerator("Move");

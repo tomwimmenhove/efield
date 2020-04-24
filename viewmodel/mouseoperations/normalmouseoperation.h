@@ -25,6 +25,8 @@ signals:
     void editElement(DrawingElement<float>& element);
 
 private:
+    bool checkStartedDragging(const QPoint& pointerPosition);
+    bool startedDragging = false;
     QPoint mousePressedAt;
 };
 

@@ -6,9 +6,6 @@
 
 std::unique_ptr<MouseOperation> DragMouseOperation::activate(std::unique_ptr<MouseOperation>&& current, const QPoint& pointerPosition)
 {
-    auto closest = scene->closestElement(pointerPosition);
-    Q_ASSERT(closest != scene->end());
-
     for(auto i = scene->begin(); i != scene->end(); ++i)
     {
         if (i->isHighlighted())
@@ -55,19 +52,9 @@ std::unique_ptr<MouseOperation> DragMouseOperation::cancelOperation(std::unique_
 
 std::unique_ptr<MouseOperation> DragMouseOperation::mouseMoved(std::unique_ptr<MouseOperation>&& current, const QPoint& pointerPosition, Qt::MouseButtons)
 {
-    if (!started)
-    {
-        QPoint p = pointerPosition - dragStartPos;
-        if (p.manhattanLength() > 5)
-            started = true;
-    }
-
-    if (!started)
-        return std::move(current);
-
     QRect rect = dragStartSelectionBounds.translated(pointerPosition - dragStartPos);
     QRect clipped = Geometry::clip(rect, scene->sceneBounds());
-    auto delta = clipped.topLeft() - dragStartSelectionBounds.topLeft();
+    QPoint delta = clipped.topLeft() - dragStartSelectionBounds.topLeft();
 
     QMapIterator<int, QPoint> i(savedPositions);
     while (i.hasNext())
@@ -88,7 +75,7 @@ std::unique_ptr<MouseOperation> DragMouseOperation::mouseReleased(std::unique_pt
     if (buttons & Qt::LeftButton)
         return std::move(current);;
 
-    if (started && !savedPositions.empty())
+    if (!savedPositions.empty())
     {
         QSharedPointer<UndoStack> nestedUndoStack = QSharedPointer<UndoStack>::create();
 

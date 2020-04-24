@@ -27,7 +27,7 @@ private:
         : parentWidget(parentWidget), undoStack(undoStack), scene(scene), surface(surface)
     { }
 
-    void visit(SceneElement<float>&);
+    void visit(SceneElement<float>& scene);
     void visit(NodeElement<float>& node);
     void visit(LineElement<float>& line);
 
