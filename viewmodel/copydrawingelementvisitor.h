@@ -5,7 +5,6 @@
 #include "graphics/lineelement.h"
 #include "graphics/nodeelement.h"
 #include "graphics/sceneelement.h"
-//#include "model/floatsurface.h"
 #include "util/undo/undostack.h"
 
 #include <map>
@@ -14,10 +13,10 @@
 class CopyDrawingElementVisitor : public DrawingElementVisitor<float>
 {
 public:
-    CopyDrawingElementVisitor(const QSharedPointer<SceneElement<float>>& scene,
+    CopyDrawingElementVisitor(const QSharedPointer<SceneElement<float>>& source,
                               const QSharedPointer<SceneElement<float>>& destination,
                               const QSharedPointer<UndoStack>& undoStack = nullptr)
-        : scene(scene), destination(destination), undoStack(undoStack)
+        : souce(source), destination(destination), undoStack(undoStack)
     { }
 
     void visit(SceneElement<float>& scene);
@@ -25,19 +24,19 @@ public:
     void visit(LineElement<float>& line);
 
 private:
-    QSharedPointer<SceneElement<float>> scene;
+    QSharedPointer<SceneElement<float>> souce;
     QSharedPointer<SceneElement<float>> destination;
     QSharedPointer<UndoStack> undoStack;
 
     std::map<int, int> defaultMap;
     std::map<int, int>& idMap = defaultMap;
 
-    int cloneNode(int originalId, const SharedNode& point);
+    int cloneNode(const SharedNode& point);
 
-    CopyDrawingElementVisitor(const QSharedPointer<SceneElement<float>>& scene,
+    CopyDrawingElementVisitor(const QSharedPointer<SceneElement<float>>& source,
                               const QSharedPointer<SceneElement<float>>& destination,
                               std::map<int, int>& idMap)
-        : scene(scene), destination(destination), idMap(idMap)
+        : souce(source), destination(destination), idMap(idMap)
     { }
 };
 

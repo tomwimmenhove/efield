@@ -118,6 +118,7 @@
     <addaction name="action_Redo"/>
     <addaction name="actionSelect_all"/>
     <addaction name="separator"/>
+    <addaction name="actionCut"/>
     <addaction name="action_Copy"/>
     <addaction name="action_Paste"/>
    </widget>
@@ -299,6 +300,14 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+V</string>
+   </property>
+  </action>
+  <action name="actionCut">
+   <property name="text">
+    <string>Cut</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+X</string>
    </property>
   </action>
  </widget>

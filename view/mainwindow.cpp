@@ -46,6 +46,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, &MainWindow::undo, mainVm, &MainVm::undo);
     connect(this, &MainWindow::redo, mainVm, &MainVm::redo);
     connect(this, &MainWindow::selectAll, mainVm, &MainVm::selectAll);
+    connect(this, &MainWindow::cut, mainVm, &MainVm::cut);
     connect(this, &MainWindow::copy, mainVm, &MainVm::copy);
     connect(this, &MainWindow::paste, mainVm, &MainVm::paste);
     connect(this, &MainWindow::closeRequested, mainVm, &MainVm::closeRequested);
@@ -283,6 +284,11 @@ void MainWindow::on_action_Redo_triggered()
 void MainWindow::on_actionSelect_all_triggered()
 {
     emit selectAll();
+}
+
+void MainWindow::on_actionCut_triggered()
+{
+    emit cut();
 }
 
 void MainWindow::on_action_Copy_triggered()

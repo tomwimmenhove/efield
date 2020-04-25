@@ -16,9 +16,7 @@
 #include "mouseoperations/mouseoperations.h"
 #include "editdrawingelementvisitor.h"
 #include "deletedrawingelementvisitor.h"
-#include "util/undo/compositundoitem.h"
-#include "copydrawingelementvisitor.h"
-#include "util/undo/compositundonamegenerator.h"
+#include "copypaste.h"
 
 MainVm::MainVm(QWidget* parent)
     : QObject(parent), parentWidget(parent)
@@ -29,7 +27,7 @@ MainVm::MainVm(QWidget* parent)
     auto newProject = std::make_unique<Project>(QSize(256, 256));
 #endif
 
-    clipBoard =
+    clipBoardScene =
             //QSharedPointer<SceneElement<float>>::create(scene->sceneBounds());
             QSharedPointer<SceneElement<float>>::create(QSize(std::numeric_limits<int>::max(), std::numeric_limits<int>::max()));
 
@@ -320,32 +318,29 @@ void MainVm::selectAll()
         emit visualizationAvailable(surface->minValue(), surface->maxValue());
 }
 
+void MainVm::cut()
+{
+    CopyPaste cp(project->scene(), clipBoardScene, undoStack);
+    cp.copySelection(true);
+
+    emit visualizationAvailable(surface->minValue(), surface->maxValue());
+}
+
 void MainVm::copy()
 {
-    clipBoard->clear();
-
-    QSharedPointer<SceneElement<float>> scene = project->scene();
-
-    CopyDrawingElementVisitor copy(scene, clipBoard);
-    for(auto& element: *scene)
-        if (element.isHighlighted())
-            element.accept(copy);
-
-    scene->highlightExclusive(scene->end());
+    CopyPaste cp(project->scene(), clipBoardScene, undoStack);
+    cp.copySelection(false);
 
     emit visualizationAvailable(surface->minValue(), surface->maxValue());
 }
 
 void MainVm::paste()
 {
-    if (clipBoard->size() == 0)
+    if (clipBoardScene->size() == 0)
         return;
 
-    QSharedPointer<SceneElement<float>> scene = project->scene();
-
-    QRect clipBoardBounds = clipBoard->selectionBounds();
-    if (clipBoardBounds.width() > scene->sceneBounds().width() ||
-        clipBoardBounds.height() > scene->sceneBounds().height())
+    CopyPaste cp(project->scene(), clipBoardScene, undoStack);
+    if (!cp.pasteFits())
     {
         QMessageBox::critical(parentWidget, "Fitting error",
                               QString("Scene not large enough for clipboard data"));
@@ -353,22 +348,7 @@ void MainVm::paste()
         return;
     }
 
-    QSharedPointer<UndoStack> nestedUndoStack = QSharedPointer<UndoStack>::create();
-
-    scene->highlightExclusive(scene->end());
-
-    CopyDrawingElementVisitor paste(clipBoard, scene, nestedUndoStack);
-    for(auto& element: *clipBoard)
-            element.accept(paste);
-
-    undoStack->add(std::make_unique<CompositUndoItem>(scene, nestedUndoStack, "Paste"));
-
-    QRect rect = scene->selectionBounds().translated(scene->center()- scene->selectionBounds().center());
-    QRect clipped = Geometry::clip(rect, scene->sceneBounds());
-    QPoint delta = clipped.topLeft() - scene->selectionBounds().topLeft();
-    for(auto& element: *scene)
-        if (element.isHighlighted() && element.canAnchor())
-            element.setCenter(element.center() + delta);
+    cp.paste();
 
     emit visualizationAvailable(surface->minValue(), surface->maxValue());
 }

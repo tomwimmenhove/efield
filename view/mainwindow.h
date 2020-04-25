@@ -54,6 +54,7 @@ private slots:
     void on_actionSelect_all_triggered();
     void on_action_Copy_triggered();
     void on_action_Paste_triggered();
+    void on_actionCut_triggered();
 
 signals:
     void startSimulation();
@@ -76,6 +77,7 @@ signals:
     void undo();
     void redo();
     void selectAll();
+    void cut();
     void copy();
     void paste();
     void closeRequested();

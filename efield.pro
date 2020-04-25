@@ -59,7 +59,8 @@ SOURCES += \
     view/mouseeventlabel.cpp \
     view/pointinputdialog.cpp \
     view/heatlegendwidget.cpp \
-    viewmodel/copydrawingelementvisitor.cpp
+    viewmodel/copydrawingelementvisitor.cpp \
+    viewmodel/copypaste.cpp
 
 HEADERS += \
     model/simulator.h \
@@ -110,7 +111,8 @@ HEADERS += \
     view/mouseeventlabel.h \
     view/pointinputdialog.h \
     view/heatmap.h \
-    viewmodel/copydrawingelementvisitor.h
+    viewmodel/copydrawingelementvisitor.h \
+    viewmodel/copypaste.h
 
 FORMS += \
     view/mainwindow.ui \

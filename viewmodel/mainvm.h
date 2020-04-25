@@ -48,6 +48,7 @@ public slots:
     void undo();
     void redo();
     void selectAll();
+    void cut();
     void copy();
     void paste();
     void closeRequested();
@@ -86,7 +87,7 @@ private:
     QSharedPointer<UndoStack> undoStack;
     std::unique_ptr<MouseOperation> mouseOperation;
     std::unique_ptr<Project> project;
-    QSharedPointer<SceneElement<float>> clipBoard;
+    QSharedPointer<SceneElement<float>> clipBoardScene;
     QThread simulatorThread;
     SimulatorWorker* simulatorWorker = nullptr;
     bool started = false;
