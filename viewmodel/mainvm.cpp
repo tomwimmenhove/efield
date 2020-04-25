@@ -336,12 +336,22 @@ void MainVm::copy()
     emit visualizationAvailable(surface->minValue(), surface->maxValue());
 }
 
-void MainVm::paste(const QPoint&, const QSize&)
+void MainVm::paste()
 {
     if (clipBoard->size() == 0)
         return;
 
     QSharedPointer<SceneElement<float>> scene = project->scene();
+
+    QRect clipBoardBounds = clipBoard->selectionBounds();
+    if (clipBoardBounds.width() > scene->sceneBounds().width() ||
+        clipBoardBounds.height() > scene->sceneBounds().height())
+    {
+        QMessageBox::critical(parentWidget, "Fitting error",
+                              QString("Scene not large enough for clipboard data"));
+
+        return;
+    }
 
     QSharedPointer<UndoStack> nestedUndoStack = QSharedPointer<UndoStack>::create();
 
@@ -352,6 +362,13 @@ void MainVm::paste(const QPoint&, const QSize&)
             element.accept(paste);
 
     undoStack->add(std::make_unique<CompositUndoItem>(scene, nestedUndoStack, "Paste"));
+
+    QRect rect = scene->selectionBounds().translated(scene->center()- scene->selectionBounds().center());
+    QRect clipped = Geometry::clip(rect, scene->sceneBounds());
+    QPoint delta = clipped.topLeft() - scene->selectionBounds().topLeft();
+    for(auto& element: *scene)
+        if (element.isHighlighted() && element.canAnchor())
+            element.setCenter(element.center() + delta);
 
     emit visualizationAvailable(surface->minValue(), surface->maxValue());
 }

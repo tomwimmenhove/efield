@@ -153,7 +153,7 @@ public:
         return rect;
     }
 
-    QPoint center() const override { return QPoint(); }
+    QPoint center() const override { return bounds().center(); }
     bool setCenter(const QPoint&) override { return false; }
     QRect bounds() const override { return QRect(QPoint(0, 0), this->sceneBounds()); }
     bool canAnchor() const override { return false; }

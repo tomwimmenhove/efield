@@ -292,6 +292,5 @@ void MainWindow::on_action_Copy_triggered()
 
 void MainWindow::on_action_Paste_triggered()
 {
-    emit paste(ui->graphicsLabel->mapFromGlobal(ui->graphicsLabel->cursor().pos()),
-               ui->graphicsLabel->size());
+    emit paste();
 }

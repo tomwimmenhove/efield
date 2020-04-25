@@ -77,7 +77,7 @@ signals:
     void redo();
     void selectAll();
     void copy();
-    void paste(const QPoint& mousePos, const QSize& labelSize);
+    void paste();
     void closeRequested();
 
 protected:
