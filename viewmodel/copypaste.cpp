@@ -1,6 +1,7 @@
 #include "copypaste.h"
 #include "copydrawingelementvisitor.h"
 #include "util/undo/compositundoitem.h"
+#include "util/undo/moveundoitem.h"
 #include "deletedrawingelementvisitor.h"
 
 void CopyPaste::copySelection(bool deleteAfter)
@@ -32,16 +33,25 @@ void CopyPaste::paste()
 
     scene->highlightExclusive(scene->end());
 
+    /* Paste all elements */
     CopyDrawingElementVisitor paste(clipBoardScene, scene, nestedUndoStack);
     for(auto& element: *clipBoardScene)
             element.accept(paste);
 
-    undoStack->add(std::make_unique<CompositUndoItem>(scene, nestedUndoStack, "Paste"));
-
+    /* And center them */
     QRect rect = scene->selectionBounds().translated(scene->center()- scene->selectionBounds().center());
     QRect clipped = Geometry::clip(rect, scene->sceneBounds());
     QPoint delta = clipped.topLeft() - scene->selectionBounds().topLeft();
     for(auto& element: *scene)
+    {
         if (element.isHighlighted() && element.canAnchor())
-            element.setCenter(element.center() + delta);
+        {
+            auto undoItem = std::make_unique<MoveUndoItem>
+                            (scene, element.identifier(), element.center(), element.center() + delta);
+            undoItem->doFunction();
+            nestedUndoStack->add(std::move(undoItem));
+        }
+    }
+
+    undoStack->add(std::make_unique<CompositUndoItem>(scene, nestedUndoStack, "Paste"));
 }
