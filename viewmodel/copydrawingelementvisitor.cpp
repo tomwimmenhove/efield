@@ -22,10 +22,13 @@ void CopyDrawingElementVisitor::visit(LineElement<float>& line)
 
     int id = destination->newId();
 
-    auto undoItem = std::make_unique<NewLineUndoItem>(destination, id, pointId1, pointId2, line.value(), true);
+    auto undoItem = std::make_unique<NewLineUndoItem>(destination, id, pointId1, pointId2, line.value());
     undoItem->doFunction();
     if (undoStack)
         undoStack->add(std::move(undoItem));
+
+    Q_ASSERT(typeid(destination->back()).hash_code() == typeid(LineElement<float>&).hash_code());
+    destination->back().setHighlighted(true);
 
     idMap[line.identifier()] = id;
 }
@@ -38,10 +41,13 @@ int CopyDrawingElementVisitor::cloneNode(const SharedNode& point)
 
     int id = destination->newId();
 
-    auto undoItem = std::make_unique<NewNodeUndoItem>(destination, id, point.point(), true);
+    auto undoItem = std::make_unique<NewNodeUndoItem>(destination, id, point.point());
     undoItem->doFunction();
     if (undoStack)
         undoStack->add(std::move(undoItem));
+
+    Q_ASSERT(typeid(destination->back()).hash_code() == typeid(NodeElement<float>&).hash_code());
+    destination->back().setHighlighted(true);
 
     idMap[point.identifier()] = id;
 

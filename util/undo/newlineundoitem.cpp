@@ -2,8 +2,8 @@
 #include "graphics/lineelement.h"
 
 NewLineUndoItem::NewLineUndoItem(const QSharedPointer<SceneElement<float>>& scene,
-                                 int id, int nodeId1, int nodeId2, float value, bool highlight)
-    : UndoItem(scene), id(id), nodeId1(nodeId1), nodeId2(nodeId2), value(value), highlight(highlight)
+                                 int id, int nodeId1, int nodeId2, float value)
+    : UndoItem(scene), id(id), nodeId1(nodeId1), nodeId2(nodeId2), value(value)
 { }
 
 void NewLineUndoItem::undoFunction()
@@ -27,6 +27,5 @@ void NewLineUndoItem::doFunction()
     SharedNode node2 = static_cast<NodeElement<float>&>(*it2).anchorNode();
 
     auto element = LineElement<float>::uniqueElement(id, scene->sceneBounds(), node1, node2, value);
-    element->setHighlighted(highlight);
     scene->add(std::move(element));
 }
