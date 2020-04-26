@@ -1,29 +1,25 @@
 #include <QGuiApplication>
 
+#include "viewmodel/elementdependencyvisitor.h"
 #include "dragmouseoperation.h"
 #include "util/undo/moveundoitem.h"
 #include "util/undo/compositundoitem.h"
 
 std::unique_ptr<MouseOperation> DragMouseOperation::activate(std::unique_ptr<MouseOperation>&& current, const QPoint& pointerPosition)
 {
-    for(auto i = scene->begin(); i != scene->end(); ++i)
-    {
-        if (i->isHighlighted())
-        {
-            nameGen.addElementName(i->name());
+    for(auto& element: *scene)
+        if (element.isHighlighted())
+            nameGen.addElementName(element.name());
 
-            if (i->canAnchor())
-                savedPositions[i->identifier()] = i->center();
-            else
-            {
-                for(auto id: i->uses())
-                {
-                    auto it = scene->findId(id);
-                    Q_ASSERT(it != scene->end());
-                    savedPositions[id] = it->center();
-                }
-            }
-        }
+    ElementDependencyVisitor deps;
+    deps.allHighlighted(*scene);
+
+    for(auto id: deps.dependencies())
+    {
+        auto it = scene->findId(id);
+        Q_ASSERT(it != scene->end());
+        if (it->canAnchor())
+            savedPositions[id] = it->center();
     }
 
     dragStartPos = pointerPosition;

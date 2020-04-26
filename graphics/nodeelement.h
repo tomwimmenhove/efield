@@ -62,7 +62,6 @@ public:
 
     bool canAnchor() const override { return true; }
     bool isInUse() const override { return anchorNode()->refCounter() != 0; }
-    std::vector<int> uses() const override { return std::vector<int> { }; }
     QString name() const override { return "Node"; }
 
     SharedNode anchorNode() const override { return n; }

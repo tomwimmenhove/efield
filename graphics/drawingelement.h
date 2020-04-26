@@ -34,7 +34,6 @@ public:
     virtual bool canAnchor() const = 0;
     virtual SharedNode anchorNode() const { abort(); }
     virtual bool isInUse() const = 0;
-    virtual std::vector<int> uses() const = 0;
     virtual QString name() const = 0;
 
     inline QSize sceneBounds() const { return sceneClipBounds; }
