@@ -11,7 +11,7 @@ DeleteNodeUndoItem::DeleteNodeUndoItem(const QSharedPointer<SceneElement<float>>
 
 void DeleteNodeUndoItem::undoFunction()
 {
-    scene->add(NodeElement<float>::uniqueElement(SharedNode(id, oldPoint), scene->sceneBounds()));
+    scene->add(NodeElement<float>::uniqueElement(SharedNode(id, oldPoint), scene->sceneSize()));
 }
 
 void DeleteNodeUndoItem::doFunction()

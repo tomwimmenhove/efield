@@ -49,7 +49,7 @@ std::unique_ptr<MouseOperation> DragMouseOperation::cancelOperation(std::unique_
 std::unique_ptr<MouseOperation> DragMouseOperation::mouseMoved(std::unique_ptr<MouseOperation>&& current, const QPoint& pointerPosition, Qt::MouseButtons)
 {
     QRect rect = dragStartSelectionBounds.translated(pointerPosition - dragStartPos);
-    QRect clipped = Geometry::clip(rect, scene->sceneBounds());
+    QRect clipped = Geometry::clip(rect, scene->sceneSize());
     QPoint delta = clipped.topLeft() - dragStartSelectionBounds.topLeft();
 
     QMapIterator<int, QPoint> i(savedPositions);

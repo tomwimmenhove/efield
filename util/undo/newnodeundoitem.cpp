@@ -15,6 +15,6 @@ void NewNodeUndoItem::undoFunction()
 
 void NewNodeUndoItem::doFunction()
 {
-    auto element = NodeElement<float>::uniqueElement(SharedNode(id, point), scene->sceneBounds());
+    auto element = NodeElement<float>::uniqueElement(SharedNode(id, point), scene->sceneSize());
     scene->add(std::move(element));
 }

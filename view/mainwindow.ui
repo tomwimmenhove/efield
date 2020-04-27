@@ -121,6 +121,7 @@
     <addaction name="actionCut"/>
     <addaction name="action_Copy"/>
     <addaction name="action_Paste"/>
+    <addaction name="action_Rotate_selection"/>
    </widget>
    <addaction name="menu_File"/>
    <addaction name="menuEdit"/>
@@ -308,6 +309,14 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+X</string>
+   </property>
+  </action>
+  <action name="action_Rotate_selection">
+   <property name="text">
+    <string>&amp;Rotate selection</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+R</string>
    </property>
   </action>
  </widget>

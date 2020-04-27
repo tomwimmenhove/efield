@@ -23,8 +23,8 @@ void CopyPaste::copySelection(bool deleteAfter)
 bool CopyPaste::pasteFits()
 {
     QRect clipBoardBounds = clipBoardScene->selectionBounds();
-    return clipBoardBounds.width() <= scene->sceneBounds().width() &&
-           clipBoardBounds.height() <= scene->sceneBounds().height();
+    return clipBoardBounds.width() <= scene->sceneSize().width() &&
+           clipBoardBounds.height() <= scene->sceneSize().height();
 }
 
 void CopyPaste::paste()
@@ -40,7 +40,7 @@ void CopyPaste::paste()
 
     /* And center them */
     QRect rect = scene->selectionBounds().translated(scene->center()- scene->selectionBounds().center());
-    QRect clipped = Geometry::clip(rect, scene->sceneBounds());
+    QRect clipped = Geometry::clip(rect, scene->sceneSize());
     QPoint delta = clipped.topLeft() - scene->selectionBounds().topLeft();
     for(auto& element: *scene)
     {

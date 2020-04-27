@@ -55,6 +55,7 @@ private slots:
     void on_action_Copy_triggered();
     void on_action_Paste_triggered();
     void on_actionCut_triggered();
+    void on_action_Rotate_selection_triggered();
 
 signals:
     void startSimulation();
@@ -80,6 +81,7 @@ signals:
     void cut();
     void copy();
     void paste();
+    void rotate(double rot);
     void closeRequested();
 
 protected:

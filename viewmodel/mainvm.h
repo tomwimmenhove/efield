@@ -51,6 +51,7 @@ public slots:
     void cut();
     void copy();
     void paste();
+    void rotate(double rot);
     void closeRequested();
 
 private slots:

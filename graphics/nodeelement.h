@@ -54,7 +54,7 @@ public:
     QPoint center() const override { return n.point(); }
     bool setCenter(const QPoint& point) override
     {
-        n.setPoint(Geometry::clip(n.point() + point - center(), this->sceneBounds()));
+        n.setPoint(Geometry::clip(n.point() + point - center(), this->sceneSize()));
         return true;
     }
 

@@ -155,7 +155,7 @@ public:
 
     QPoint center() const override { return bounds().center(); }
     bool setCenter(const QPoint&) override { return false; }
-    QRect bounds() const override { return QRect(QPoint(0, 0), this->sceneBounds()); }
+    QRect bounds() const override { return QRect(QPoint(0, 0), this->sceneSize()); }
     bool canAnchor() const override { return false; }
     bool isInUse() const override { return true; }
     QString name() const override { return "Scene"; }

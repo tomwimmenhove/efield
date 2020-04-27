@@ -353,6 +353,61 @@ void MainVm::paste()
     emit visualizationAvailable(surface->minValue(), surface->maxValue());
 }
 
+#include "util/undo/moveundoitem.h"
+#include "util/undo/compositundoitem.h"
+#include "elementdependencyvisitor.h"
+
+void MainVm::rotate(double rot)
+{
+    if (std::isnan(rot))
+    {
+        bool ok;
+        rot = QInputDialog::getDouble(parentWidget, QWidget::tr("Rotate selection"),
+                                      QWidget::tr("Rotation in degrees: "),  0, -360, 360, 1, &ok);
+        if (!ok)
+            return;
+    }
+
+    QSharedPointer<SceneElement<float>> scene = project->scene();
+
+    ElementDependencyVisitor deps;
+    deps.allHighlighted(*scene);
+
+    QPoint center = scene->selectionBounds().center();
+    QMatrix mat;
+    mat.rotate(rot);
+
+    QSharedPointer<UndoStack> nestedUndoStack = QSharedPointer<UndoStack>::create();
+    for(auto id: deps.dependencies())
+    {
+        auto it = scene->findId(id);
+        Q_ASSERT(it != scene->end());
+        if (!it->canAnchor())
+            continue;
+
+        QPoint oldPoint = it->anchorNode().point();
+        QPoint newPoint = (oldPoint - center) * mat + center;
+
+        if (!scene->bounds().contains(newPoint))
+        {
+            QMessageBox::critical(parentWidget, "Fitting error",
+                                  QString("This rotation would cause one or more points "
+                                          "to fall outside the bounds of the scene."));
+
+            nestedUndoStack->undoAll();
+            return;
+        }
+
+        auto undoItem = std::make_unique<MoveUndoItem>(scene, it->identifier(), oldPoint, newPoint);
+        undoItem->doFunction();
+        nestedUndoStack->add(std::move(undoItem));
+    }
+
+    undoStack->add(std::make_unique<CompositUndoItem>(nestedUndoStack, "Rotate selection"));
+
+    emit visualizationAvailable(surface->minValue(), surface->maxValue());
+}
+
 void MainVm::closeRequested()
 {
     if (!saveIfAltered())
@@ -502,13 +557,13 @@ void MainVm::createScene()
     SharedNode cathodeLeft(scene->newId(), 100, 100);
     SharedNode cathodeRight(scene->newId(), 500, 100);
 
-    scene->add(NodeElement<float>::uniqueElement(anodeRight, scene->sceneBounds()));
-    scene->add(NodeElement<float>::uniqueElement(anodeLeft, scene->sceneBounds()));
-    scene->add(NodeElement<float>::uniqueElement(cathodeLeft, scene->sceneBounds()));
-    scene->add(NodeElement<float>::uniqueElement(cathodeRight, scene->sceneBounds()));
+    scene->add(NodeElement<float>::uniqueElement(anodeRight, scene->sceneSize()));
+    scene->add(NodeElement<float>::uniqueElement(anodeLeft, scene->sceneSize()));
+    scene->add(NodeElement<float>::uniqueElement(cathodeLeft, scene->sceneSize()));
+    scene->add(NodeElement<float>::uniqueElement(cathodeRight, scene->sceneSize()));
 
-    scene->add(LineElement<float>::uniqueElement(scene->newId(), scene->sceneBounds(), anodeLeft, anodeRight, 1));
-    scene->add(LineElement<float>::uniqueElement(scene->newId(), scene->sceneBounds(), cathodeLeft, cathodeRight, -1));
+    scene->add(LineElement<float>::uniqueElement(scene->newId(), scene->sceneSize(), anodeLeft, anodeRight, 1));
+    scene->add(LineElement<float>::uniqueElement(scene->newId(), scene->sceneSize(), cathodeLeft, cathodeRight, -1));
 }
 #endif
 
@@ -522,14 +577,14 @@ void MainVm::createBorder(float voltage)
     SharedNode bottomLeft(scene->newId(), 0, 0);
     SharedNode bottomRight(scene->newId(), size.height(), 0);
 
-    scene->add(NodeElement<float>::uniqueElement(topLeft, scene->sceneBounds()));
-    scene->add(NodeElement<float>::uniqueElement(topRight, scene->sceneBounds()));
-    scene->add(NodeElement<float>::uniqueElement(bottomLeft, scene->sceneBounds()));
-    scene->add(NodeElement<float>::uniqueElement(bottomRight, scene->sceneBounds()));
+    scene->add(NodeElement<float>::uniqueElement(topLeft, scene->sceneSize()));
+    scene->add(NodeElement<float>::uniqueElement(topRight, scene->sceneSize()));
+    scene->add(NodeElement<float>::uniqueElement(bottomLeft, scene->sceneSize()));
+    scene->add(NodeElement<float>::uniqueElement(bottomRight, scene->sceneSize()));
 
-    scene->add(LineElement<float>::uniqueElement(scene->newId(), scene->sceneBounds(), topLeft, topRight, voltage));
-    scene->add(LineElement<float>::uniqueElement(scene->newId(), scene->sceneBounds(), bottomLeft, bottomRight, voltage));
-    scene->add(LineElement<float>::uniqueElement(scene->newId(), scene->sceneBounds(), topLeft, bottomLeft, voltage));
-    scene->add(LineElement<float>::uniqueElement(scene->newId(), scene->sceneBounds(), topRight, bottomRight, voltage));
+    scene->add(LineElement<float>::uniqueElement(scene->newId(), scene->sceneSize(), topLeft, topRight, voltage));
+    scene->add(LineElement<float>::uniqueElement(scene->newId(), scene->sceneSize(), bottomLeft, bottomRight, voltage));
+    scene->add(LineElement<float>::uniqueElement(scene->newId(), scene->sceneSize(), topLeft, bottomLeft, voltage));
+    scene->add(LineElement<float>::uniqueElement(scene->newId(), scene->sceneSize(), topRight, bottomRight, voltage));
 }
 

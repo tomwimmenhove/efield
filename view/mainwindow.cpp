@@ -1,4 +1,5 @@
 #include <QFileInfo>
+#include <cmath>
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -49,6 +50,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, &MainWindow::cut, mainVm, &MainVm::cut);
     connect(this, &MainWindow::copy, mainVm, &MainVm::copy);
     connect(this, &MainWindow::paste, mainVm, &MainVm::paste);
+    connect(this, &MainWindow::rotate, mainVm, &MainVm::rotate);
     connect(this, &MainWindow::closeRequested, mainVm, &MainVm::closeRequested);
 
     connect(mainVm, &MainVm::visualizationAvailable, this, &MainWindow::mainVm_VisualizationAvailable);
@@ -212,6 +214,10 @@ void MainWindow::keyPressEvent(QKeyEvent* e)
             case Qt::Key_Escape:
                 emit cancelOperation();
                 break;
+
+            case Qt::Key_Space:
+                emit rotate(-45.0f);
+                break;
         }
     }
 
@@ -299,4 +305,9 @@ void MainWindow::on_action_Copy_triggered()
 void MainWindow::on_action_Paste_triggered()
 {
     emit paste();
+}
+
+void MainWindow::on_action_Rotate_selection_triggered()
+{
+    emit rotate(NAN);
 }

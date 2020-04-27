@@ -26,6 +26,6 @@ void NewLineUndoItem::doFunction()
     Q_ASSERT(typeid(*it2).hash_code() == typeid(NodeElement<float>).hash_code());
     SharedNode node2 = static_cast<NodeElement<float>&>(*it2).anchorNode();
 
-    auto element = LineElement<float>::uniqueElement(id, scene->sceneBounds(), node1, node2, value);
+    auto element = LineElement<float>::uniqueElement(id, scene->sceneSize(), node1, node2, value);
     scene->add(std::move(element));
 }

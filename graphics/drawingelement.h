@@ -22,7 +22,7 @@ class DrawingElement
 {
 public:
     DrawingElement(int id, const QSize& bounds)
-        : id(id), sceneClipBounds(bounds)
+        : id(id), sceneClipSize(bounds)
     { }
 
     virtual void draw(IDrawer<T>& drawer) = 0;
@@ -36,8 +36,8 @@ public:
     virtual bool isInUse() const = 0;
     virtual QString name() const = 0;
 
-    inline QSize sceneBounds() const { return sceneClipBounds; }
-    inline void setSceneBounds(const QSize& bounds) { sceneClipBounds = bounds; }
+    inline QSize sceneSize() const { return sceneClipSize; }
+    inline void setSceneSize(const QSize& bounds) { sceneClipSize = bounds; }
 
     inline int identifier() const { return id; }
 
@@ -49,13 +49,13 @@ public:
     virtual ~DrawingElement() { }
 
 protected:
-    inline bool isInBounds(const QPoint& p) { return QRect(QPoint(0, 0), sceneClipBounds).contains(p); }
+    inline bool isInBounds(const QPoint& p) { return QRect(QPoint(0, 0), sceneClipSize).contains(p); }
 
     bool highlighted = false;
     int id;
 
 private:
-    QSize sceneClipBounds;
+    QSize sceneClipSize;
 };
 
 #endif // DRAWINGELEMENT_H
