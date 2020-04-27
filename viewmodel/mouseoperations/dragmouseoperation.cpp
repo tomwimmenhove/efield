@@ -87,7 +87,7 @@ std::unique_ptr<MouseOperation> DragMouseOperation::mouseReleased(std::unique_pt
             nestedUndoStack->add(std::move(undoItem));
         }
 
-        undoStack->add(std::make_unique<CompositUndoItem>(scene, nestedUndoStack, nameGen.generate()));
+        undoStack->add(std::make_unique<CompositUndoItem>(nestedUndoStack, nameGen.generate()));
     }
 
     return std::move(parent);

@@ -2,7 +2,7 @@
 #include "graphics/lineelement.h"
 
 DeleteLineUndoItem::DeleteLineUndoItem(const QSharedPointer<SceneElement<float>>& scene, int id)
-    : UndoItem(scene), id(id)
+    : scene(scene), id(id)
 {
     auto it = scene->findId(id);
     Q_ASSERT(it != scene->end());

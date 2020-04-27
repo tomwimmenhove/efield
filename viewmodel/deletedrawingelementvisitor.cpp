@@ -38,7 +38,7 @@ bool DeleteDrawingElementVisitor::deleteSelected(const QSharedPointer<UndoStack>
         }
     } while (n != 0);
 
-    undoStack->add(std::make_unique<CompositUndoItem>(scene, nestedUndoStack, nameGen.generate()));
+    undoStack->add(std::make_unique<CompositUndoItem>( nestedUndoStack, nameGen.generate()));
 
     return update;
 }

@@ -4,7 +4,7 @@ MoveUndoItem::MoveUndoItem(const QSharedPointer<SceneElement<float>>& scene,
                            int id,
                            const QPoint& oldPoint,
                            const QPoint& newPoint)
-    : UndoItem(scene), id(id), oldPoint(oldPoint), newPoint(newPoint)
+    : scene(scene), id(id), oldPoint(oldPoint), newPoint(newPoint)
 { }
 
 void MoveUndoItem::undoFunction()

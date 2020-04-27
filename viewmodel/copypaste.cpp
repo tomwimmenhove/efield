@@ -53,5 +53,5 @@ void CopyPaste::paste()
         }
     }
 
-    undoStack->add(std::make_unique<CompositUndoItem>(scene, nestedUndoStack, "Paste"));
+    undoStack->add(std::make_unique<CompositUndoItem>( nestedUndoStack, "Paste"));
 }

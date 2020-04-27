@@ -1,9 +1,8 @@
 #include "compositundoitem.h"
 
-CompositUndoItem::CompositUndoItem(const QSharedPointer<SceneElement<float>>& scene,
-                                   const QSharedPointer<UndoStack>& undoStack,
+CompositUndoItem::CompositUndoItem(const QSharedPointer<UndoStack>& undoStack,
                                    const QString& title)
-    : UndoItem(scene), undoStack(undoStack), titleString(title)
+    : undoStack(undoStack), titleString(title)
 { }
 
 void CompositUndoItem::undoFunction()

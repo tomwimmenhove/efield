@@ -20,6 +20,7 @@ public:
     void doFunction() override;
 
 private:
+    QSharedPointer<SceneElement<float>> scene;
     int id;
     QPoint oldPoint;
     QPoint newPoint;

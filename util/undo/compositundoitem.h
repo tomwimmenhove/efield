@@ -3,14 +3,12 @@
 
 #include <QSharedPointer>
 
-#include "graphics/sceneelement.h"
 #include "undostack.h"
 
 class CompositUndoItem : public UndoItem
 {
 public:
-    CompositUndoItem(const QSharedPointer<SceneElement<float>>& scene,
-                     const QSharedPointer<UndoStack>& undoStack,
+    CompositUndoItem(const QSharedPointer<UndoStack>& undoStack,
                      const QString& title);
 
     QString title() const override { return titleString; }

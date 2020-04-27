@@ -17,6 +17,7 @@ public:
     void doFunction() override;
 
 private:
+    QSharedPointer<SceneElement<float>> scene;
     int id;
     int pointId1;
     int pointId2;
