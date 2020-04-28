@@ -24,12 +24,7 @@ void ElementManipulators::copySelection(QSharedPointer<SceneElement<float>> clip
             element.accept(copy);
 
     if (deleteAfter)
-    {
-        ElementManipulators manip(scene, undoStack);
-        manip.deleteSelected();
-
-        update = true;
-    }
+        deleteSelected();
 }
 
 bool ElementManipulators::paste(QSharedPointer<SceneElement<float>> clipBoardScene)
