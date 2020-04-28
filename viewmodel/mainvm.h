@@ -36,8 +36,6 @@ public slots:
     void mouseMovedOnPixmap(const QPoint& mousePos, Qt::MouseButtons buttons, const QSize& labelSize);
     void mouseReleasedFromPixmap(const QPoint& mousePos, Qt::MouseButtons buttons, const QSize& labelSize);
     void mouseDoubleClickedOnPixmap(const QPoint& mousePos, Qt::MouseButtons buttons, const QSize& labelSize);
-    void deleteSelectedElement();
-    void editSelectedElement();
     void newNodeElement(const QPoint& mousePos, const QSize& labelSize);
     void newLineElement(const QPoint& mousePos, const QSize& labelSize);
     void cancelOperation();
@@ -45,6 +43,7 @@ public slots:
     void projectOpen();
     bool projectSave();
     bool projectSaveAs();
+    void closeRequested();
     void undo();
     void redo();
     void selectAll();
@@ -52,7 +51,8 @@ public slots:
     void copy();
     void paste();
     void rotate(double rot);
-    void closeRequested();
+    void deleteSelectedElement();
+    void editSelectedElement();
 
 private slots:
     void on_undoStackUpdated(bool canUndo, const QString& undoName, bool canRedo, const QString& redoName, size_t level);

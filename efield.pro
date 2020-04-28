@@ -60,8 +60,8 @@ SOURCES += \
     view/pointinputdialog.cpp \
     view/heatlegendwidget.cpp \
     viewmodel/copydrawingelementvisitor.cpp \
-    viewmodel/copypaste.cpp \
-    viewmodel/elementdependencyvisitor.cpp
+    viewmodel/elementdependencyvisitor.cpp \
+    viewmodel/elementmanipulators.cpp
 
 HEADERS += \
     model/simulator.h \
@@ -113,8 +113,8 @@ HEADERS += \
     view/pointinputdialog.h \
     view/heatmap.h \
     viewmodel/copydrawingelementvisitor.h \
-    viewmodel/copypaste.h \
-    viewmodel/elementdependencyvisitor.h
+    viewmodel/elementdependencyvisitor.h \
+    viewmodel/elementmanipulators.h
 
 FORMS += \
     view/mainwindow.ui \

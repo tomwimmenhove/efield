@@ -1,7 +1,6 @@
 #ifndef DELETEDRAWINGELEMENTVISITOR_H
 #define DELETEDRAWINGELEMENTVISITOR_H
 
-#include "graphics/drawingelement.h"
 #include "graphics/lineelement.h"
 #include "graphics/nodeelement.h"
 #include "graphics/sceneelement.h"
@@ -11,19 +10,14 @@
 class DeleteDrawingElementVisitor : public DrawingElementVisitor<float>
 {
 public:
-    static bool deleteElement(const QSharedPointer<UndoStack>& undoStack,
-                     const QSharedPointer<SceneElement<float> >& scene,
-                     DrawingElement<float>& element);
-
-    static bool deleteSelected(const QSharedPointer<UndoStack>& undoStack,
-                     const QSharedPointer<SceneElement<float> >& scene);
-
-private:
     DeleteDrawingElementVisitor(const QSharedPointer<UndoStack>& undoStack,
                               const QSharedPointer<SceneElement<float>>& scene)
         : undoStack(undoStack), scene(scene)
     { }
 
+    bool needsUpdate() const { return update; }
+
+private:
     void visit(SceneElement<float>&);
     void visit(NodeElement<float>& node);
     void visit(LineElement<float>& line);

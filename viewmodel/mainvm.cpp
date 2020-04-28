@@ -15,8 +15,7 @@
 #include "graphics/scenedeserializevisitor.h"
 #include "mouseoperations/mouseoperations.h"
 #include "editdrawingelementvisitor.h"
-#include "deletedrawingelementvisitor.h"
-#include "copypaste.h"
+#include "elementmanipulators.h"
 
 MainVm::MainVm(QWidget* parent)
     : QObject(parent), parentWidget(parent)
@@ -131,9 +130,6 @@ void MainVm::cancelOperation()
 
 void MainVm::mousePressedOnPixmap(const QPoint& mousePos, Qt::MouseButtons buttons, const QSize& labelSize)
 {
-    if (!surface)
-        return;
-
     if (buttons == Qt::LeftButton)
     {
         QPoint translated = Geometry::translatePoint(mousePos, labelSize, surface->size(), true);
@@ -149,9 +145,6 @@ void MainVm::mousePressedOnPixmap(const QPoint& mousePos, Qt::MouseButtons butto
 
 void MainVm::mouseMovedOnPixmap(const QPoint& mousePos, Qt::MouseButtons buttons, const QSize& labelSize)
 {
-    if (!surface)
-        return;
-
     QPoint translated = Geometry::translatePoint(mousePos, labelSize, surface->size(), true);
     mouseOperation = std::move(mouseOperation->mouseMoved(std::move(mouseOperation), translated, buttons));
     postMouseOperation();
@@ -168,9 +161,6 @@ void MainVm::mouseReleasedFromPixmap(const QPoint& mousePos, Qt::MouseButtons bu
 
 void MainVm::mouseDoubleClickedOnPixmap(const QPoint& mousePos, Qt::MouseButtons buttons, const QSize& labelSize)
 {
-    if (!surface)
-        return;
-
     QPoint translated = Geometry::translatePoint(mousePos, labelSize, surface->size(), true);
     mouseOperation = std::move(mouseOperation->mouseDoubleClicked(std::move(mouseOperation), translated, buttons));
     postMouseOperation();
@@ -283,6 +273,14 @@ bool MainVm::projectSaveAs()
     return false;
 }
 
+void MainVm::closeRequested()
+{
+    if (!saveIfAltered())
+        return;
+
+    QApplication::quit();
+}
+
 void MainVm::undo()
 {
     if (undoStack->canUndo())
@@ -299,6 +297,12 @@ void MainVm::redo()
         undoStack->redo();
         emit visualizationAvailable(surface->minValue(), surface->maxValue());
     }
+}
+
+void MainVm::on_undoStackUpdated(bool canUndo, const QString& undoName, bool canRedo, const QString& redoName, size_t level)
+{
+    emit undoStackUpdated(canUndo, undoName, canRedo, redoName);
+    project->setAltered(level != project->savedAtUndoLevel());
 }
 
 void MainVm::selectAll()
@@ -320,18 +324,34 @@ void MainVm::selectAll()
 
 void MainVm::cut()
 {
-    CopyPaste cp(project->scene(), clipBoardScene, undoStack);
-    cp.copySelection(true);
+    QSharedPointer<SceneElement<float>> scene = project->scene();
+    if (scene->numHighlighted() == 0)
+        return;
 
-    emit visualizationAvailable(surface->minValue(), surface->maxValue());
+    cancelOperation();
+
+    ElementManipulators manip(project->scene(), undoStack);
+
+    manip.copySelection(clipBoardScene, true);
+
+    if (manip.needsUpdate())
+        emit visualizationAvailable(surface->minValue(), surface->maxValue());
 }
 
 void MainVm::copy()
 {
-    CopyPaste cp(project->scene(), clipBoardScene, undoStack);
-    cp.copySelection(false);
+    QSharedPointer<SceneElement<float>> scene = project->scene();
+    if (scene->numHighlighted() == 0)
+        return;
 
-    emit visualizationAvailable(surface->minValue(), surface->maxValue());
+    cancelOperation();
+
+    ElementManipulators manip(project->scene(), undoStack);
+
+    manip.copySelection(clipBoardScene, false);
+
+    if (manip.needsUpdate())
+        emit visualizationAvailable(surface->minValue(), surface->maxValue());
 }
 
 void MainVm::paste()
@@ -339,26 +359,27 @@ void MainVm::paste()
     if (clipBoardScene->size() == 0)
         return;
 
-    CopyPaste cp(project->scene(), clipBoardScene, undoStack);
-    if (!cp.pasteFits())
+    ElementManipulators manip(project->scene(), undoStack);
+
+    if (!manip.paste(clipBoardScene))
     {
         QMessageBox::critical(parentWidget, "Fitting error",
                               QString("Scene not large enough for clipboard data"));
-
         return;
     }
 
-    cp.paste();
-
-    emit visualizationAvailable(surface->minValue(), surface->maxValue());
+    if (manip.needsUpdate())
+        emit visualizationAvailable(surface->minValue(), surface->maxValue());
 }
-
-#include "util/undo/moveundoitem.h"
-#include "util/undo/compositundoitem.h"
-#include "elementdependencyvisitor.h"
 
 void MainVm::rotate(double rot)
 {
+    QSharedPointer<SceneElement<float>> scene = project->scene();
+    if (scene->numHighlighted() == 0)
+        return;
+
+    cancelOperation();
+
     if (std::isnan(rot))
     {
         bool ok;
@@ -368,72 +389,30 @@ void MainVm::rotate(double rot)
             return;
     }
 
-    QSharedPointer<SceneElement<float>> scene = project->scene();
+    ElementManipulators manip(scene, undoStack);
 
-    ElementDependencyVisitor deps;
-    deps.allHighlighted(*scene);
+    if (!manip.rotateSelection(rot))
+        QMessageBox::critical(parentWidget, "Unable to rotate",
+                              QString("Could not rotate selection.\n"
+                                      "Make sure that all points will stay inside the scene bounds after rotation."));
 
-    QPoint center = scene->selectionBounds().center();
-    QMatrix mat;
-    mat.rotate(rot);
-
-    QSharedPointer<UndoStack> nestedUndoStack = QSharedPointer<UndoStack>::create();
-    for(auto id: deps.dependencies())
-    {
-        auto it = scene->findId(id);
-        Q_ASSERT(it != scene->end());
-        if (!it->canAnchor())
-            continue;
-
-        QPoint oldPoint = it->anchorNode().point();
-        QPoint newPoint = (oldPoint - center) * mat + center;
-
-        if (!scene->bounds().contains(newPoint))
-        {
-            QMessageBox::critical(parentWidget, "Fitting error",
-                                  QString("This rotation would cause one or more points "
-                                          "to fall outside the bounds of the scene."));
-
-            nestedUndoStack->undoAll();
-            return;
-        }
-
-        auto undoItem = std::make_unique<MoveUndoItem>(scene, it->identifier(), oldPoint, newPoint);
-        undoItem->doFunction();
-        nestedUndoStack->add(std::move(undoItem));
-    }
-
-    undoStack->add(std::make_unique<CompositUndoItem>(nestedUndoStack, "Rotate selection"));
-
-    emit visualizationAvailable(surface->minValue(), surface->maxValue());
-}
-
-void MainVm::closeRequested()
-{
-    if (!saveIfAltered())
-        return;
-
-    QApplication::quit();
-}
-
-void MainVm::on_undoStackUpdated(bool canUndo, const QString& undoName, bool canRedo, const QString& redoName, size_t level)
-{
-    emit undoStackUpdated(canUndo, undoName, canRedo, redoName);
-    project->setAltered(level != project->savedAtUndoLevel());
+    if (manip.needsUpdate())
+        emit visualizationAvailable(surface->minValue(), surface->maxValue());
 }
 
 void MainVm::deleteSelectedElement()
 {
-    if (!surface)
-        return;
-
     QSharedPointer<SceneElement<float>> scene = project->scene();
     if (scene->numHighlighted() == 0)
         return;
 
     cancelOperation();
 
-    if (DeleteDrawingElementVisitor::deleteSelected(undoStack, scene))
+    ElementManipulators manip(scene, undoStack);
+
+    manip.deleteSelected();
+
+    if (manip.needsUpdate())
         emit visualizationAvailable(surface->minValue(), surface->maxValue());
 }
 
@@ -445,9 +424,6 @@ void MainVm::editElement(DrawingElement<float>& element)
 
 void MainVm::editSelectedElement()
 {
-    if (!surface)
-        return;
-
     QSharedPointer<SceneElement<float>> scene = project->scene();
     if (scene->numHighlighted() != 1)
         return;

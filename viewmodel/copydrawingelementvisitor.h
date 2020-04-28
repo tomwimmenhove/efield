@@ -19,11 +19,11 @@ public:
         : souce(source), destination(destination), undoStack(undoStack)
     { }
 
+private:
     void visit(SceneElement<float>& scene);
     void visit(NodeElement<float>& node);
     void visit(LineElement<float>& line);
 
-private:
     QSharedPointer<SceneElement<float>> souce;
     QSharedPointer<SceneElement<float>> destination;
     QSharedPointer<UndoStack> undoStack;
