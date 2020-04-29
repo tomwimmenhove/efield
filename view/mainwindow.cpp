@@ -1,7 +1,9 @@
 #include <QFileInfo>
+#include <QInputDialog>
 #include <cmath>
 
 #include "mainwindow.h"
+#include "pointinputdialog.h"
 #include "ui_mainwindow.h"
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -21,11 +23,11 @@ MainWindow::MainWindow(QWidget *parent) :
 
     mainVm = new MainVm(this);
 
-    connect(ui->graphicsLabel, &MouseEventLabel::mouse_Moved, this, &MainWindow::graphLabel_MouseMoved);
-    connect(ui->graphicsLabel, &MouseEventLabel::mouse_Pressed, this, &MainWindow::graphLabel_MousePressed);
-    connect(ui->graphicsLabel, &MouseEventLabel::mouse_Released, this, &MainWindow::graphLabel_MouseReleased);
-    connect(ui->graphicsLabel, &MouseEventLabel::mouse_DoubleClicked, this, &MainWindow::graphLabel_MouseDoubleClicked);
-    connect(ui->graphicsLabel, &MouseEventLabel::resized, this, &MainWindow::graphLabel_Resized);
+    connect(ui->graphicsLabel, &MouseEventLabel::mouse_Moved, this, &MainWindow::graphLabel_mouseMoved);
+    connect(ui->graphicsLabel, &MouseEventLabel::mouse_Pressed, this, &MainWindow::graphLabel_mousePressed);
+    connect(ui->graphicsLabel, &MouseEventLabel::mouse_Released, this, &MainWindow::graphLabel_mouseReleased);
+    connect(ui->graphicsLabel, &MouseEventLabel::mouse_DoubleClicked, this, &MainWindow::graphLabel_mouseDoubleClicked);
+    connect(ui->graphicsLabel, &MouseEventLabel::resized, this, &MainWindow::graphLabel_resized);
 
     connect(this, &MainWindow::startSimulation, mainVm, &MainVm::startSimulation);
     connect(this, &MainWindow::stopSimulation, mainVm, &MainVm::stopSimulation);
@@ -52,13 +54,17 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, &MainWindow::paste, mainVm, &MainVm::paste);
     connect(this, &MainWindow::rotate, mainVm, &MainVm::rotate);
     connect(this, &MainWindow::closeRequested, mainVm, &MainVm::closeRequested);
+    connect(this, &MainWindow::setLineVoltage, mainVm, &MainVm::setLineVoltage);
+    connect(this, &MainWindow::setNodePosition, mainVm, &MainVm::setNodePosition);
 
-    connect(mainVm, &MainVm::visualizationAvailable, this, &MainWindow::mainVm_VisualizationAvailable);
-    connect(mainVm, &MainVm::newVisualization, this, &MainWindow::mainVm_NewVisualization);
-    connect(mainVm, &MainVm::newStatusMessage, this, &MainWindow::mainVm_NewStatusMessage);
-    connect(mainVm, &MainVm::updateMouseCursor, this, &MainWindow::mainVm_UpdateMouseCursor);
-    connect(mainVm, &MainVm::undoStackUpdated, this, &MainWindow::mainVm_UndoStackUpdated);
-    connect(mainVm, &MainVm::projectStatusUpdate, this, &MainWindow::mainVm_ProjectStatusUpdate);
+    connect(mainVm, &MainVm::visualizationAvailable, this, &MainWindow::mainVm_visualizationAvailable);
+    connect(mainVm, &MainVm::newVisualization, this, &MainWindow::mainVm_newVisualization);
+    connect(mainVm, &MainVm::newStatusMessage, this, &MainWindow::mainVm_newStatusMessage);
+    connect(mainVm, &MainVm::updateMouseCursor, this, &MainWindow::mainVm_updateMouseCursor);
+    connect(mainVm, &MainVm::undoStackUpdated, this, &MainWindow::mainVm_undoStackUpdated);
+    connect(mainVm, &MainVm::projectStatusUpdate, this, &MainWindow::mainVm_projectStatusUpdate);
+    connect(mainVm, &MainVm::editLine, this, &MainWindow::mainVm_editLine);
+    connect(mainVm, &MainVm::editNode, this, &MainWindow::mainVm_editNode);
 
 #ifdef USE_VM_THREAD
     mainVm->moveToThread(&vmThread);
@@ -80,29 +86,29 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::graphLabel_MouseMoved(const QPoint& point, Qt::MouseButtons buttons)
+void MainWindow::graphLabel_mouseMoved(const QPoint& point, Qt::MouseButtons buttons)
 {
     emit mouseMovedOnPixmap(point, buttons, ui->graphicsLabel->size());
 
     graphLabelMousePos = point;
 }
 
-void MainWindow::graphLabel_MousePressed(const QPoint& point, Qt::MouseButtons buttons)
+void MainWindow::graphLabel_mousePressed(const QPoint& point, Qt::MouseButtons buttons)
 {
     emit mousePressedOnPixmap(point, buttons, ui->graphicsLabel->size());
 }
 
-void MainWindow::graphLabel_MouseReleased(const QPoint& point, Qt::MouseButtons buttons)
+void MainWindow::graphLabel_mouseReleased(const QPoint& point, Qt::MouseButtons buttons)
 {
     emit mouseReleasedFromPixmap(point, buttons, ui->graphicsLabel->size());
 }
 
-void MainWindow::graphLabel_MouseDoubleClicked(const QPoint& point, Qt::MouseButtons buttons)
+void MainWindow::graphLabel_mouseDoubleClicked(const QPoint& point, Qt::MouseButtons buttons)
 {
     emit mouseDoubleClickedOnPixmap(point, buttons, ui->graphicsLabel->size());
 }
 
-void MainWindow::graphLabel_Resized(const QSize&)
+void MainWindow::graphLabel_resized(const QSize&)
 {
     frameUpdate();
 }
@@ -112,7 +118,7 @@ void MainWindow::frameUpdate()
     emit updateVisualization(ui->actionGradient->isChecked());
 }
 
-void MainWindow::mainVm_VisualizationAvailable(float minValue, float maxValue)
+void MainWindow::mainVm_visualizationAvailable(float minValue, float maxValue)
 {
     ui->heatMapLegend->setMin(minValue);
     ui->heatMapLegend->setMax(maxValue);
@@ -120,22 +126,22 @@ void MainWindow::mainVm_VisualizationAvailable(float minValue, float maxValue)
     emit requestVisualization(ui->heatMapLegend->stepper(), ui->graphicsLabel->size());
 }
 
-void MainWindow::mainVm_NewVisualization(const QPixmap& pixmap)
+void MainWindow::mainVm_newVisualization(const QPixmap& pixmap)
 {
     ui->graphicsLabel->setPixmap(pixmap);
 }
 
-void MainWindow::mainVm_NewStatusMessage(const QString& message)
+void MainWindow::mainVm_newStatusMessage(const QString& message)
 {
     ui->statusBar->showMessage(message);
 }
 
-void MainWindow::mainVm_UpdateMouseCursor(Qt::CursorShape cursor)
+void MainWindow::mainVm_updateMouseCursor(Qt::CursorShape cursor)
 {
     ui->graphicsLabel->setCursor(cursor);
 }
 
-void MainWindow::mainVm_UndoStackUpdated(bool canUndo, const QString& undoName, bool canRedo, const QString& redoName)
+void MainWindow::mainVm_undoStackUpdated(bool canUndo, const QString& undoName, bool canRedo, const QString& redoName)
 {
     ui->action_Undo->setEnabled(canUndo);
     ui->action_Undo->setText(tr("Undo %1").arg(undoName));
@@ -144,7 +150,7 @@ void MainWindow::mainVm_UndoStackUpdated(bool canUndo, const QString& undoName, 
     ui->action_Redo->setText(tr("Redo %1").arg(redoName));
 }
 
-void MainWindow::mainVm_ProjectStatusUpdate(const QString& filename, bool altered)
+void MainWindow::mainVm_projectStatusUpdate(const QString& filename, bool altered)
 {
     ui->action_Save->setEnabled(altered);
     ui->action_Save_as->setEnabled(altered);
@@ -160,9 +166,32 @@ void MainWindow::mainVm_ProjectStatusUpdate(const QString& filename, bool altere
     setWindowTitle(QString("[%1]- %2%3")
                       .arg(QFileInfo(filename).fileName())
                       .arg(QCoreApplication::applicationName())
-                      .arg(altered ? " *" : ""));
+                   .arg(altered ? " *" : ""));
 }
 
+void MainWindow::mainVm_editNode(int id, const QPoint& defaultPosition,
+                                 const QPoint& minPosition,
+                                 const QPoint& maxPosition)
+{
+    PointInputDialog d(QWidget::tr("Node coordinates"),
+                       defaultPosition, minPosition, maxPosition, this);
+    if (d.exec() != QDialog::Accepted)
+        return;
+
+    emit setNodePosition(id, defaultPosition, d.point());
+}
+
+void MainWindow::mainVm_editLine(int id, float defaultVoltage)
+{
+    bool ok;
+
+    double voltage = QInputDialog::getDouble(this, QWidget::tr("Edit line"),
+                                    QWidget::tr("Voltage: "),  defaultVoltage, -1e100, 1e100, 1, &ok);
+    if (!ok)
+        return;
+
+    emit setLineVoltage(id, defaultVoltage, voltage);
+}
 
 void MainWindow::on_actionStart_triggered()
 {

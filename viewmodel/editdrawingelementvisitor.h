@@ -11,7 +11,7 @@ class EditDrawingElementVisitor : public QObject, public DrawingElementVisitor<f
 
 signals:
     void editLine(int id, float defaultValue);
-    void editNode(int id, QPoint defaultPosition);
+    void editNode(int id, const QPoint& defaultPosition);
 
 private:
     void visit(SceneElement<float>& scene);

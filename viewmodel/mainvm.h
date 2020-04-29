@@ -53,12 +53,13 @@ public slots:
     void rotate(double rot);
     void deleteSelectedElement();
     void editSelectedElement();
-
-    void editLine(int id, float defaultValue);
-    void editNode(int id, QPoint defaultPosition);
+    void setLineVoltage(int id, float oldVotlage, float newVolate);
+    void setNodePosition(int id, const QPoint& oldPosition, const QPoint& newPosition);
 
 private slots:
     void on_undoStackUpdated(bool canUndo, const QString& undoName, bool canRedo, const QString& redoName, size_t level);
+    void editVisitor_editLine(int id, float defaultValue);
+    void editVisitor_editNode(int id, const QPoint& defaultPosition);
 
 signals:
     void visualizationAvailable(float minValue, float maxValue);
@@ -69,6 +70,8 @@ signals:
     void updateMouseCursor(Qt::CursorShape cursor);
     void undoStackUpdated(bool canUndo, const QString& undoName, bool canRedo, const QString& redoName);
     void projectStatusUpdate(const QString& filename, bool altered);
+    void editLine(int id, float defaultValue);
+    void editNode(int id, const QPoint& defaultPosition, const QPoint& minPosition, const QPoint& maxPosition);
 
 private:
 #ifdef _OPENMP

@@ -22,18 +22,20 @@ public:
     ~MainWindow();
 
 private slots:
-    void graphLabel_MouseMoved(const QPoint& point, Qt::MouseButtons buttons);
-    void graphLabel_MousePressed(const QPoint& point, Qt::MouseButtons buttons);
-    void graphLabel_MouseReleased(const QPoint& point, Qt::MouseButtons buttons);
-    void graphLabel_MouseDoubleClicked(const QPoint& point, Qt::MouseButtons buttons);
-    void graphLabel_Resized(const QSize& size);
+    void graphLabel_mouseMoved(const QPoint& point, Qt::MouseButtons buttons);
+    void graphLabel_mousePressed(const QPoint& point, Qt::MouseButtons buttons);
+    void graphLabel_mouseReleased(const QPoint& point, Qt::MouseButtons buttons);
+    void graphLabel_mouseDoubleClicked(const QPoint& point, Qt::MouseButtons buttons);
+    void graphLabel_resized(const QSize& size);
 
-    void mainVm_VisualizationAvailable(float minValue, float maxValue);
-    void mainVm_NewVisualization(const QPixmap& pixmap);
-    void mainVm_NewStatusMessage(const QString& message);
-    void mainVm_UpdateMouseCursor(Qt::CursorShape cursor);
-    void mainVm_UndoStackUpdated(bool canUndo, const QString& undoName, bool canRedo, const QString& redoName);
-    void mainVm_ProjectStatusUpdate(const QString& filename, bool altered);
+    void mainVm_visualizationAvailable(float minValue, float maxValue);
+    void mainVm_newVisualization(const QPixmap& pixmap);
+    void mainVm_newStatusMessage(const QString& message);
+    void mainVm_updateMouseCursor(Qt::CursorShape cursor);
+    void mainVm_undoStackUpdated(bool canUndo, const QString& undoName, bool canRedo, const QString& redoName);
+    void mainVm_projectStatusUpdate(const QString& filename, bool altered);
+    void mainVm_editNode(int id, const QPoint& defaultPosition, const QPoint& minPosition, const QPoint& maxPosition);
+    void mainVm_editLine(int id, float defaultVoltage);
 
     void on_actionStart_triggered();
     void on_actionS_top_triggered();
@@ -83,6 +85,9 @@ signals:
     void paste();
     void rotate(double rot);
     void closeRequested();
+
+    void setLineVoltage(int id, float oldVotlage, float newVolate);
+    void setNodePosition(int id, QPoint oldPosition, QPoint newPosition);
 
 protected:
     void keyPressEvent(QKeyEvent *e);

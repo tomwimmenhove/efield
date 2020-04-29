@@ -418,16 +418,6 @@ void MainVm::deleteSelectedElement()
         emit visualizationAvailable(surface->minValue(), surface->maxValue());
 }
 
-void MainVm::editElement(DrawingElement<float>& element)
-{
-    EditDrawingElementVisitor v;
-
-    connect(&v, &EditDrawingElementVisitor::editLine, this, &MainVm::editLine);
-    connect(&v, &EditDrawingElementVisitor::editNode, this, &MainVm::editNode);
-
-    element.accept(v);
-}
-
 void MainVm::editSelectedElement()
 {
     QSharedPointer<SceneElement<float>> scene = project->scene();
@@ -441,28 +431,36 @@ void MainVm::editSelectedElement()
     editElement(*highLighted);
 }
 
-void MainVm::editLine(int id, float defaultValue)
+void MainVm::editElement(DrawingElement<float>& element)
 {
-    bool ok;
+    EditDrawingElementVisitor v;
 
-    double volt = QInputDialog::getDouble(parentWidget, QWidget::tr("Edit line"),
-                                    QWidget::tr("Voltage: "),  defaultValue, -1e100, 1e100, 1, &ok);
-    if (!ok)
-        return;
+    connect(&v, &EditDrawingElementVisitor::editLine, this, &MainVm::editVisitor_editLine);
+    connect(&v, &EditDrawingElementVisitor::editNode, this, &MainVm::editVisitor_editNode);
 
-    auto undoItem = std::make_unique<LineValueUndoItem>(project->scene(), id, defaultValue, volt);
+    element.accept(v);
+}
+
+void MainVm::editVisitor_editLine(int id, float defaultValue)
+{
+    emit editLine(id, defaultValue);
+}
+
+void MainVm::editVisitor_editNode(int id, const QPoint& defaultPosition)
+{
+    emit editNode(id, defaultPosition, QPoint(0, 0), QPoint(surface->width() - 1, surface->height() - 1));
+}
+
+void MainVm::setLineVoltage(int id, float oldVotlage, float newVolate)
+{
+    auto undoItem = std::make_unique<LineValueUndoItem>(project->scene(), id, oldVotlage, newVolate);
     undoItem->doFunction();
     undoStack->add(std::move(undoItem));
 }
 
-void MainVm::editNode(int id, QPoint defaultPosition)
+void MainVm::setNodePosition(int id, const QPoint& oldPosition, const QPoint& newPosition)
 {
-    PointInputDialog d(QWidget::tr("Node coordinates"),
-                       defaultPosition, QPoint(0, 0), QPoint(surface->width() - 1, surface->height() - 1), parentWidget);
-    if (d.exec() != QDialog::Accepted)
-        return;
-
-    auto undoItem = std::make_unique<MoveUndoItem>(project->scene(), id, defaultPosition, d.point());
+    auto undoItem = std::make_unique<MoveUndoItem>(project->scene(), id, oldPosition, newPosition);
     undoItem->doFunction();
     undoStack->add(std::move(undoItem));
 
