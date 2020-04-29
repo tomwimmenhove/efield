@@ -53,7 +53,7 @@ public slots:
     void rotate(double rot);
     void deleteSelectedElement();
     void editSelectedElement();
-    void setLineVoltage(int id, float oldVotlage, float newVolate);
+    void setLineVoltage(int id, float oldVoltage, float newVoltage);
     void setNodePosition(int id, const QPoint& oldPosition, const QPoint& newPosition);
 
 private slots:

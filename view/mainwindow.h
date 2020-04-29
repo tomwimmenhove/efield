@@ -86,7 +86,7 @@ signals:
     void rotate(double rot);
     void closeRequested();
 
-    void setLineVoltage(int id, float oldVotlage, float newVolate);
+    void setLineVoltage(int id, float oldVoltage, float newVoltage);
     void setNodePosition(int id, QPoint oldPosition, QPoint newPosition);
 
 protected:

@@ -455,9 +455,9 @@ void MainVm::editVisitor_editNode(int id, const QPoint& defaultPosition)
     emit editNode(id, defaultPosition, QPoint(0, 0), QPoint(surface->width() - 1, surface->height() - 1));
 }
 
-void MainVm::setLineVoltage(int id, float oldVotlage, float newVolate)
+void MainVm::setLineVoltage(int id, float oldVoltage, float newVoltage)
 {
-    auto undoItem = std::make_unique<LineValueUndoItem>(project->scene(), id, oldVotlage, newVolate);
+    auto undoItem = std::make_unique<LineValueUndoItem>(project->scene(), id, oldVoltage, newVoltage);
     undoItem->doFunction();
     undoStack->add(std::move(undoItem));
 }
