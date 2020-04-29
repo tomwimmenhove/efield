@@ -394,9 +394,13 @@ void MainVm::rotate(double rot)
     ElementManipulators manip(scene, undoStack);
 
     if (!manip.rotateSelection(rot))
+    {
         QMessageBox::critical(parentWidget, "Unable to rotate",
                               QString("Could not rotate selection.\n"
                                       "Make sure that all points will stay inside the scene bounds after rotation."));
+
+        return;
+    }
 
     if (manip.needsUpdate())
         emit visualizationAvailable(surface->minValue(), surface->maxValue());
