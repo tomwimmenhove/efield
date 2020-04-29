@@ -16,6 +16,8 @@
 #include "mouseoperations/mouseoperations.h"
 #include "editdrawingelementvisitor.h"
 #include "elementmanipulators.h"
+#include <util/undo/linevalueundoitem.h>
+#include <util/undo/moveundoitem.h>
 
 MainVm::MainVm(QWidget* parent)
     : QObject(parent), parentWidget(parent)
@@ -418,8 +420,12 @@ void MainVm::deleteSelectedElement()
 
 void MainVm::editElement(DrawingElement<float>& element)
 {
-    if (EditDrawingElementVisitor::editElement(parentWidget, undoStack, project->scene(), element, surface))
-        emit visualizationAvailable(surface->minValue(), surface->maxValue());
+    EditDrawingElementVisitor v;
+
+    connect(&v, &EditDrawingElementVisitor::editLine, this, &MainVm::editLine);
+    connect(&v, &EditDrawingElementVisitor::editNode, this, &MainVm::editNode);
+
+    element.accept(v);
 }
 
 void MainVm::editSelectedElement()
@@ -433,6 +439,34 @@ void MainVm::editSelectedElement()
 
     cancelOperation();
     editElement(*highLighted);
+}
+
+void MainVm::editLine(int id, float defaultValue)
+{
+    bool ok;
+
+    double volt = QInputDialog::getDouble(parentWidget, QWidget::tr("Edit line"),
+                                    QWidget::tr("Voltage: "),  defaultValue, -1e100, 1e100, 1, &ok);
+    if (!ok)
+        return;
+
+    auto undoItem = std::make_unique<LineValueUndoItem>(project->scene(), id, defaultValue, volt);
+    undoItem->doFunction();
+    undoStack->add(std::move(undoItem));
+}
+
+void MainVm::editNode(int id, QPoint defaultPosition)
+{
+    PointInputDialog d(QWidget::tr("Node coordinates"),
+                       defaultPosition, QPoint(0, 0), QPoint(surface->width() - 1, surface->height() - 1), parentWidget);
+    if (d.exec() != QDialog::Accepted)
+        return;
+
+    auto undoItem = std::make_unique<MoveUndoItem>(project->scene(), id, defaultPosition, d.point());
+    undoItem->doFunction();
+    undoStack->add(std::move(undoItem));
+
+    emit visualizationAvailable(surface->minValue(), surface->maxValue());
 }
 
 template<typename T>

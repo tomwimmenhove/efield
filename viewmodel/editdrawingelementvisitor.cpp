@@ -1,50 +1,14 @@
-#include <QInputDialog>
-
 #include "editdrawingelementvisitor.h"
-#include "view/pointinputdialog.h"
-#include "util/undo/moveundoitem.h"
-#include "util/undo/linevalueundoitem.h"
-
-bool EditDrawingElementVisitor::editElement(QWidget* parentWidget, const QSharedPointer<UndoStack>& undoStack,
-                                     const QSharedPointer<SceneElement<float>>& scene,
-                                     DrawingElement<float>& element, const QSharedPointer<FloatSurface> surface)
-{
-    EditDrawingElementVisitor v(parentWidget, undoStack, scene, surface);
-    element.accept(v);
-
-    return v.update;
-}
 
 void EditDrawingElementVisitor::visit(SceneElement<float>&)
 { }
 
 void EditDrawingElementVisitor::visit(NodeElement<float>& node)
 {
-    SharedNode sharedNode = node.anchorNode();
-
-    PointInputDialog d(QWidget::tr("Node coordinates"),
-                       sharedNode, QPoint(0, 0), QPoint(surface->width() - 1, surface->height() - 1), parentWidget);
-    if (d.exec() != QDialog::Accepted)
-        return;
-
-    auto undoItem = std::make_unique<MoveUndoItem>(scene, node.identifier(), node.center(), d.point());
-    undoItem->doFunction();
-    undoStack->add(std::move(undoItem));
-
-    update = true;
+    emit editNode(node.identifier(), node.anchorNode());
 }
 
 void EditDrawingElementVisitor::visit(LineElement<float>& line)
 {
-    bool ok;
-    int def = line.value();
-
-    int volt = QInputDialog::getInt(parentWidget, QWidget::tr("Edit line"),
-                                    QWidget::tr("Voltage: "),  def, -2147483647, 2147483647, 1, &ok);
-    if (!ok)
-        return;
-
-    auto undoItem = std::make_unique<LineValueUndoItem>(scene, line.identifier(), def, volt);
-    undoItem->doFunction();
-    undoStack->add(std::move(undoItem));
+    emit editLine(line.identifier(), line.value());
 }

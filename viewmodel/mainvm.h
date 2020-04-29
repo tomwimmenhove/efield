@@ -54,6 +54,9 @@ public slots:
     void deleteSelectedElement();
     void editSelectedElement();
 
+    void editLine(int id, float defaultValue);
+    void editNode(int id, QPoint defaultPosition);
+
 private slots:
     void on_undoStackUpdated(bool canUndo, const QString& undoName, bool canRedo, const QString& redoName, size_t level);
 
