@@ -23,7 +23,7 @@ class MainVm : public QObject
     Q_OBJECT
 
 public:
-    MainVm(QWidget* parent = nullptr);
+    MainVm();
 
     ~MainVm();
 
@@ -39,11 +39,7 @@ public slots:
     void newNodeElement(const QPoint& mousePos, const QSize& labelSize);
     void newLineElement(const QPoint& mousePos, const QSize& labelSize);
     void cancelOperation();
-    void newSimulation();
-    void projectOpen();
-    bool projectSave();
-    bool projectSaveAs();
-    void closeRequested();
+    void projectSave();
     void undo();
     void redo();
     void selectAll();
@@ -56,12 +52,35 @@ public slots:
     void setLineVoltage(int id, float oldVoltage, float newVoltage);
     void setNodePosition(int id, const QPoint& oldPosition, const QPoint& newPosition);
 
+    /* Save as */
+    bool saveAs(const QString& fileName);
+
+    /* Closing */
+    void closeRequested();
+    void saveBeforeClose();
+    void closeApplication();
+    void saveAsBeforeClose(const QString& filename);
+
+    /* Opening */
+    void projectOpenRequested();
+    void saveBeforeOpen();
+    void projectOpen(const QString filename);
+    void saveAsBeforeOpen(const QString& filename);
+
+    /* New */
+    void newProjectRequested();
+    void saveBeforeNewProject();
+    void newProject(const QSize& size);
+    void saveAsBeforeNewProject(const QString& filename);
+
 private slots:
     void on_undoStackUpdated(bool canUndo, const QString& undoName, bool canRedo, const QString& redoName, size_t level);
     void editVisitor_editLine(int id, float defaultValue);
     void editVisitor_editNode(int id, const QPoint& defaultPosition);
 
 signals:
+    void criticalMessage(const QString& topic, const QString& message);
+
     void visualizationAvailable(float minValue, float maxValue);
     void newVisualization(const QPixmap& pixmap);
     void newStatusMessage(const QString& message);
@@ -72,6 +91,23 @@ signals:
     void projectStatusUpdate(const QString& filename, bool altered);
     void editLine(int id, float defaultValue);
     void editNode(int id, const QPoint& defaultPosition, const QPoint& minPosition, const QPoint& maxPosition);
+
+    /* Save As */
+    void saveDialog();
+
+    /* Closing */
+    void askSaveBeforeClose();
+    void saveDialogBeforeClose();
+
+    /* Opening */
+    void openDialog();
+    void askSaveBeforeOpen();
+    void saveDialogBeforeOpen();
+
+    /* New */
+    void newProjectDialog();
+    void askSaveBeforeNewProject();
+    void saveDialogBeforeNewProject();
 
 private:
 #ifdef _OPENMP
@@ -87,10 +123,7 @@ private:
     void postMouseOperation();
     void updateStatusBarValue(const QPoint& pointerPosition);
     void initNewProject(std::unique_ptr<Project>&& newProject);
-    bool projectSaveTo(const QString& fileName);
-    bool saveIfAltered();
 
-    QWidget* parentWidget;
     QSharedPointer<UndoStack> undoStack;
     std::unique_ptr<MouseOperation> mouseOperation;
     std::unique_ptr<Project> project;

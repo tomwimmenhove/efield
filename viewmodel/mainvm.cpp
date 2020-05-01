@@ -1,10 +1,7 @@
 #include <cmath>
 #include <limits>
 
-#include <QInputDialog>
-#include <QFileDialog>
 #include <QFile>
-#include <QMessageBox>
 #include <QApplication>
 
 #include "mainvm.h"
@@ -19,27 +16,19 @@
 #include <util/undo/linevalueundoitem.h>
 #include <util/undo/moveundoitem.h>
 
-MainVm::MainVm(QWidget* parent)
-    : QObject(parent), parentWidget(parent)
+MainVm::MainVm()
 {
-#ifdef QT_DEBUG
-    auto newProject = std::make_unique<Project>(QSize(601, 601));
-#else
-    auto newProject = std::make_unique<Project>(QSize(256, 256));
-#endif
-
     clipBoardScene =
-            //QSharedPointer<SceneElement<float>>::create(scene->sceneBounds());
             QSharedPointer<SceneElement<float>>::create(QSize(std::numeric_limits<int>::max(), std::numeric_limits<int>::max()));
 
-    initNewProject(std::move(newProject));
-    createBorder(0);
+#ifdef QT_DEBUG
+    newProject(QSize(601, 601));
+    createScene();
+#else
+    newProject(QSize(256, 256));
+#endif
 
     simulatorThread.start();
-
-#ifdef QT_DEBUG
-    createScene();
-#endif
 }
 
 MainVm::~MainVm()
@@ -84,11 +73,8 @@ void MainVm::requestVisualization(const SimpleValueStepper& stepper, const QSize
     painter.setRenderHint(QPainter::Antialiasing);
     project->scene()->drawAnnotation(painter, surface->size());
 
-    frames++;
-    if (frames % 25 == 0)
-    {
+    if (++frames % 25 == 0)
         qDebug() << ((float) simulatorWorker->iterations() * 1000.0 / runTimer.elapsed()) << " iterations/sec";
-    }
 
     emit newVisualization(scaledPixmap);
 }
@@ -168,119 +154,128 @@ void MainVm::mouseDoubleClickedOnPixmap(const QPoint& mousePos, Qt::MouseButtons
     postMouseOperation();
 }
 
-void MainVm::newSimulation()
-{
-    if (!saveIfAltered())
-        return;
-
-    PointInputDialog d("Node coordinates", QPoint(256, 256), QPoint(1, 1), QPoint(1024, 1024), parentWidget);
-    if (d.exec() != QDialog::Accepted)
-        return;
-
-    initNewProject(std::make_unique<Project>(d.size()));
-
-    createBorder(0);
-}
-
-void MainVm::projectOpen()
-{
-    if (!saveIfAltered())
-        return;
-
-    QString fileName = QFileDialog::getOpenFileName(parentWidget, tr("Open Project"), "",
-                                                    tr("E-Field Sim files (*.efs)"));
-
-    if (!fileName.isEmpty())
-    {
-        QFile file(fileName);
-
-        if(file.open(QIODevice::ReadOnly | QIODevice::Text))
-        {
-            initNewProject(std::make_unique<Project>(file.readAll()));
-            project->setFileName(fileName);
-        }
-        else
-            QMessageBox::critical(parentWidget, "Unable to load",
-                                  QString("Unable to load %1: %2")
-                                  .arg(fileName).arg(file.errorString()));
-    }
-}
-
-bool MainVm::projectSave()
+void MainVm::projectSave()
 {
     if (project->fileName().isEmpty())
-        return projectSaveAs();
-
-    return projectSaveTo(project->fileName());
+        emit saveDialog();
+    else
+        saveAs(project->fileName());
 }
 
-bool MainVm::projectSaveTo(const QString& fileName)
+bool MainVm::saveAs(const QString& fileName)
 {
     QFile file(fileName);
 
-    if(file.open(QIODevice::WriteOnly | QIODevice::Truncate | QIODevice::Text))
+    if(!file.open(QIODevice::WriteOnly | QIODevice::Truncate | QIODevice::Text))
     {
-        file.write(project->toXmlBytes());
-        project->setFileName(fileName);
-        project->setAltered(false);
-        project->setSavedAtUndoLevel(undoStack->level());
+        emit criticalMessage(tr("Unable to save"),
+                             tr("Unable to save %1: %2")
+                             .arg(fileName).arg(file.errorString()));
 
-        return true;
-    }
-    QMessageBox::critical(parentWidget, "Unable to save",
-                          QString("Unable to save %1: %2")
-                          .arg(fileName).arg(file.errorString()));
-
-    return false;
-}
-
-bool MainVm::saveIfAltered()
-{
-    if (!project->isAltered())
-    {
-        return true;
+        return false;
     }
 
-    QMessageBox msgBox;
-    msgBox.setText("The current project has been modified.");
-    msgBox.setInformativeText("Do you want to save your changes?");
-    msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
-    msgBox.setDefaultButton(QMessageBox::Save);
+    file.write(project->toXmlBytes());
+    project->setFileName(fileName);
+    project->setAltered(false);
+    project->setSavedAtUndoLevel(undoStack->level());
 
-    switch(msgBox.exec())
-    {
-        case QMessageBox::Discard:
-            return true;
-        case QMessageBox::Save:
-            return projectSave();
-        case QMessageBox::Cancel:
-        default:
-            return false;
-    }
-
-    return false;
-}
-
-bool MainVm::projectSaveAs()
-{
-    QString fileName = QFileDialog::getSaveFileName(parentWidget, tr("Open Project"), "",
-                                                    tr("E-Field Sim files (*.efs)"));
-
-    if (!fileName.isEmpty())
-    {
-        projectSaveTo(fileName);
-        return true;
-    }
-
-    return false;
+    return true;
 }
 
 void MainVm::closeRequested()
 {
-    if (!saveIfAltered())
-        return;
+    if (project->isAltered())
+        emit askSaveBeforeClose();
+    else
+        closeApplication();
+}
 
+void MainVm::saveBeforeClose()
+{
+    if (project->fileName().isEmpty())
+        emit saveDialogBeforeClose();
+    else
+        if (saveAs(project->fileName()))
+            closeApplication();
+}
+
+void MainVm::closeApplication()
+{
     QApplication::quit();
+}
+
+void MainVm::saveAsBeforeClose(const QString& filename)
+{
+    if (saveAs(filename))
+        closeApplication();
+}
+
+void MainVm::projectOpenRequested()
+{
+    if (project->isAltered())
+        emit askSaveBeforeOpen();
+    else
+        emit openDialog();
+}
+
+void MainVm::saveBeforeOpen()
+{
+    if (project->fileName().isEmpty())
+        emit saveDialogBeforeOpen();
+    else
+        if (saveAs(project->fileName()))
+            emit openDialog();
+}
+
+void MainVm::projectOpen(const QString filename)
+{
+    QFile file(filename);
+
+    if(file.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        initNewProject(std::make_unique<Project>(file.readAll()));
+        project->setFileName(filename);
+    }
+    else
+        emit criticalMessage(tr("Unable to load"),
+                             tr("Unable to load %1: %2")
+                             .arg(filename).arg(file.errorString()));
+}
+
+void MainVm::saveAsBeforeOpen(const QString& filename)
+{
+    if (saveAs(filename))
+        emit openDialog();
+}
+
+void MainVm::newProjectRequested()
+{
+    if (project->isAltered())
+        emit askSaveBeforeNewProject();
+    else
+        emit newProjectDialog();
+}
+
+void MainVm::saveBeforeNewProject()
+{
+    if (project->fileName().isEmpty())
+        emit saveDialogBeforeNewProject();
+    else
+        if (saveAs(project->fileName()))
+            emit newProjectDialog();
+}
+
+void MainVm::newProject(const QSize& size)
+{
+    initNewProject(std::make_unique<Project>(size));
+    createBorder(0);
+}
+
+void MainVm::saveAsBeforeNewProject(const QString& filename)
+{
+    if (saveAs(filename))
+        emit newProjectDialog();
 }
 
 void MainVm::undo()
@@ -365,8 +360,8 @@ void MainVm::paste()
 
     if (!manip.paste(clipBoardScene))
     {
-        QMessageBox::critical(parentWidget, "Fitting error",
-                              QString("Scene not large enough for clipboard data"));
+        emit criticalMessage(tr("Fitting error"),
+                             tr("Scene not large enough for clipboard data"));
         return;
     }
 
@@ -382,23 +377,13 @@ void MainVm::rotate(double rot)
 
     cancelOperation();
 
-    if (std::isnan(rot))
-    {
-        bool ok;
-        rot = QInputDialog::getDouble(parentWidget, QWidget::tr("Rotate selection"),
-                                      QWidget::tr("Rotation in degrees: "),  0, -360, 360, 1, &ok);
-        if (!ok)
-            return;
-    }
-
     ElementManipulators manip(scene, undoStack);
 
     if (!manip.rotateSelection(rot))
     {
-        QMessageBox::critical(parentWidget, "Unable to rotate",
-                              QString("Could not rotate selection.\n"
-                                      "Make sure that all points will stay inside the scene bounds after rotation."));
-
+        emit criticalMessage(tr("Unable to rotate"),
+                             tr("Could not rotate selection.\n"
+                                "Make sure that all points will stay inside the scene bounds after rotation."));
         return;
     }
 

@@ -28,6 +28,7 @@ private slots:
     void graphLabel_mouseDoubleClicked(const QPoint& point, Qt::MouseButtons buttons);
     void graphLabel_resized(const QSize& size);
 
+    void mainVm_criticalMessage(const QString& topic, const QString& message);
     void mainVm_visualizationAvailable(float minValue, float maxValue);
     void mainVm_newVisualization(const QPixmap& pixmap);
     void mainVm_newStatusMessage(const QString& message);
@@ -36,6 +37,23 @@ private slots:
     void mainVm_projectStatusUpdate(const QString& filename, bool altered);
     void mainVm_editNode(int id, const QPoint& defaultPosition, const QPoint& minPosition, const QPoint& maxPosition);
     void mainVm_editLine(int id, float defaultVoltage);
+
+    /* Save as */
+    void mainVm_saveDialog();
+
+    /* Closing */
+    void mainVm_askSaveBeforeClose();
+    void mainVm_saveDialogBeforeClose();
+
+    /* Opening */
+    void mainVm_askSaveBeforeOpen();
+    void mainVm_saveDialogBeforeOpen();
+    void mainVm_openDialog();
+
+    /* New Project */
+    void mainVm_askSaveBeforeNewProject();
+    void mainVm_saveDialogBeforeNewProject();
+    void mainVm_newProjectDialog();
 
     void on_actionStart_triggered();
     void on_actionS_top_triggered();
@@ -70,13 +88,10 @@ signals:
     void mouseDoubleClickedOnPixmap(const QPoint& mousePos, Qt::MouseButtons buttons, const QSize& labelSize);
     void deleteSelectedElement();
     void editSelectedElement();
-    void newSimulation();
     void newNodeElement(const QPoint& mousePos, const QSize& labelSize);
     void newLineElement(const QPoint& mousePos, const QSize& labelSize);
     void cancelOperation();
-    void projectOpen();
     void projectSave();
-    void projectSaveAs();
     void undo();
     void redo();
     void selectAll();
@@ -84,17 +99,39 @@ signals:
     void copy();
     void paste();
     void rotate(double rot);
-    void closeRequested();
 
     void setLineVoltage(int id, float oldVoltage, float newVoltage);
     void setNodePosition(int id, QPoint oldPosition, QPoint newPosition);
+
+    /* Save as */
+    void saveAs(const QString& filename);
+
+    /* Closing */
+    void closeRequested();
+    void closeApplication();
+    void saveBeforeClose();
+    void saveAsBeforeClose(const QString& filename);
+
+    /* Opening */
+    void projectOpenRequested();
+    void projectOpen(const QString filename);
+    void saveBeforeOpen();
+    void saveAsBeforeOpen(const QString& filename);
+
+    /* New project */
+    void newProjectRequested();
+    void newProject(const QSize& size);
+    void saveBeforeNewProject();
+    void saveAsBeforeNewProject(const QString& filename);
 
 protected:
     void keyPressEvent(QKeyEvent *e);
     void closeEvent(QCloseEvent *event);
 
 private:
+    int askSaveDialog();
     void frameUpdate();
+    QString saveAsDialog();
 
     MainVm* mainVm;
 #ifdef USE_VM_THREAD
