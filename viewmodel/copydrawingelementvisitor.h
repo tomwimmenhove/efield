@@ -20,9 +20,13 @@ public:
     { }
 
 private:
-    void visit(SceneElement<float>& scene);
-    void visit(NodeElement<float>& node);
-    void visit(LineElement<float>& line);
+    void visit(SceneElement<float>& scene) override;
+    void visit(NodeElement<float>& node) override;
+    void visit(LineElement<float>& line) override;
+    void visit(CircleElement<float>& circle) override;
+
+    template <typename T, typename U>
+    void copyTwoNodeElement(T& element);
 
     QSharedPointer<SceneElement<float>> souce;
     QSharedPointer<SceneElement<float>> destination;

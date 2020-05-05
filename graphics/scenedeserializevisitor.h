@@ -11,6 +11,7 @@
 #include "sceneelement.h"
 #include "nodeelement.h"
 #include "lineelement.h"
+#include "circleelement.h"
 
 template<typename T>
 class SceneDeserializeVisitor : public DrawingElementVisitor<T>
@@ -22,10 +23,11 @@ public:
 
     void visit(SceneElement<T>& element) override
     {
-        std::array<QPair<QString, std::function<DrawingElement<T>*(int id, const QSize& bounds)>>, 2> nodeFactories
+        std::array<QPair<QString, std::function<DrawingElement<T>*(int id, const QSize& bounds)>>, 3> nodeFactories
         {{
             { "Node", [](int id, const QSize& bounds) { return new NodeElement<T>(id, bounds); } }, // First, because LineElements depends on it
             { "Line", [](int id, const QSize& bounds) { return new LineElement<T>(id, bounds); } },
+            { "Circle", [](int id, const QSize& bounds) { return new CircleElement<T>(id, bounds); } },
         }};
 
         int maxId = 0;
@@ -47,7 +49,7 @@ public:
                 if (id > maxId)
                     maxId = id;
 
-                std::unique_ptr<DrawingElement<T>> nodeElement = std::unique_ptr<DrawingElement<T>>(nodeFactory.second(id, size));
+                auto nodeElement = std::unique_ptr<DrawingElement<T>>(nodeFactory.second(id, size));
 
                 SceneDeserializeVisitor visitor(nodeXmlElement, nodeMap);
                 nodeElement->accept(visitor);
@@ -70,6 +72,18 @@ public:
 
     void visit(LineElement<T>& element) override
     {
+        visitTwoNodeElement(element);
+    }
+
+    void visit(CircleElement<T>& element) override
+    {
+        visitTwoNodeElement(element);
+    }
+
+private:
+    template<typename U>
+    void visitTwoNodeElement(U& element)
+    {
         QDomNamedNodeMap attributes = domElement.attributes();
         float value;
         stringToValue(value, domElement.firstChild().nodeValue());
@@ -79,7 +93,6 @@ public:
         element.setPoint2(nodeMap[attributes.namedItem("Node2").nodeValue().toInt()]);
     }
 
-private:
     QMap<int, SharedNode> defaultMap;
     QDomElement& domElement;
     QMap<int, SharedNode>& nodeMap = defaultMap;

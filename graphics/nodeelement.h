@@ -34,10 +34,7 @@ public:
 
         int y = painter.device()->height() - 1 - sp.y();
 
-        if (this->isHighlighted())
-            painter.setPen(Qt::red);
-        else
-            painter.setPen(Qt::black);
+        painter.setPen(this->isHighlighted() ? Qt::red : Qt::black);
 
         painter.drawLine(sp.x() - margin, y - margin, sp.x() + margin, y - margin);
         painter.drawLine(sp.x() - margin, y - margin, sp.x() - margin, y + margin);

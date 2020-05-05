@@ -39,17 +39,14 @@ SOURCES += \
     model/project.cpp \
     viewmodel/mouseoperations/mouseoperation.cpp \
     viewmodel/mouseoperations/newnodemouseoperation.cpp \
-    viewmodel/mouseoperations/newlinemouseoperation.cpp \
     viewmodel/mouseoperations/normalmouseoperation.cpp \
     viewmodel/editdrawingelementvisitor.cpp \
     viewmodel/mouseoperations/dragmouseoperation.cpp \
     util/undo/undostack.cpp \
     util/undo/moveundoitem.cpp \
-    util/undo/linevalueundoitem.cpp \
     util/undo/deletenodeundoitem.cpp \
     util/undo/deletelineundoitem.cpp \
     viewmodel/deletedrawingelementvisitor.cpp \
-    util/undo/newlineundoitem.cpp \
     util/undo/newnodeundoitem.cpp \
     viewmodel/mouseoperations/selectionmouseoperation.cpp \
     util/undo/compositundoitem.cpp \
@@ -61,7 +58,9 @@ SOURCES += \
     view/heatlegendwidget.cpp \
     viewmodel/copydrawingelementvisitor.cpp \
     viewmodel/elementdependencyvisitor.cpp \
-    viewmodel/elementmanipulators.cpp
+    viewmodel/elementmanipulators.cpp \
+    util/undo/deletecircleundoitem.cpp \
+    util/undo/circlevalueundoitem.cpp
 
 HEADERS += \
     model/simulator.h \
@@ -114,7 +113,15 @@ HEADERS += \
     view/heatmap.h \
     viewmodel/copydrawingelementvisitor.h \
     viewmodel/elementdependencyvisitor.h \
-    viewmodel/elementmanipulators.h
+    viewmodel/elementmanipulators.h \
+    graphics/circleelement.h \
+    util/undo/deletecircleundoitem.h \
+    util/undo/valueundoitem.h \
+    util/undo/circlevalueundoitem.h \
+    util/undo/newtwonodeundoitem.h \
+    util/undo/newcircleundoitem.h \
+    viewmodel/mouseoperations/newtwonodemousepperation.h \
+    viewmodel/mouseoperations/newcirclemouseoperation.h
 
 FORMS += \
     view/mainwindow.ui \

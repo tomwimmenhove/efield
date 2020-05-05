@@ -43,6 +43,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, &MainWindow::editSelectedElement, mainVm, &MainVm::editSelectedElement);
     connect(this, &MainWindow::newNodeElement, mainVm, &MainVm::newNodeElement);
     connect(this, &MainWindow::newLineElement, mainVm, &MainVm::newLineElement);
+    connect(this, &MainWindow::newCircleElement, mainVm, &MainVm::newCircleElement);
     connect(this, &MainWindow::cancelOperation, mainVm, &MainVm::cancelOperation);
     connect(this, &MainWindow::projectSave, mainVm, &MainVm::projectSave);
     connect(this, &MainWindow::undo, mainVm, &MainVm::undo);
@@ -53,6 +54,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, &MainWindow::paste, mainVm, &MainVm::paste);
     connect(this, &MainWindow::rotate, mainVm, &MainVm::rotate);
     connect(this, &MainWindow::setLineVoltage, mainVm, &MainVm::setLineVoltage);
+    connect(this, &MainWindow::setCircleVoltage, mainVm, &MainVm::setCircleVoltage);
     connect(this, &MainWindow::setNodePosition, mainVm, &MainVm::setNodePosition);
 
     connect(mainVm, &MainVm::criticalMessage, this, &MainWindow::mainVm_criticalMessage);
@@ -63,6 +65,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(mainVm, &MainVm::undoStackUpdated, this, &MainWindow::mainVm_undoStackUpdated);
     connect(mainVm, &MainVm::projectStatusUpdate, this, &MainWindow::mainVm_projectStatusUpdate);
     connect(mainVm, &MainVm::editLine, this, &MainWindow::mainVm_editLine);
+    connect(mainVm, &MainVm::editCircle, this, &MainWindow::mainVm_editCircle);
     connect(mainVm, &MainVm::editNode, this, &MainWindow::mainVm_editNode);
 
     /* Save as */
@@ -235,6 +238,18 @@ void MainWindow::mainVm_editLine(int id, float defaultVoltage)
         return;
 
     emit setLineVoltage(id, defaultVoltage, voltage);
+}
+
+void MainWindow::mainVm_editCircle(int id, float defaultVoltage)
+{
+    bool ok;
+
+    double voltage = QInputDialog::getDouble(this, QWidget::tr("Edit circle"),
+                                    QWidget::tr("Voltage: "),  defaultVoltage, -1e100, 1e100, 1, &ok);
+    if (!ok)
+        return;
+
+    emit setCircleVoltage(id, defaultVoltage, voltage);
 }
 
 void MainWindow::mainVm_saveDialog()
@@ -425,6 +440,11 @@ void MainWindow::closeEvent(QCloseEvent* event)
 void MainWindow::on_actionPlace_Node_triggered()
 {
     emit newNodeElement(graphLabelMousePos, ui->graphicsLabel->size());
+}
+
+void MainWindow::on_actionPlace_Circle_triggered()
+{
+    emit newCircleElement(graphLabelMousePos, ui->graphicsLabel->size());
 }
 
 void MainWindow::on_actionPlace_L_triggered()

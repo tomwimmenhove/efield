@@ -1,6 +1,7 @@
 #include "copydrawingelementvisitor.h"
 
 #include "util/undo/newlineundoitem.h"
+#include "util/undo/newcircleundoitem.h"
 #include "util/undo/newnodeundoitem.h"
 
 void CopyDrawingElementVisitor::visit(SceneElement<float>&)
@@ -15,22 +16,12 @@ void CopyDrawingElementVisitor::visit(NodeElement<float>& node)
 
 void CopyDrawingElementVisitor::visit(LineElement<float>& line)
 {
-    Q_ASSERT(idMap.find(line.identifier()) == idMap.end());
+    copyTwoNodeElement<LineElement<float>, NewLineUndoItem>(line);
+}
 
-    int pointId1 = cloneNode(line.point1());
-    int pointId2 = cloneNode(line.point2());
-
-    int id = destination->newId();
-
-    auto undoItem = std::make_unique<NewLineUndoItem>(destination, id, pointId1, pointId2, line.value());
-    undoItem->doFunction();
-    if (undoStack)
-        undoStack->add(std::move(undoItem));
-
-    Q_ASSERT(typeid(destination->back()).hash_code() == typeid(LineElement<float>&).hash_code());
-    destination->back().setHighlighted(true);
-
-    idMap[line.identifier()] = id;
+void CopyDrawingElementVisitor::visit(CircleElement<float>& circle)
+{
+    copyTwoNodeElement<CircleElement<float>, NewCircleUndoItem>(circle);
 }
 
 int CopyDrawingElementVisitor::cloneNode(const SharedNode& point)
@@ -52,4 +43,25 @@ int CopyDrawingElementVisitor::cloneNode(const SharedNode& point)
     idMap[point.identifier()] = id;
 
     return id;
+}
+
+template<typename T, typename U>
+void CopyDrawingElementVisitor::copyTwoNodeElement(T& element)
+{
+    Q_ASSERT(idMap.find(element.identifier()) == idMap.end());
+
+    int pointId1 = cloneNode(element.point1());
+    int pointId2 = cloneNode(element.point2());
+
+    int id = destination->newId();
+
+    auto undoItem = std::make_unique<U>(destination, id, pointId1, pointId2, element.value());
+    undoItem->doFunction();
+    if (undoStack)
+        undoStack->add(std::move(undoItem));
+
+    Q_ASSERT(typeid(destination->back()).hash_code() == typeid(T&).hash_code());
+    destination->back().setHighlighted(true);
+
+    idMap[element.identifier()] = id;
 }

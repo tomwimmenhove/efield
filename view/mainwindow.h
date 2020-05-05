@@ -37,6 +37,7 @@ private slots:
     void mainVm_projectStatusUpdate(const QString& filename, bool altered);
     void mainVm_editNode(int id, const QPoint& defaultPosition, const QPoint& minPosition, const QPoint& maxPosition);
     void mainVm_editLine(int id, float defaultVoltage);
+    void mainVm_editCircle(int id, float defaultVoltage);
 
     /* Save as */
     void mainVm_saveDialog();
@@ -62,6 +63,7 @@ private slots:
     void on_actionStepped_triggered();
     void on_actionRedraw_triggered();
     void on_actionPlace_Node_triggered();
+    void on_actionPlace_Circle_triggered();
     void on_actionPlace_L_triggered();
     void on_actionDelete_element_triggered();
     void on_action_Edit_selected_element_triggered();
@@ -90,6 +92,7 @@ signals:
     void editSelectedElement();
     void newNodeElement(const QPoint& mousePos, const QSize& labelSize);
     void newLineElement(const QPoint& mousePos, const QSize& labelSize);
+    void newCircleElement(const QPoint& mousePos, const QSize& labelSize);
     void cancelOperation();
     void projectSave();
     void undo();
@@ -101,6 +104,7 @@ signals:
     void rotate(double rot);
 
     void setLineVoltage(int id, float oldVoltage, float newVoltage);
+    void setCircleVoltage(int id, float oldVoltage, float newVoltage);
     void setNodePosition(int id, QPoint oldPosition, QPoint newPosition);
 
     /* Save as */

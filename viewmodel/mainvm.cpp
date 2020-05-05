@@ -14,6 +14,7 @@
 #include "editdrawingelementvisitor.h"
 #include "elementmanipulators.h"
 #include <util/undo/linevalueundoitem.h>
+#include <util/undo/circlevalueundoitem.h>
 #include <util/undo/moveundoitem.h>
 
 MainVm::MainVm()
@@ -425,6 +426,7 @@ void MainVm::editElement(DrawingElement<float>& element)
     EditDrawingElementVisitor v;
 
     connect(&v, &EditDrawingElementVisitor::editLine, this, &MainVm::editVisitor_editLine);
+    connect(&v, &EditDrawingElementVisitor::editCircle, this, &MainVm::editVisitor_editCircle);
     connect(&v, &EditDrawingElementVisitor::editNode, this, &MainVm::editVisitor_editNode);
 
     element.accept(v);
@@ -435,6 +437,11 @@ void MainVm::editVisitor_editLine(int id, float defaultValue)
     emit editLine(id, defaultValue);
 }
 
+void MainVm::editVisitor_editCircle(int id, float defaultValue)
+{
+    emit editCircle(id, defaultValue);
+}
+
 void MainVm::editVisitor_editNode(int id, const QPoint& defaultPosition)
 {
     emit editNode(id, defaultPosition, QPoint(0, 0), QPoint(surface->width() - 1, surface->height() - 1));
@@ -443,6 +450,13 @@ void MainVm::editVisitor_editNode(int id, const QPoint& defaultPosition)
 void MainVm::setLineVoltage(int id, float oldVoltage, float newVoltage)
 {
     auto undoItem = std::make_unique<LineValueUndoItem>(project->scene(), id, oldVoltage, newVoltage);
+    undoItem->doFunction();
+    undoStack->add(std::move(undoItem));
+}
+
+void MainVm::setCircleVoltage(int id, float oldVoltage, float newVoltage)
+{
+    auto undoItem = std::make_unique<CircleValueUndoItem>(project->scene(), id, oldVoltage, newVoltage);
     undoItem->doFunction();
     undoStack->add(std::move(undoItem));
 }
@@ -490,6 +504,13 @@ void MainVm::newLineElement(const QPoint& mousePos, const QSize& labelSize)
 {
     if (surface)
         activateNewMouseOperation<NewLineMouseOperation>(
+                    Geometry::translatePoint(mousePos, labelSize, surface->size(), true));
+}
+
+void MainVm::newCircleElement(const QPoint& mousePos, const QSize& labelSize)
+{
+    if (surface)
+        activateNewMouseOperation<NewCircleMouseOperation>(
                     Geometry::translatePoint(mousePos, labelSize, surface->size(), true));
 }
 
@@ -544,6 +565,8 @@ void MainVm::initNewProject(std::unique_ptr<Project>&& newProject)
 }
 
 #ifdef QT_DEBUG
+#include "graphics/circleelement.h"
+
 void MainVm::createScene()
 {
     QSharedPointer<SceneElement<float>> scene = project->scene();
@@ -561,6 +584,8 @@ void MainVm::createScene()
 
     scene->add(LineElement<float>::uniqueElement(scene->newId(), scene->sceneSize(), anodeLeft, anodeRight, 1));
     scene->add(LineElement<float>::uniqueElement(scene->newId(), scene->sceneSize(), cathodeLeft, cathodeRight, -1));
+
+    scene->add(CircleElement<float>::uniqueElement(scene->newId(), scene->sceneSize(), cathodeLeft, anodeRight, -1));
 }
 #endif
 

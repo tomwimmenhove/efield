@@ -12,3 +12,8 @@ void EditDrawingElementVisitor::visit(LineElement<float>& line)
 {
     emit editLine(line.identifier(), line.value());
 }
+
+void EditDrawingElementVisitor::visit(CircleElement<float>& circle)
+{
+    emit editCircle(circle.identifier(), circle.value());
+}

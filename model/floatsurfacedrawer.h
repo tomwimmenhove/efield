@@ -11,7 +11,11 @@ public:
      : surface(surface)
     { }
 
-    void putPixel(int x, int y, float value) override { surface.setValue(x, y, value); }
+    void putPixel(int x, int y, float value) override
+    {
+        if (x >= 0 && y >= 0 && x < surface.width() && y < surface.height())
+            surface.setValue(x, y, value);
+    }
 
 private:
     FloatSurface& surface;

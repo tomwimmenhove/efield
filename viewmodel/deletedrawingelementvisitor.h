@@ -3,6 +3,7 @@
 
 #include "graphics/lineelement.h"
 #include "graphics/nodeelement.h"
+#include "graphics/circleelement.h"
 #include "graphics/sceneelement.h"
 #include "model/floatsurface.h"
 #include "util/undo/undostack.h"
@@ -18,9 +19,10 @@ public:
     bool needsUpdate() const { return update; }
 
 private:
-    void visit(SceneElement<float>&);
-    void visit(NodeElement<float>& node);
-    void visit(LineElement<float>& line);
+    void visit(SceneElement<float>&) override;
+    void visit(NodeElement<float>& node) override;
+    void visit(LineElement<float>& line) override;
+    void visit(CircleElement<float>&) override;
 
     bool update = false;
     QSharedPointer<UndoStack> undoStack;

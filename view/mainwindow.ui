@@ -98,6 +98,7 @@
     </property>
     <addaction name="actionPlace_Node"/>
     <addaction name="actionPlace_L"/>
+    <addaction name="actionPlace_Circle"/>
     <addaction name="actionDelete_element"/>
     <addaction name="action_Edit_selected_element"/>
    </widget>
@@ -313,10 +314,18 @@
   </action>
   <action name="action_Rotate_selection">
    <property name="text">
-    <string>&amp;Rotate selection</string>
+    <string>R&amp;otate selection</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+R</string>
+   </property>
+  </action>
+  <action name="actionPlace_Circle">
+   <property name="text">
+    <string>Place &amp;Circle</string>
+   </property>
+   <property name="shortcut">
+    <string>C</string>
    </property>
   </action>
  </widget>

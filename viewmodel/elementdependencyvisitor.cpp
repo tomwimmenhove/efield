@@ -24,3 +24,10 @@ void ElementDependencyVisitor::visit(LineElement<float>& line)
     deps.insert(line.point1().identifier());
     deps.insert(line.point2().identifier());
 }
+
+void ElementDependencyVisitor::visit(CircleElement<float>& circle)
+{
+    deps.insert(circle.identifier());
+    deps.insert(circle.point1().identifier());
+    deps.insert(circle.point2().identifier());
+}

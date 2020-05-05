@@ -38,6 +38,7 @@ public slots:
     void mouseDoubleClickedOnPixmap(const QPoint& mousePos, Qt::MouseButtons buttons, const QSize& labelSize);
     void newNodeElement(const QPoint& mousePos, const QSize& labelSize);
     void newLineElement(const QPoint& mousePos, const QSize& labelSize);
+    void newCircleElement(const QPoint& mousePos, const QSize& labelSize);
     void cancelOperation();
     void projectSave();
     void undo();
@@ -50,6 +51,7 @@ public slots:
     void deleteSelectedElement();
     void editSelectedElement();
     void setLineVoltage(int id, float oldVoltage, float newVoltage);
+    void setCircleVoltage(int id, float oldVoltage, float newVoltage);
     void setNodePosition(int id, const QPoint& oldPosition, const QPoint& newPosition);
 
     /* Save as */
@@ -76,6 +78,7 @@ public slots:
 private slots:
     void on_undoStackUpdated(bool canUndo, const QString& undoName, bool canRedo, const QString& redoName, size_t level);
     void editVisitor_editLine(int id, float defaultValue);
+    void editVisitor_editCircle(int id, float defaultValue);
     void editVisitor_editNode(int id, const QPoint& defaultPosition);
 
 signals:
@@ -90,6 +93,7 @@ signals:
     void undoStackUpdated(bool canUndo, const QString& undoName, bool canRedo, const QString& redoName);
     void projectStatusUpdate(const QString& filename, bool altered);
     void editLine(int id, float defaultValue);
+    void editCircle(int id, float defaultValue);
     void editNode(int id, const QPoint& defaultPosition, const QPoint& minPosition, const QPoint& maxPosition);
 
     /* Save As */

@@ -1,28 +1,14 @@
 #ifndef LINEVALUEUNDOITEM_H
 #define LINEVALUEUNDOITEM_H
 
-#include <QSharedPointer>
+#include "valueundoitem.h"
+#include "graphics/lineelement.h"
 
-#include "graphics/sceneelement.h"
-#include "undostack.h"
-
-class LineValueUndoItem : public UndoItem
+class LineValueUndoItem : public ValueUndoItem<LineElement<float>>
 {
 public:
-    LineValueUndoItem(const QSharedPointer<SceneElement<float>>& scene,
-                      int id,
-                      float oldValue,
-                      float newValue);
-
-    QString title() const override { return "Change voltage"; }
-
-    void undoFunction() override;
-    void doFunction() override;
-
-private:
-    QSharedPointer<SceneElement<float>> scene;
-    int id;
-    float oldValue;
-    float newValue;
+    using ValueUndoItem::ValueUndoItem;
+    QString title() const override { return "Change line voltage"; }
 };
+
 #endif // LINEVALUEUNDOITEM_H

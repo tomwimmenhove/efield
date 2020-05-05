@@ -6,6 +6,7 @@
 #include "sceneelement.h"
 #include "nodeelement.h"
 #include "lineelement.h"
+#include "circleelement.h"
 
 template<typename T>
 class SceneSerializeVisitor : public DrawingElementVisitor<T>
@@ -38,7 +39,19 @@ public:
 
     void visit(LineElement<T>& element) override
     {
-        QDomElement line = domDocument.createElement("Line");
+        visitTwoNodeElement<LineElement<T>>(element, "Line");
+    }
+
+    void visit(CircleElement<T>& element) override
+    {
+        visitTwoNodeElement<CircleElement<T>>(element, "Circle");
+    }
+
+private:
+    template <typename U>
+    void visitTwoNodeElement(U& element, const QString& name)
+    {
+        QDomElement line = domDocument.createElement(name);
         line.setAttribute("Node1", QString::number(element.point1().identifier()));
         line.setAttribute("Node2", QString::number(element.point2().identifier()));
         line.setAttribute("ID", QString::number(element.identifier()));
@@ -46,7 +59,6 @@ public:
         domElement.appendChild(line);
     }
 
-private:
     /* This needs to be done for any type this template will be serialized to */
     inline QString valueToString(double x) const { return QString::number(x); }
 

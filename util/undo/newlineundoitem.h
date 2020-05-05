@@ -3,26 +3,15 @@
 
 #include <QSharedPointer>
 
-#include "graphics/sceneelement.h"
-#include "undostack.h"
+#include "graphics/lineelement.h"
+#include "newtwonodeundoitem.h"
 
-class NewLineUndoItem : public UndoItem
+class NewLineUndoItem : public NewTwoNodeUndoItem<LineElement<float>>
 {
 public:
-    NewLineUndoItem(const QSharedPointer<SceneElement<float>>& scene,
-                  int id, int nodeId1, int nodeId2, float value);
+    using NewTwoNodeUndoItem::NewTwoNodeUndoItem;
 
     QString title() const override { return "Place line"; }
-
-    void undoFunction() override;
-    void doFunction() override;
-
-private:
-    QSharedPointer<SceneElement<float>> scene;
-    int id;
-    int nodeId1;
-    int nodeId2;
-    float value;
 };
 
 #endif // PLACEUNDOITEM_H

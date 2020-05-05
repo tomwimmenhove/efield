@@ -1,6 +1,5 @@
-#ifndef LINEELEMENT_H
-#define LINEELEMENT_H
-
+#ifndef CIRCLEELEMENT_H
+#define CIRCLEELEMENT_H
 #include <memory>
 
 #include "sharednode.h"
@@ -9,39 +8,41 @@
 #include "util/geometry.h"
 
 template<typename T>
-class LineElement : public DrawingElement<T>
+class CircleElement : public DrawingElement<T>
 {
 public:
-    LineElement(int id, const QSize& bounds)
+    CircleElement(int id, const QSize& bounds)
         : DrawingElement<T>(id, bounds)
     { }
 
-    LineElement (const LineElement&) = delete;
+    CircleElement (const CircleElement&) = delete;
 
-    LineElement(int id, const QSize& bounds, SharedNode& p1, SharedNode& p2, const T& value)
+    CircleElement(int id, const QSize& bounds, SharedNode& p1, SharedNode& p2, const T& value)
         : DrawingElement<T>(id, bounds), p1(p1), p2(p2), v(value)
     {
         p1->use();
         p2->use();
     }
 
-    ~LineElement()
+    ~CircleElement()
     {
         p1->release();
         p2->release();
     }
 
     template<typename... Args>
-    static std::unique_ptr<LineElement<float>> uniqueElement(Args&& ...arguments)
+    static std::unique_ptr<CircleElement<float>> uniqueElement(Args&& ...arguments)
     {
-        return std::make_unique<LineElement<float>>(std::forward<Args>(arguments)...);
+        return std::make_unique<CircleElement<float>>(std::forward<Args>(arguments)...);
     }
 
     void draw(IDrawer<T>& drawer) override
     {
         Drawing<T> drawing(drawer);
 
-        drawing.drawLine(p1, p2, v);
+        int radius = Geometry::distance(QVector2D(p1), QVector2D(p2));
+
+        drawing.drawCircle(p1, radius, v);
     }
 
     void drawAnnotation(QPainter& painter, const QSize& surfaceSize) override
@@ -54,13 +55,22 @@ public:
 
         painter.setPen(this->isHighlighted() ? Qt::red : Qt::black);
 
+        int radius = Geometry::distance(QVector2D(sp1), QVector2D(sp2));
+
+        painter.drawEllipse(QPoint(sp1.x(), mh - sp1.y()), radius, radius);
+
+        painter.setPen(Qt::DashLine);
+
         painter.drawLine(sp1.x(), mh - sp1.y(),
                          sp2.x(), mh - sp2.y());
     }
 
     float distanceTo(const QPoint& point) const override
     {
-        return Geometry::distToLine(QVector2D(p1), QVector2D(p2), QVector2D(point));
+        float distFromCenter = Geometry::distance(QVector2D(p1), QVector2D(point));
+        float radius = Geometry::distance(QVector2D(p1), QVector2D(p2));
+
+        return std::abs(distFromCenter - radius);
     }
 
     inline T value() const { return v; }
@@ -102,7 +112,7 @@ public:
 
     bool canAnchor() const override { return false; }
     bool isInUse() const override { return false; }
-    QString name() const override { return "Line"; }
+    QString name() const override { return "Circle"; }
 
     void accept(DrawingElementVisitor<T>& visitor) override { visitor.visit(*this); }
 
@@ -112,4 +122,4 @@ private:
     T v;
 };
 
-#endif // LINEELEMENT_H
+#endif // CIRCLEELEMENT_H

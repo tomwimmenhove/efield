@@ -12,7 +12,7 @@ public:
      : drawer(drawer)
     { }
 
-    inline void drawLine(QPoint p1, QPoint p2, const T& value) { drawLine(p1.x(), p1.y(), p2.x(), p2.y(), value); }
+    inline void drawLine(const QPoint& p1, const QPoint& p2, const T& value) { drawLine(p1.x(), p1.y(), p2.x(), p2.y(), value); }
 
     // XXX: Fuck this motherfucker.
     void drawLine(int x1, int y1, int x2, int y2, const T& value)
@@ -96,6 +96,37 @@ public:
                     py=py+2*(dx1-dy1);
                 }
                 drawer.putPixel(x, y, value);
+            }
+        }
+    }
+
+    inline void drawCircle(const QPoint& p, int radius, const T& value) { drawCircle(p.x(), p.y(), radius, value); }
+
+    void drawCircle(int x1, int y1, int r, const T& value)
+    {
+        int x, y, p;
+        x = 0;
+        y = r;
+        p = 3 - (2 * r);
+        while(x <= y)
+        {
+            drawer.putPixel(x1 + x, y1 + y, value);
+            drawer.putPixel(x1 - x, y1 + y, value);
+            drawer.putPixel(x1 + x, y1 - y, value);
+            drawer.putPixel(x1 - x, y1 - y, value);
+            drawer.putPixel(x1 + y, y1 + x, value);
+            drawer.putPixel(x1 + y, y1 - x, value);
+            drawer.putPixel(x1 - y, y1 + x, value);
+            drawer.putPixel(x1 - y, y1 - x, value);
+            x = x + 1;
+            if(p < 0)
+            {
+                p = p + 4 * x + 6;
+            }
+            else
+            {
+                p = p + 4 * (x - y) + 10;
+                y = y - 1;
             }
         }
     }
