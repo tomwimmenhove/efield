@@ -318,38 +318,36 @@ void MainVm::selectAll()
 
     if (update)
         emit visualizationAvailable(surface->minValue(), surface->maxValue());
+
+    checkSelectionChanged();
+}
+
+void MainVm::cutOrCopy(bool deleteAfter)
+{
+    QSharedPointer<SceneElement<float>> scene = project->scene();
+    if (scene->numHighlighted() == 0)
+        return;
+
+    cancelOperation();
+
+    ElementManipulators manip(project->scene(), undoStack);
+
+    manip.copySelection(clipBoardScene, deleteAfter);
+
+    if (manip.needsUpdate())
+        emit visualizationAvailable(surface->minValue(), surface->maxValue());
+
+    emit clipBoardChanged(clipBoardScene->size());
 }
 
 void MainVm::cut()
 {
-    QSharedPointer<SceneElement<float>> scene = project->scene();
-    if (scene->numHighlighted() == 0)
-        return;
-
-    cancelOperation();
-
-    ElementManipulators manip(project->scene(), undoStack);
-
-    manip.copySelection(clipBoardScene, true);
-
-    if (manip.needsUpdate())
-        emit visualizationAvailable(surface->minValue(), surface->maxValue());
+    cutOrCopy(true);
 }
 
 void MainVm::copy()
 {
-    QSharedPointer<SceneElement<float>> scene = project->scene();
-    if (scene->numHighlighted() == 0)
-        return;
-
-    cancelOperation();
-
-    ElementManipulators manip(project->scene(), undoStack);
-
-    manip.copySelection(clipBoardScene, false);
-
-    if (manip.needsUpdate())
-        emit visualizationAvailable(surface->minValue(), surface->maxValue());
+    cutOrCopy(false);
 }
 
 void MainVm::paste()
@@ -518,7 +516,21 @@ void MainVm::postMouseOperation()
 {
     emit updateMouseCursor(mouseOperation->cursorShape());
     if (mouseOperation->popUpdate())
+    {
+        checkSelectionChanged();
+
         emit visualizationAvailable(surface->minValue(), surface->maxValue());
+    }
+}
+
+void MainVm::checkSelectionChanged()
+{
+    int numHighlighted = project->scene()->numHighlighted();
+    if (oldNumHighlighted != numHighlighted)
+    {
+        oldNumHighlighted = numHighlighted;
+        emit selectionChanged(numHighlighted);
+    }
 }
 
 void MainVm::newNodeElement(const QPoint& mousePos, const QSize& labelSize)

@@ -119,7 +119,7 @@
     <addaction name="action_Redo"/>
     <addaction name="actionSelect_all"/>
     <addaction name="separator"/>
-    <addaction name="actionCut"/>
+    <addaction name="action_Cut"/>
     <addaction name="action_Copy"/>
     <addaction name="action_Paste"/>
     <addaction name="action_Rotate_selection"/>
@@ -290,6 +290,9 @@
    </property>
   </action>
   <action name="action_Copy">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>&amp;Copy</string>
    </property>
@@ -298,6 +301,9 @@
    </property>
   </action>
   <action name="action_Paste">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>&amp;Paste</string>
    </property>
@@ -305,7 +311,10 @@
     <string>Ctrl+V</string>
    </property>
   </action>
-  <action name="actionCut">
+  <action name="action_Cut">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Cut</string>
    </property>
@@ -314,6 +323,9 @@
    </property>
   </action>
   <action name="action_Rotate_selection">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>R&amp;otate selection</string>
    </property>
@@ -330,6 +342,9 @@
    </property>
   </action>
   <action name="action_Move_selection">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>&amp;Move selection</string>
    </property>

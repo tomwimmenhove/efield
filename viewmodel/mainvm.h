@@ -97,6 +97,8 @@ signals:
     void editCircle(int id, float defaultValue);
     void editNode(int id, const QPoint& defaultPosition, const QPoint& minPosition, const QPoint& maxPosition);
     void moveSelectionDialog(const QPoint& maxPoint);
+    void selectionChanged(int numHighlighted);
+    void clipBoardChanged(int numCopies);
 
     /* Save As */
     void saveDialog();
@@ -123,8 +125,10 @@ private:
 #ifdef QT_DEBUG
     void createScene();
 #endif
+    void cutOrCopy(bool deleteAfter);
     void createBorder(float voltage);
     void editElement(DrawingElement<float>& element);
+    void checkSelectionChanged();
     template<typename T> void activateNewMouseOperation(const QPoint& pointerPosition);
     void postMouseOperation();
     void updateStatusBarValue(const QPoint& pointerPosition);
@@ -141,6 +145,7 @@ private:
     QSharedPointer<GradientSurface> gradient;
     QElapsedTimer runTimer;
     int frames = 0;
+    int oldNumHighlighted = 0;
 };
 
 #endif // MAINVM_H

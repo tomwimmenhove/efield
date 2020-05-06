@@ -70,6 +70,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(mainVm, &MainVm::editCircle, this, &MainWindow::mainVm_editCircle);
     connect(mainVm, &MainVm::editNode, this, &MainWindow::mainVm_editNode);
     connect(mainVm, &MainVm::moveSelectionDialog, this, &MainWindow::mainVm_moveSelectionDialog);
+    connect(mainVm, &MainVm::selectionChanged, this, &MainWindow::mainVm_selectionChanged);
+    connect(mainVm, &MainVm::clipBoardChanged, this, &MainWindow::mainVm_clipBoardChanged);
 
     /* Save as */
     connect(mainVm, &MainVm::saveDialog, this, &MainWindow::mainVm_saveDialog);
@@ -528,7 +530,22 @@ void MainWindow::mainVm_moveSelectionDialog(const QPoint& maxPoint)
     if (d.exec() != QDialog::Accepted)
         return;
 
-    emit moveSelection(d.point());
+    if (!d.point().isNull())
+        emit moveSelection(d.point());
+}
+
+void MainWindow::mainVm_selectionChanged(int numHighlighted)
+{
+    bool enable = numHighlighted != 0;
+    ui->action_Cut->setEnabled(enable);
+    ui->action_Copy->setEnabled(enable);
+    ui->action_Rotate_selection->setEnabled(enable);
+    ui->action_Move_selection->setEnabled(enable);
+}
+
+void MainWindow::mainVm_clipBoardChanged(int numCopies)
+{
+    ui->action_Paste->setEnabled(numCopies != 0);
 }
 
 void MainWindow::on_action_Move_selection_triggered()

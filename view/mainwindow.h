@@ -38,8 +38,9 @@ private slots:
     void mainVm_editNode(int id, const QPoint& defaultPosition, const QPoint& minPosition, const QPoint& maxPosition);
     void mainVm_editLine(int id, float defaultVoltage);
     void mainVm_editCircle(int id, float defaultVoltage);
-
     void mainVm_moveSelectionDialog(const QPoint& maxPoint);
+    void mainVm_selectionChanged(int numHighlighted);
+    void mainVm_clipBoardChanged(int numCopies);
 
     /* Save as */
     void mainVm_saveDialog();
