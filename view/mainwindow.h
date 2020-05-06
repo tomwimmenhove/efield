@@ -39,6 +39,8 @@ private slots:
     void mainVm_editLine(int id, float defaultVoltage);
     void mainVm_editCircle(int id, float defaultVoltage);
 
+    void mainVm_moveSelectionDialog(const QPoint& maxPoint);
+
     /* Save as */
     void mainVm_saveDialog();
 
@@ -78,6 +80,7 @@ private slots:
     void on_action_Paste_triggered();
     void on_actionCut_triggered();
     void on_action_Rotate_selection_triggered();
+    void on_action_Move_selection_triggered();
 
 signals:
     void startSimulation();
@@ -102,6 +105,8 @@ signals:
     void copy();
     void paste();
     void rotate(double rot);
+    void moveSelectionRequested();
+    void moveSelection(const QPoint& delta);
 
     void setLineVoltage(int id, float oldVoltage, float newVoltage);
     void setCircleVoltage(int id, float oldVoltage, float newVoltage);

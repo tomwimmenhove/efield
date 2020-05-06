@@ -48,11 +48,13 @@ public slots:
     void copy();
     void paste();
     void rotate(double rot);
+    void moveSelection(const QPoint& delta);
     void deleteSelectedElement();
     void editSelectedElement();
     void setLineVoltage(int id, float oldVoltage, float newVoltage);
     void setCircleVoltage(int id, float oldVoltage, float newVoltage);
     void setNodePosition(int id, const QPoint& oldPosition, const QPoint& newPosition);
+    void moveSelectionRequested();
 
     /* Save as */
     bool saveAs(const QString& fileName);
@@ -83,7 +85,6 @@ private slots:
 
 signals:
     void criticalMessage(const QString& topic, const QString& message);
-
     void visualizationAvailable(float minValue, float maxValue);
     void newVisualization(const QPixmap& pixmap);
     void newStatusMessage(const QString& message);
@@ -95,6 +96,7 @@ signals:
     void editLine(int id, float defaultValue);
     void editCircle(int id, float defaultValue);
     void editNode(int id, const QPoint& defaultPosition, const QPoint& minPosition, const QPoint& maxPosition);
+    void moveSelectionDialog(const QPoint& maxPoint);
 
     /* Save As */
     void saveDialog();

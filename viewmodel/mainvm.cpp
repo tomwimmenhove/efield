@@ -392,6 +392,28 @@ void MainVm::rotate(double rot)
         emit visualizationAvailable(surface->minValue(), surface->maxValue());
 }
 
+void MainVm::moveSelection(const QPoint& delta)
+{
+    QSharedPointer<SceneElement<float>> scene = project->scene();
+    if (scene->numHighlighted() == 0)
+        return;
+
+    cancelOperation();
+
+    ElementManipulators manip(scene, undoStack);
+
+    if (!manip.moveSelection(delta))
+    {
+        emit criticalMessage(tr("Unable to move"),
+                             tr("Could not move selection.\n"
+                                "Make sure that all points will stay inside the scene bounds after moving."));
+        return;
+    }
+
+    if (manip.needsUpdate())
+        emit visualizationAvailable(surface->minValue(), surface->maxValue());
+}
+
 void MainVm::deleteSelectedElement()
 {
     QSharedPointer<SceneElement<float>> scene = project->scene();
@@ -468,6 +490,12 @@ void MainVm::setNodePosition(int id, const QPoint& oldPosition, const QPoint& ne
     undoStack->add(std::move(undoItem));
 
     emit visualizationAvailable(surface->minValue(), surface->maxValue());
+}
+
+void MainVm::moveSelectionRequested()
+{
+    QSize size = project->scene()->sceneSize();
+    emit moveSelectionDialog(QPoint(size.width(), size.height()));
 }
 
 template<typename T>
@@ -565,8 +593,6 @@ void MainVm::initNewProject(std::unique_ptr<Project>&& newProject)
 }
 
 #ifdef QT_DEBUG
-#include "graphics/circleelement.h"
-
 void MainVm::createScene()
 {
     QSharedPointer<SceneElement<float>> scene = project->scene();
@@ -585,7 +611,10 @@ void MainVm::createScene()
     scene->add(LineElement<float>::uniqueElement(scene->newId(), scene->sceneSize(), anodeLeft, anodeRight, 1));
     scene->add(LineElement<float>::uniqueElement(scene->newId(), scene->sceneSize(), cathodeLeft, cathodeRight, -1));
 
-    scene->add(CircleElement<float>::uniqueElement(scene->newId(), scene->sceneSize(), cathodeLeft, anodeRight, -1));
+    SharedNode circleCenter(scene->newId(), 450, 450);
+    scene->add(NodeElement<float>::uniqueElement(circleCenter, scene->sceneSize()));
+
+    scene->add(CircleElement<float>::uniqueElement(scene->newId(), scene->sceneSize(), circleCenter, anodeRight, -1));
 }
 #endif
 
@@ -597,7 +626,7 @@ void MainVm::createBorder(float voltage)
     SharedNode topLeft(scene->newId(), 0, size.width() - 1);
     SharedNode topRight(scene->newId(), size.height() - 1, size.width() - 1);
     SharedNode bottomLeft(scene->newId(), 0, 0);
-    SharedNode bottomRight(scene->newId(), size.height(), 0);
+    SharedNode bottomRight(scene->newId(), size.height() - 1, 0);
 
     scene->add(NodeElement<float>::uniqueElement(topLeft, scene->sceneSize()));
     scene->add(NodeElement<float>::uniqueElement(topRight, scene->sceneSize()));

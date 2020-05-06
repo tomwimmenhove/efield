@@ -17,6 +17,7 @@ public:
 
     void deleteSelected();
     bool rotateSelection(double angle);
+    bool moveSelection(const QPoint& delta);
 
     bool needsUpdate() const { return update; }
 

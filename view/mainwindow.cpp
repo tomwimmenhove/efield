@@ -53,9 +53,11 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, &MainWindow::copy, mainVm, &MainVm::copy);
     connect(this, &MainWindow::paste, mainVm, &MainVm::paste);
     connect(this, &MainWindow::rotate, mainVm, &MainVm::rotate);
+    connect(this, &MainWindow::moveSelection, mainVm, &MainVm::moveSelection);
     connect(this, &MainWindow::setLineVoltage, mainVm, &MainVm::setLineVoltage);
     connect(this, &MainWindow::setCircleVoltage, mainVm, &MainVm::setCircleVoltage);
     connect(this, &MainWindow::setNodePosition, mainVm, &MainVm::setNodePosition);
+    connect(this, &MainWindow::moveSelectionRequested, mainVm, &MainVm::moveSelectionRequested);
 
     connect(mainVm, &MainVm::criticalMessage, this, &MainWindow::mainVm_criticalMessage);
     connect(mainVm, &MainVm::visualizationAvailable, this, &MainWindow::mainVm_visualizationAvailable);
@@ -67,6 +69,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(mainVm, &MainVm::editLine, this, &MainWindow::mainVm_editLine);
     connect(mainVm, &MainVm::editCircle, this, &MainWindow::mainVm_editCircle);
     connect(mainVm, &MainVm::editNode, this, &MainWindow::mainVm_editNode);
+    connect(mainVm, &MainVm::moveSelectionDialog, this, &MainWindow::mainVm_moveSelectionDialog);
 
     /* Save as */
     connect(mainVm, &MainVm::saveDialog, this, &MainWindow::mainVm_saveDialog);
@@ -516,4 +519,19 @@ void MainWindow::on_action_Rotate_selection_triggered()
         return;
 
     emit rotate(rot);
+}
+
+void MainWindow::mainVm_moveSelectionDialog(const QPoint& maxPoint)
+{
+    PointInputDialog d(QWidget::tr("Move selection"),
+                       QPoint(0, 0), QPoint(0, 0), maxPoint, this);
+    if (d.exec() != QDialog::Accepted)
+        return;
+
+    emit moveSelection(d.point());
+}
+
+void MainWindow::on_action_Move_selection_triggered()
+{
+    emit moveSelectionRequested();
 }

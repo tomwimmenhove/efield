@@ -132,3 +132,37 @@ bool ElementManipulators::rotateSelection(double angle)
 
     return true;
 }
+
+bool ElementManipulators::moveSelection(const QPoint& delta)
+{
+    ElementDependencyVisitor deps;
+    deps.allHighlighted(*scene);
+
+    QSharedPointer<UndoStack> nestedUndoStack = QSharedPointer<UndoStack>::create();
+    for(auto id: deps.dependencies())
+    {
+        auto it = scene->findId(id);
+        Q_ASSERT(it != scene->end());
+        if (!it->canAnchor())
+            continue;
+
+        QPoint oldPoint = it->anchorNode().point();
+        QPoint newPoint = oldPoint + delta;
+
+        if (!scene->bounds().contains(newPoint))
+        {
+            nestedUndoStack->undoAll();
+            return false;
+        }
+
+        auto undoItem = std::make_unique<MoveUndoItem>(scene, it->identifier(), oldPoint, newPoint);
+        undoItem->doFunction();
+        nestedUndoStack->add(std::move(undoItem));
+
+        update |= true;
+    }
+
+    undoStack->add(std::make_unique<CompositUndoItem>(nestedUndoStack, "Move selection"));
+
+    return true;
+}

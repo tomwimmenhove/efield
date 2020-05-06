@@ -123,6 +123,7 @@
     <addaction name="action_Copy"/>
     <addaction name="action_Paste"/>
     <addaction name="action_Rotate_selection"/>
+    <addaction name="action_Move_selection"/>
    </widget>
    <addaction name="menu_File"/>
    <addaction name="menuEdit"/>
@@ -326,6 +327,14 @@
    </property>
    <property name="shortcut">
     <string>C</string>
+   </property>
+  </action>
+  <action name="action_Move_selection">
+   <property name="text">
+    <string>&amp;Move selection</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+M</string>
    </property>
   </action>
  </widget>
